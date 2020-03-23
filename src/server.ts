@@ -1,7 +1,7 @@
-import { sequelize } from "./database";
+// import { sequelize } from "./database";
 import Koa from "koa";
 import Router from "koa-router";
-import { Student } from "./database/models/Student";
+// import { Student } from "./database/models/Student";
 import Queue from "bull";
 import dotenv from "dotenv";
 dotenv.config();
@@ -27,20 +27,23 @@ router.get("/jobs", async ctx => {
 	ctx.body = await workQueue.getJobs([]);
 });
 
-router.get("/Students", async ctx => {
-	await Student.findAll()
-		.then(result => {
-			ctx.body = result;
-		})
-		.catch(err => {
-			console.log(err);
-			ctx.body = "Nooo";
-		});
-});
+// router.get("/Students", async ctx => {
+// 	await Student.findAll()
+// 		.then(result => {
+// 			ctx.body = result;
+// 		})
+// 		.catch(err => {
+// 			console.log(err);
+// 			ctx.body = "Nooo";
+// 		});
+// });
 
 app.use(router.routes()).use(router.allowedMethods());
 
-sequelize.sync().then(() => {
-	app.listen(PORT);
-	console.log(`Server listening on ${PORT}`);
-});
+// sequelize.sync().then(() => {
+// 	app.listen(PORT);
+// 	console.log(`Server listening on ${PORT}`);
+// });
+
+app.listen(PORT);
+console.log(`Server listening on ${PORT}`);
