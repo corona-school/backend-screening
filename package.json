@@ -26,7 +26,15 @@
   },
   "scripts": {
     "dev": "ts-node-dev server.ts",
-    "start": "node server.ts"
+    "build-ts": "tsc",
+    "postinstall": "npm run build-ts",
+    "start": "npm run serve",
+    "serve": "node dist/server.js",
+    "watch-node": "nodemon dist/server.js",
+    "watch-ts": "tsc -w"
+  },
+  "engines": {
+    "node": "8.11.4"
   },
   "devDependencies": {
     "ts-node-dev": "^1.0.0-pre.44"
