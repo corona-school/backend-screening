@@ -26,7 +26,7 @@
   },
   "scripts": {
     "dev": "ts-node-dev server.ts",
-    "start": "npm install && node server.ts"
+    "start": "node server.ts"
   },
   "devDependencies": {
     "ts-node-dev": "^1.0.0-pre.44"
