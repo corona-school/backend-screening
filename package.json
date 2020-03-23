@@ -25,7 +25,8 @@
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "start": "ts-node-dev server.ts"
+    "dev": "ts-node-dev server.ts",
+    "start": "npm install && node server.ts"
   },
   "devDependencies": {
     "ts-node-dev": "^1.0.0-pre.44"
