@@ -1,14 +1,21 @@
 {
 	"compilerOptions": {
 		"experimentalDecorators": true,
-		"module": "commonjs",
-		"noImplicitAny": true,
 		"removeComments": true,
 		"preserveConstEnums": true,
 		"emitDecoratorMetadata": true,
+		"module": "commonjs",
 		"esModuleInterop": true,
+		"target": "es6",
+		"noImplicitAny": true,
+		"moduleResolution": "node",
 		"sourceMap": true,
-		"target": "es6"
+		"outDir": "dist",
+		"baseUrl": ".",
+		"paths": {
+			"*": ["node_modules/*", "src/types/*"]
+		},
+		"lib": ["es2015"]
 	},
-	"include": ["./**/*"]
+	"include": ["src/**/*"]
 }
