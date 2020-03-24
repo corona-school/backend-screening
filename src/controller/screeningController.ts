@@ -1,6 +1,7 @@
 import Router from "koa-router";
 import { Student } from "../database/models/Student";
-import Queue, { Job } from "../queue";
+import Queue, { Job, Status } from "../queue";
+import { createJob } from "../utils/jobUtils";
 
 const router = new Router();
 
@@ -16,23 +17,27 @@ router.post("/add", async ctx => {
 		}
 	});
 	if (student === null) {
-		ctx.body = "error";
+		ctx.body = "an error occured";
+		ctx.status = 500;
 		return;
 	}
 
-	const job: Job = {
-		firstname: student.firstname,
-		lastname: student.lastname,
-		email: student.email,
-		time: Date.now(),
-		status: "waiting"
-	};
-
-	ctx.body = await myQueue.add(job);
+	ctx.body = await myQueue.add(createJob(student));
 });
 
-router.post("/complete", async ctx => {
-	ctx.body = "removed first";
+router.post("/changeStatus", async ctx => {
+	const { email, status } = ctx.request.body;
+	if (!email || !status) {
+		ctx.body = "an error occurred";
+		ctx.status = 401;
+	}
+	await myQueue.changeStatus(email, status);
+	ctx.body = await myQueue.getJob(email);
+});
+
+router.post("/reset", async ctx => {
+	await myQueue.reset();
+	ctx.body = await myQueue.list();
 });
 
 router.get("/jobs", async ctx => {

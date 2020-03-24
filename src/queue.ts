@@ -2,13 +2,14 @@ import redis, { RedisClient } from "redis";
 
 const KEY = "QUEUE";
 
-type Status = "waiting" | "active" | "completed" | "rejected";
+export type Status = "waiting" | "active" | "completed" | "rejected";
 
 export interface Job {
 	firstname: string;
 	lastname: string;
 	email: string;
 	time: number;
+	jitsi: string;
 	status: Status;
 }
 
@@ -39,9 +40,17 @@ export default class Queue {
 		return currentList.find(job => job.email === email);
 	};
 
-	changeStatus = (email: string, status: Status) => {};
+	changeStatus = async (email: string, status: Status) => {
+		let job = await this.getJob(email);
+		const list = await this.list();
+		const index = list.findIndex(job => job.email === email);
+		job.status = status;
+		this.client.lset(KEY, index, JSON.stringify(job));
+	};
 
-	reset = () => {};
+	reset = () => {
+		this.client.del(KEY);
+	};
 
 	list = (): Promise<Job[]> => {
 		return new Promise((resolve, reject) => {
