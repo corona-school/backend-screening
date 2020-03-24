@@ -1,11 +1,9 @@
 import { sequelize } from "./database";
 import Koa from "koa";
 import Router from "koa-router";
-import { Student } from "./database/models/Student";
 import dotenv from "dotenv";
 import koaBody from "koa-body";
 import redis from "redis";
-import { reject } from "bluebird";
 dotenv.config();
 
 const app = new Koa();
