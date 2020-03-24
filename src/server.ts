@@ -29,7 +29,5 @@ sequelize
 		console.log(`Server listening on ${PORT}`);
 	})
 	.catch(err => {
-		app.listen(PORT);
-		console.log(`Server listening on ${PORT}`);
 		console.error(err);
 	});
