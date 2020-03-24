@@ -4,6 +4,9 @@ import Router from "koa-router";
 import dotenv from "dotenv";
 import koaBody from "koa-body";
 import redis from "redis";
+import Queue, { Job } from "./queue";
+import { Student } from "./database/models/Student";
+
 dotenv.config();
 
 const app = new Koa();
@@ -12,7 +15,7 @@ const router = new Router();
 const PORT = process.env.PORT || 3000;
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
-const client = redis.createClient({ url: REDIS_URL });
+const myQueue = new Queue(REDIS_URL);
 
 router.get("/", async ctx => {
 	ctx.body = "Hello World";
@@ -21,40 +24,34 @@ router.get("/", async ctx => {
 const key = "queue";
 
 router.post("/add", async ctx => {
-	const { id, firstname, lastname } = ctx.request.body;
-	const data = {
-		id,
-		firstname,
-		lastname
-	};
-	console.log(data);
+	const { email } = ctx.request.body;
 
-	ctx.body = await new Promise((resolve, reject) => {
-		client.rpush(key, JSON.stringify(data), (err, res) => {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(res);
-			}
-		});
+	const student = await Student.findOne({
+		where: {
+			email
+		}
 	});
+	if (student === null) {
+		ctx.body = "error";
+		return;
+	}
+
+	const job: Job = {
+		firstname: student.firstname,
+		lastname: student.lastname,
+		email: student.email,
+		status: "waiting"
+	};
+
+	ctx.body = await myQueue.add(job);
 });
 
 router.post("/complete", async ctx => {
-	client.lpop(key);
 	ctx.body = "removed first";
 });
 
 router.get("/jobs", async ctx => {
-	ctx.body = await new Promise((resolve, reject) => {
-		client.lrange(key, 0, -1, (err, res) => {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(res.map(job => JSON.parse(job)));
-			}
-		});
-	});
+	ctx.body = await myQueue.list();
 });
 
 app.use(router.routes()).use(router.allowedMethods());
