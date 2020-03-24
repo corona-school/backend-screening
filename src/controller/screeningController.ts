@@ -25,6 +25,11 @@ router.post("/add", async ctx => {
 	ctx.body = await myQueue.add(createJob(student));
 });
 
+router.post("/jobInfo", async ctx => {
+	const { email } = ctx.request.body;
+	ctx.body = await myQueue.getJob(email);
+});
+
 router.post("/changeStatus", async ctx => {
 	const { email, status } = ctx.request.body;
 	if (!email || !status) {
