@@ -2,40 +2,61 @@ import { sequelize } from "./database";
 import Koa from "koa";
 import Router from "koa-router";
 import { Student } from "./database/models/Student";
-import Queue from "bull";
 import dotenv from "dotenv";
+import koaBody from "koa-body";
+import redis from "redis";
+import { reject } from "bluebird";
 dotenv.config();
 
 const app = new Koa();
+app.use(koaBody());
 const router = new Router();
 const PORT = process.env.PORT || 3000;
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
-// Create / Connect to a named work queue
-let workQueue = new Queue("work", REDIS_URL);
+const client = redis.createClient({ url: REDIS_URL });
 
 router.get("/", async ctx => {
 	ctx.body = "Hello World";
 });
 
-router.get("/add", async ctx => {
-	let job = await workQueue.add({ text: "Stuff" });
-	ctx.body = job.id;
+const key = "queue";
+
+router.post("/add", async ctx => {
+	const { id, firstname, lastname } = ctx.request.body;
+	const data = {
+		id,
+		firstname,
+		lastname
+	};
+	console.log(data);
+
+	ctx.body = await new Promise((resolve, reject) => {
+		client.rpush(key, JSON.stringify(data), (err, res) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(res);
+			}
+		});
+	});
+});
+
+router.post("/complete", async ctx => {
+	client.lpop(key);
+	ctx.body = "removed first";
 });
 
 router.get("/jobs", async ctx => {
-	ctx.body = await workQueue.getJobs([]);
-});
-
-router.get("/Students", async ctx => {
-	await Student.findAll()
-		.then(result => {
-			ctx.body = result;
-		})
-		.catch(err => {
-			console.log(err);
-			ctx.body = "Nooo";
+	ctx.body = await new Promise((resolve, reject) => {
+		client.lrange(key, 0, -1, (err, res) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(res.map(job => JSON.parse(job)));
+			}
 		});
+	});
 });
 
 app.use(router.routes()).use(router.allowedMethods());
