@@ -1,4 +1,5 @@
 import redis, { RedisClient } from "redis";
+import { reject } from "bluebird";
 
 const KEY = "QUEUE";
 
@@ -20,22 +21,42 @@ export default class Queue {
 		this.client = redis.createClient({ url: url });
 	}
 
-	add = (job: Job) => {
+	hasJob = async (email: String) => {
+		const list = await this.list();
+		return list.some(job => job.email === email);
+	};
+
+	add = async (job: Job) => {
+		if (await this.hasJob(job.email)) {
+			return await this.getJob(job.email);
+		}
 		return new Promise((resolve, reject) => {
 			this.client.rpush(KEY, JSON.stringify(job), (err, res) => {
 				if (err) {
 					return reject(err);
 				} else {
-					resolve({
-						...job,
-						count: res
-					});
+					resolve(job);
 				}
 			});
 		});
 	};
 
-	getJob = async (email: string) => {
+	remove = async (email: string) => {
+		const job = await this.getJob(email);
+		return this.client.lrem(KEY, 0, JSON.stringify(job));
+	};
+
+	getJobInfo = async (email: string) => {
+		const currentList = await this.list();
+		const index: number = currentList.findIndex(job => job.email === email);
+		const job: Job | null = currentList.find(job => job.email === email);
+		if (index === -1 || !job) {
+			return null;
+		}
+		return { ...job, position: index + 1 };
+	};
+
+	private getJob = async (email: string) => {
 		const currentList = await this.list();
 		return currentList.find(job => job.email === email);
 	};
@@ -59,9 +80,22 @@ export default class Queue {
 					reject(err);
 				} else {
 					const list: Job[] = res.map(job => JSON.parse(job));
+
 					resolve(list.sort((a, b) => a.time - b.time));
 				}
 			});
+		});
+	};
+
+	listInfo = async () => {
+		return new Promise((resolve, reject) => {
+			this.list()
+				.then(list => {
+					resolve(list.map((job, index) => ({ ...job, position: index + 1 })));
+				})
+				.catch(err => {
+					reject(err);
+				});
 		});
 	};
 }

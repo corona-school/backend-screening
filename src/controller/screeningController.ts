@@ -1,6 +1,6 @@
 import Router from "koa-router";
 import { Student } from "../database/models/Student";
-import Queue, { Job, Status } from "../queue";
+import Queue from "../queue";
 import { createJob } from "../utils/jobUtils";
 
 const router = new Router();
@@ -8,7 +8,7 @@ const router = new Router();
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 const myQueue = new Queue(REDIS_URL);
 
-router.post("/add", async ctx => {
+router.post("/student/login", async ctx => {
 	const { email } = ctx.request.body;
 
 	const student = await Student.findOne({
@@ -17,36 +17,59 @@ router.post("/add", async ctx => {
 		}
 	});
 	if (student === null) {
-		ctx.body = "an error occured";
+		ctx.body = `Could not find a Student with email: ${email}`;
 		ctx.status = 500;
 		return;
 	}
+	await myQueue.add(createJob(student));
 
-	ctx.body = await myQueue.add(createJob(student));
+	const jobInfo = await myQueue.getJobInfo(email);
+	if (jobInfo === null) {
+		ctx.body = "Could not add Job to Queue. Please try again later..";
+		ctx.status = 500;
+		return;
+	}
+	ctx.body = jobInfo;
 });
 
-router.post("/jobInfo", async ctx => {
+router.post("/student/logout", async ctx => {
 	const { email } = ctx.request.body;
-	ctx.body = await myQueue.getJob(email);
+
+	ctx.body = await myQueue.remove(email);
 });
 
-router.post("/changeStatus", async ctx => {
+router.post("/student/jobInfo", async ctx => {
+	const { email } = ctx.request.body;
+	ctx.body = await myQueue.getJobInfo(email);
+});
+
+router.post("/student/changeStatus", async ctx => {
 	const { email, status } = ctx.request.body;
 	if (!email || !status) {
-		ctx.body = "an error occurred";
+		ctx.body = "Could not change Status of Student.";
 		ctx.status = 401;
 	}
 	await myQueue.changeStatus(email, status);
-	ctx.body = await myQueue.getJob(email);
+	ctx.body = await myQueue.getJobInfo(email);
 });
 
-router.post("/reset", async ctx => {
+router.post("/student/complete", async ctx => {
+	const { email, isVerified } = ctx.request.body;
+	if (!email || !isVerified) {
+		ctx.body = "Could not verify Student.";
+		ctx.status = 401;
+	}
+	await myQueue.changeStatus(email, isVerified ? "completed" : "rejected");
+	ctx.body = await myQueue.getJobInfo(email);
+});
+
+router.post("/queue/reset", async ctx => {
 	await myQueue.reset();
 	ctx.body = await myQueue.list();
 });
 
-router.get("/jobs", async ctx => {
-	ctx.body = await myQueue.list();
+router.post("/queue/jobs", async ctx => {
+	ctx.body = await myQueue.listInfo();
 });
 
 export default router;
