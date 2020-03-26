@@ -3,7 +3,7 @@ import { Student } from "./models/Student";
 import dotenv from "dotenv";
 dotenv.config();
 
-const uri = process.env.DATABSE_URL;
+const uri = process.env.DATABASE_URL;
 
 export const sequelize = new Sequelize(uri, {
 	dialect: "postgres",
