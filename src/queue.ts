@@ -1,5 +1,5 @@
 import redis, { RedisClient } from "redis";
-import { reject } from "bluebird";
+import { reject, resolve } from "bluebird";
 
 const KEY = "QUEUE";
 
@@ -36,10 +36,24 @@ export default class Queue {
 		);
 	};
 
-	remove = async (email: string) => {
+	remove = async (email: string): Promise<boolean> => {
 		const currentList = await this.list();
+		console.log(currentList, email);
+
 		const job = currentList.find(job => job.email === email);
-		return job ? this.client.lrem(KEY, 0, JSON.stringify(job)) : false;
+
+		return new Promise((resolve, reject) => {
+			if (!job) {
+				reject("No job found.");
+			}
+
+			this.client.lrem(KEY, 0, JSON.stringify(job), (err, number) => {
+				if (err) {
+					return reject(err);
+				}
+				return resolve(true);
+			});
+		});
 	};
 
 	getJobWithPosition = async (email: string) => {
@@ -61,7 +75,14 @@ export default class Queue {
 	};
 
 	reset = () => {
-		this.client.del(KEY);
+		return new Promise((resolve, reject) => {
+			this.client.del(KEY, (err, res) => {
+				if (err) {
+					reject("Could not delete list.");
+				}
+				resolve([]);
+			});
+		});
 	};
 
 	list = (): Promise<Job[]> => {
