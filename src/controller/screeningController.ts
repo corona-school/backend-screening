@@ -34,7 +34,6 @@ router.post("/student/login", async ctx => {
 
 router.post("/student/logout", async ctx => {
 	const { email } = ctx.request.body;
-
 	ctx.body = await myQueue.remove(email);
 });
 
@@ -48,6 +47,7 @@ router.post("/student/changeStatus", async ctx => {
 	if (!email || !status) {
 		ctx.body = "Could not change status of student.";
 		ctx.status = 400;
+		return;
 	}
 	await myQueue.changeStatus(email, status);
 	ctx.body = await myQueue.getJobInfo(email);
@@ -58,6 +58,7 @@ router.post("/student/complete", async ctx => {
 	if (!email || typeof isVerified !== 'boolean') {
 		ctx.body = "Could not verify student.";
 		ctx.status = 400;
+		return;
 	}
 	await myQueue.changeStatus(email, isVerified ? "completed" : "rejected");
 	ctx.body = await myQueue.getJobInfo(email);
