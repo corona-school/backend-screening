@@ -55,7 +55,7 @@ router.post("/student/changeStatus", async ctx => {
 
 router.post("/student/complete", async ctx => {
 	const { email, isVerified } = ctx.request.body;
-	if (!email || !isVerified) {
+	if (!email || typeof isVerified !== 'boolean') {
 		ctx.body = "Could not verify student.";
 		ctx.status = 400;
 	}
