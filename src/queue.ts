@@ -46,7 +46,7 @@ export default class Queue {
 			return null;
 		}
 		const job: Job = currentList[position];
-		return job ? { ...job, position } : null;
+		return currentList[position] ? { ...currentList[position], position } : null;
 	};
 
 	changeStatus = async (email: string, status: Status) => {
