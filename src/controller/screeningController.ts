@@ -21,9 +21,7 @@ router.post("/student/login", async ctx => {
 		ctx.status = 400;
 		return;
 	}
-	await myQueue.add(createJob(student));
-
-	const jobInfo = await myQueue.getJobInfo(email);
+	const jobInfo = await myQueue.add(createJob(student));
 	if (jobInfo === null) {
 		ctx.body = "Could not add job to queue. Please try again later.";
 		ctx.status = 500;
@@ -39,7 +37,7 @@ router.post("/student/logout", async ctx => {
 
 router.post("/student/jobInfo", async ctx => {
 	const { email } = ctx.request.body;
-	ctx.body = await myQueue.getJobInfo(email);
+	ctx.body = await myQueue.getJobWithPosition(email);
 });
 
 router.post("/student/changeStatus", async ctx => {
@@ -49,8 +47,7 @@ router.post("/student/changeStatus", async ctx => {
 		ctx.status = 400;
 		return;
 	}
-	await myQueue.changeStatus(email, status);
-	ctx.body = await myQueue.getJobInfo(email);
+	ctx.body = await myQueue.changeStatus(email, status);
 });
 
 router.post("/student/complete", async ctx => {
@@ -60,8 +57,7 @@ router.post("/student/complete", async ctx => {
 		ctx.status = 400;
 		return;
 	}
-	await myQueue.changeStatus(email, isVerified ? "completed" : "rejected");
-	ctx.body = await myQueue.getJobInfo(email);
+	ctx.body = await myQueue.changeStatus(email, isVerified ? "completed" : "rejected");
 });
 
 router.post("/queue/reset", async ctx => {

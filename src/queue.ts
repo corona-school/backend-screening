@@ -21,52 +21,38 @@ export default class Queue {
 		this.client = redis.createClient({ url: url });
 	}
 
-	hasJob = async (email: String) => {
-		const list = await this.list();
-		return list.some(job => job.email === email);
-	};
-
 	add = async (job: Job) => {
-		if (await this.hasJob(job.email)) {
-			return await this.getJob(job.email);
-		}
-		return new Promise((resolve, reject) => {
-			this.client.rpush(KEY, JSON.stringify(job), (err, res) => {
+		return (await this.getJobWithPosition(job.email)) ?? new Promise((resolve, reject) => {
+			this.client.rpush(KEY, JSON.stringify(job), err => {
 				if (err) {
 					return reject(err);
 				} else {
-					resolve(job);
+					resolve(this.getJobWithPosition(job.email));
 				}
 			});
 		});
 	};
 
 	remove = async (email: string) => {
-		const job = await this.getJob(email);
-		return this.client.lrem(KEY, 0, JSON.stringify(job));
+		const currentList = await this.list();
+		const job = currentList.find(job => job.email === email);
+		return job ? this.client.lrem(KEY, 0, JSON.stringify(job)) : false;
 	};
 
-	getJobInfo = async (email: string) => {
+	getJobWithPosition = async (email: string) => {
 		const currentList = await this.list();
-		const index: number = currentList.findIndex(job => job.email === email);
-		const job: Job | null = currentList.find(job => job.email === email);
-		if (index === -1 || !job) {
+		const position: number = currentList.findIndex(job => job.email === email);
+		if (position === -1) {
 			return null;
 		}
-		return { ...job, position: index + 1 };
-	};
-
-	private getJob = async (email: string) => {
-		const currentList = await this.list();
-		return currentList.find(job => job.email === email);
+		return currentList[position] ? { ...currentList[position], position } : null;
 	};
 
 	changeStatus = async (email: string, status: Status) => {
-		let job = await this.getJob(email);
-		const list = await this.list();
-		const index = list.findIndex(job => job.email === email);
+		const { position, ...job } = await this.getJobWithPosition(email);
 		job.status = status;
-		this.client.lset(KEY, index, JSON.stringify(job));
+		this.client.lset(KEY, position, JSON.stringify(job));
+		return { ...job, position };
 	};
 
 	reset = () => {
@@ -80,7 +66,6 @@ export default class Queue {
 					reject(err);
 				} else {
 					const list: Job[] = res.map(job => JSON.parse(job));
-
 					resolve(list.sort((a, b) => a.time - b.time));
 				}
 			});
@@ -91,7 +76,7 @@ export default class Queue {
 		return new Promise((resolve, reject) => {
 			this.list()
 				.then(list => {
-					resolve(list.map((job, index) => ({ ...job, position: index + 1 })));
+					resolve(list.map((job, position) => ({ ...job, position })));
 				})
 				.catch(err => {
 					reject(err);
