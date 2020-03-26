@@ -45,7 +45,6 @@ export default class Queue {
 		if (position === -1) {
 			return null;
 		}
-		const job: Job = currentList[position];
 		return currentList[position] ? { ...currentList[position], position } : null;
 	};
 
