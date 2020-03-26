@@ -28,14 +28,14 @@ export default class Queue {
 
 	add = async (job: Job) => {
 		if (await this.hasJob(job.email)) {
-			return await this.getJob(job.email);
+			return await this.getJobWithPosition(job.email);
 		}
 		return new Promise((resolve, reject) => {
-			this.client.rpush(KEY, JSON.stringify(job), (err, res) => {
+			this.client.rpush(KEY, JSON.stringify(job), err => {
 				if (err) {
 					return reject(err);
 				} else {
-					resolve(job);
+					resolve(this.getJobWithPosition(job.email));
 				}
 			});
 		});
@@ -46,14 +46,14 @@ export default class Queue {
 		return this.client.lrem(KEY, 0, JSON.stringify(job));
 	};
 
-	getJobInfo = async (email: string) => {
+	getJobWithPosition = async (email: string) => {
 		const currentList = await this.list();
-		const index: number = currentList.findIndex(job => job.email === email);
-		const job: Job | null = currentList.find(job => job.email === email);
-		if (index === -1 || !job) {
+		const position: number = currentList.findIndex(job => job.email === email);
+		if (position === -1) {
 			return null;
 		}
-		return { ...job, position: index + 1 };
+		const job: Job = currentList[position];
+		return job ? { ...job, position } : null;
 	};
 
 	private getJob = async (email: string) => {
@@ -62,11 +62,9 @@ export default class Queue {
 	};
 
 	changeStatus = async (email: string, status: Status) => {
-		let job = await this.getJob(email);
-		const list = await this.list();
-		const index = list.findIndex(job => job.email === email);
+		const { position, ...job } = await this.getJobWithPosition(email);
 		job.status = status;
-		this.client.lset(KEY, index, JSON.stringify(job));
+		this.client.lset(KEY, position, JSON.stringify(job));
 	};
 
 	reset = () => {
@@ -91,7 +89,7 @@ export default class Queue {
 		return new Promise((resolve, reject) => {
 			this.list()
 				.then(list => {
-					resolve(list.map((job, index) => ({ ...job, position: index + 1 })));
+					resolve(list.map((job, position) => ({ ...job, position })));
 				})
 				.catch(err => {
 					reject(err);
