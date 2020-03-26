@@ -4,7 +4,7 @@ jest.spyOn(redis, "createClient").mockImplementation(redis_mock.createClient);
 import Queue, { Job } from "../src/queue";
 
 describe("Testing queue functionality", () => {
-	const myQueue = new Queue("");
+	const myQueue = new Queue("", "StudentQueue");
 	const time = Date.now();
 	const job: Job = {
 		firstname: "Max",

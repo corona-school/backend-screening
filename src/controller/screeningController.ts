@@ -6,7 +6,7 @@ import { createJob } from "../utils/jobUtils";
 const router = new Router();
 
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
-const myQueue = new Queue(REDIS_URL);
+const myQueue = new Queue(REDIS_URL, "StudentQueue");
 
 router.post("/student/login", async ctx => {
 	const { email } = ctx.request.body;
@@ -52,12 +52,15 @@ router.post("/student/changeStatus", async ctx => {
 
 router.post("/student/complete", async ctx => {
 	const { email, isVerified } = ctx.request.body;
-	if (!email || typeof isVerified !== 'boolean') {
+	if (!email || typeof isVerified !== "boolean") {
 		ctx.body = "Could not verify student.";
 		ctx.status = 400;
 		return;
 	}
-	ctx.body = await myQueue.changeStatus(email, isVerified ? "completed" : "rejected");
+	ctx.body = await myQueue.changeStatus(
+		email,
+		isVerified ? "completed" : "rejected"
+	);
 });
 
 router.post("/queue/reset", async ctx => {

@@ -1,7 +1,4 @@
 import redis, { RedisClient } from "redis";
-import { reject, resolve } from "bluebird";
-
-const KEY = "QUEUE";
 
 export type Status = "waiting" | "active" | "completed" | "rejected";
 
@@ -16,16 +13,18 @@ export interface Job {
 
 export default class Queue {
 	private client: RedisClient;
+	private key: string;
 
-	constructor(url: string) {
+	constructor(url: string, key: string) {
 		this.client = redis.createClient({ url: url });
+		this.key = key;
 	}
 
 	add = async (job: Job) => {
 		return (
 			(await this.getJobWithPosition(job.email)) ??
 			new Promise((resolve, reject) => {
-				this.client.rpush(KEY, JSON.stringify(job), err => {
+				this.client.rpush(this.key, JSON.stringify(job), err => {
 					if (err) {
 						return reject(err);
 					} else {
@@ -47,7 +46,7 @@ export default class Queue {
 				reject("No job found.");
 			}
 
-			this.client.lrem(KEY, 0, JSON.stringify(job), (err, number) => {
+			this.client.lrem(this.key, 0, JSON.stringify(job), (err, number) => {
 				if (err) {
 					return reject(err);
 				}
@@ -70,13 +69,13 @@ export default class Queue {
 	changeStatus = async (email: string, status: Status) => {
 		const { position, ...job } = await this.getJobWithPosition(email);
 		job.status = status;
-		this.client.lset(KEY, position, JSON.stringify(job));
+		this.client.lset(this.key, position, JSON.stringify(job));
 		return { ...job, position };
 	};
 
 	reset = () => {
 		return new Promise((resolve, reject) => {
-			this.client.del(KEY, (err, res) => {
+			this.client.del(this.key, (err, res) => {
 				if (err) {
 					reject("Could not delete list.");
 				}
@@ -87,7 +86,7 @@ export default class Queue {
 
 	list = (): Promise<Job[]> => {
 		return new Promise((resolve, reject) => {
-			this.client.lrange(KEY, 0, -1, (err, res) => {
+			this.client.lrange(this.key, 0, -1, (err, res) => {
 				if (err) {
 					reject(err);
 				} else {
