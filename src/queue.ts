@@ -21,16 +21,8 @@ export default class Queue {
 		this.client = redis.createClient({ url: url });
 	}
 
-	hasJob = async (email: String) => {
-		const list = await this.list();
-		return list.some(job => job.email === email);
-	};
-
 	add = async (job: Job) => {
-		if (await this.hasJob(job.email)) {
-			return await this.getJobWithPosition(job.email);
-		}
-		return new Promise((resolve, reject) => {
+		return (await this.getJobWithPosition(job.email)) ?? new Promise((resolve, reject) => {
 			this.client.rpush(KEY, JSON.stringify(job), err => {
 				if (err) {
 					return reject(err);
