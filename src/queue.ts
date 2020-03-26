@@ -42,8 +42,9 @@ export default class Queue {
 	};
 
 	remove = async (email: string) => {
-		const job = await this.getJob(email);
-		return this.client.lrem(KEY, 0, JSON.stringify(job));
+		const currentList = await this.list();
+		const job = currentList.find(job => job.email === email);
+		return job ? this.client.lrem(KEY, 0, JSON.stringify(job)) : false;
 	};
 
 	getJobWithPosition = async (email: string) => {
@@ -54,11 +55,6 @@ export default class Queue {
 		}
 		const job: Job = currentList[position];
 		return job ? { ...job, position } : null;
-	};
-
-	private getJob = async (email: string) => {
-		const currentList = await this.list();
-		return currentList.find(job => job.email === email);
 	};
 
 	changeStatus = async (email: string, status: Status) => {
