@@ -65,6 +65,7 @@ export default class Queue {
 		const { position, ...job } = await this.getJobWithPosition(email);
 		job.status = status;
 		this.client.lset(KEY, position, JSON.stringify(job));
+		return { ...job, position };
 	};
 
 	reset = () => {
@@ -78,7 +79,6 @@ export default class Queue {
 					reject(err);
 				} else {
 					const list: Job[] = res.map(job => JSON.parse(job));
-
 					resolve(list.sort((a, b) => a.time - b.time));
 				}
 			});

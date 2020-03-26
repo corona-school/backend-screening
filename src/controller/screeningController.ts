@@ -47,8 +47,7 @@ router.post("/student/changeStatus", async ctx => {
 		ctx.body = "Could not change Status of Student.";
 		ctx.status = 401;
 	}
-	await myQueue.changeStatus(email, status);
-	ctx.body = await myQueue.getJobWithPosition(email);
+	ctx.body = await myQueue.changeStatus(email, status);
 });
 
 router.post("/student/complete", async ctx => {
@@ -57,8 +56,7 @@ router.post("/student/complete", async ctx => {
 		ctx.body = "Could not verify Student.";
 		ctx.status = 401;
 	}
-	await myQueue.changeStatus(email, isVerified ? "completed" : "rejected");
-	ctx.body = await myQueue.getJobWithPosition(email);
+	ctx.body = await myQueue.changeStatus(email, isVerified ? "completed" : "rejected");
 });
 
 router.post("/queue/reset", async ctx => {
