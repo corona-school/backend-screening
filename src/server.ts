@@ -1,6 +1,7 @@
 import Koa from "koa";
 import Router from "koa-router";
 import koaBody from "koa-body";
+const cors = require("@koa/cors");
 import dotenv from "dotenv";
 import { sequelize } from "./database";
 import screeningRouter from "./controller/screeningController";
@@ -9,6 +10,7 @@ dotenv.config();
 
 const app = new Koa();
 app.use(koaBody());
+app.use(cors());
 
 const router = new Router();
 const PORT = process.env.PORT || 3000;
