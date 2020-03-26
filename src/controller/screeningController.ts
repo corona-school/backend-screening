@@ -17,15 +17,15 @@ router.post("/student/login", async ctx => {
 		}
 	});
 	if (student === null) {
-		ctx.body = `Could not find a Student with email: ${email}`;
-		ctx.status = 500;
+		ctx.body = `Could not find a student with email: ${email}`;
+		ctx.status = 400;
 		return;
 	}
 	await myQueue.add(createJob(student));
 
 	const jobInfo = await myQueue.getJobInfo(email);
 	if (jobInfo === null) {
-		ctx.body = "Could not add Job to Queue. Please try again later..";
+		ctx.body = "Could not add job to queue. Please try again later.";
 		ctx.status = 500;
 		return;
 	}
@@ -46,8 +46,8 @@ router.post("/student/jobInfo", async ctx => {
 router.post("/student/changeStatus", async ctx => {
 	const { email, status } = ctx.request.body;
 	if (!email || !status) {
-		ctx.body = "Could not change Status of Student.";
-		ctx.status = 401;
+		ctx.body = "Could not change status of student.";
+		ctx.status = 400;
 	}
 	await myQueue.changeStatus(email, status);
 	ctx.body = await myQueue.getJobInfo(email);
@@ -56,8 +56,8 @@ router.post("/student/changeStatus", async ctx => {
 router.post("/student/complete", async ctx => {
 	const { email, isVerified } = ctx.request.body;
 	if (!email || !isVerified) {
-		ctx.body = "Could not verify Student.";
-		ctx.status = 401;
+		ctx.body = "Could not verify student.";
+		ctx.status = 400;
 	}
 	await myQueue.changeStatus(email, isVerified ? "completed" : "rejected");
 	ctx.body = await myQueue.getJobInfo(email);
