@@ -14,6 +14,7 @@
     "@types/koa__cors": "^3.0.1",
     "@types/node": "^13.9.3",
     "@types/redis": "^2.8.16",
+    "@types/redis-mock": "^0.17.0",
     "@types/validator": "^12.0.1",
     "dotenv": "^8.2.0",
     "koa": "^2.11.0",
@@ -23,6 +24,7 @@
     "pg-hstore": "^2.3.3",
     "pg-native": "^3.0.0",
     "redis": "^3.0.2",
+    "redis-mock": "^0.49.0",
     "reflect-metadata": "^0.1.13",
     "sequelize": "^5.21.5",
     "sequelize-typescript": "^1.1.0",
@@ -35,9 +37,14 @@
     "start": "npm run serve",
     "serve": "node dist/server.js",
     "watch-node": "nodemon dist/server.js",
-    "watch-ts": "tsc -w"
+    "watch-ts": "tsc -w",
+    "test": "jest",
+    "coverage": "jest --coverage"
   },
   "devDependencies": {
+    "@types/jest": "^25.1.4",
+    "jest": "^25.2.2",
+    "ts-jest": "^25.2.1",
     "ts-node-dev": "^1.0.0-pre.44"
   }
 }

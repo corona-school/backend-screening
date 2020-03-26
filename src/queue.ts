@@ -22,15 +22,18 @@ export default class Queue {
 	}
 
 	add = async (job: Job) => {
-		return (await this.getJobWithPosition(job.email)) ?? new Promise((resolve, reject) => {
-			this.client.rpush(KEY, JSON.stringify(job), err => {
-				if (err) {
-					return reject(err);
-				} else {
-					resolve(this.getJobWithPosition(job.email));
-				}
-			});
-		});
+		return (
+			(await this.getJobWithPosition(job.email)) ??
+			new Promise((resolve, reject) => {
+				this.client.rpush(KEY, JSON.stringify(job), err => {
+					if (err) {
+						return reject(err);
+					} else {
+						resolve(this.getJobWithPosition(job.email));
+					}
+				});
+			})
+		);
 	};
 
 	remove = async (email: string) => {
@@ -45,7 +48,9 @@ export default class Queue {
 		if (position === -1) {
 			return null;
 		}
-		return currentList[position] ? { ...currentList[position], position } : null;
+		return currentList[position]
+			? { ...currentList[position], position }
+			: null;
 	};
 
 	changeStatus = async (email: string, status: Status) => {
