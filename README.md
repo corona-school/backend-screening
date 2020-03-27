@@ -42,3 +42,21 @@ To start the local development use the following command:
 yarn install
 yarn run dev
 ```
+
+#### Docker
+
+To run temporary Redis and Postgres containers in Docker, use the following commands (the first two each in a separate terminal):
+
+```
+docker run --rm -it -p 6379:6379 redis
+docker run --rm -it -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 postgres
+psql -h localhost -p 5432 -U postgres -c "create database dev_corona_school"
+```
+
+Set your `DATABASE_URL` variable in `.env`:
+
+```
+DATABASE_URL=postgresql://postgres@localhost:5432/dev_corona_school
+```
+
+Then use `yarn install` and `yarn run dev` as usual.
