@@ -17,17 +17,20 @@ app.use(cors());
 
 // sessions
 app.keys = [process.env.COOKIE_SESSION_SECRET];
-app.use(session({
-	renew: true,
-	store: redisStore({}),
-}, app));
-
+app.use(
+	session(
+		{
+			renew: true,
+			store: redisStore({})
+		},
+		app
+	)
+);
 
 // authentication
-require('./auth');
+require("./auth");
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 const router = new Router();
 const PORT = process.env.PORT || 3000;

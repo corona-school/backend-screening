@@ -1,6 +1,7 @@
 import Router from "koa-router";
 import { Student } from "../database/models/Student";
 import Queue from "../queue";
+import { Context } from "koa";
 import { createJob } from "../utils/jobUtils";
 import passport from "koa-passport";
 
@@ -9,15 +10,17 @@ const router = new Router();
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 const myQueue = new Queue(REDIS_URL, "StudentQueue");
 
-router.post('/screener/login', ctx => {
-	passport.authenticate('local', req => {
+// TODO: current Workaround because koa-router and koa-passport dont like eachother
+router.post("/screener/login", (ctx: any) => {
+	passport.authenticate("local", req => {
 		return ctx.login(req.user);
 	});
 });
 
-router.get('/screener/logout', function (ctx) {
+// TODO: current Workaround because koa-router and koa-passport dont like eachother
+router.get("/screener/logout", (ctx: any) => {
 	ctx.logout();
-	ctx.redirect('/');
+	ctx.redirect("/");
 });
 
 router.post("/student/login", async ctx => {
