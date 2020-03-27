@@ -27,11 +27,12 @@ psql
 createdb dev_corona_school
 ```
 
-Additionally create a ".env" file in the root of the project with the following urls:
+Additionally create an ".env" file in the root of the project with the following variables:
 
 ```
 DATABASE_URL=postgresql://localhost:5432/dev_corona_school
 REDIS_URL=redis://127.0.0.1:6379
+COOKIE_SESSION_SECRET=oYz2bYa2MBDqiqQE7T80bmoFikIpamkHvxEVnYPpAxlFTV5F5JWHbckS04Xd
 ```
 
 ### Local Development
