@@ -1,27 +1,59 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Router from "koa-router";
+import passport from "koa-passport";
 import { Student } from "../database/models/Student";
 import Queue from "../queue";
 import { createJob } from "../utils/jobUtils";
-import passport from "koa-passport";
+import { Screener } from "../database/models/Screener";
+import { Next } from "koa";
 
 const router = new Router();
 
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 const myQueue = new Queue(REDIS_URL, "StudentQueue");
 
-// TODO: current Workaround because koa-router and koa-passport dont like eachother
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-router.post("/screener/login", (ctx: any) => {
-  passport.authenticate("local", (req) => {
-    return ctx.login(req.user);
-  });
+const requireAuth = async (ctx: any, next: Next) => {
+  if (ctx.isAuthenticated()) {
+    return next();
+  } else {
+    ctx.body = { success: false };
+    return ctx.throw(401);
+  }
+};
+
+router.post("/screener/create", async (ctx) => {
+  const { firstname, lastname, email, password } = ctx.request.body;
+
+  const screener = await Screener.build({
+    firstname,
+    lastname,
+    email,
+    password,
+  }).save();
+
+  ctx.body = screener;
 });
 
-// TODO: current Workaround because koa-router and koa-passport dont like eachother
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+router.post("/screener/login", async (ctx: any, next) => {
+  return passport.authenticate("local", (err, user) => {
+    if (!user || err) {
+      ctx.body = { success: false };
+      ctx.throw(401);
+    }
+    ctx.body = { success: true };
+    return ctx.login(user);
+  })(ctx, next);
+});
+
 router.get("/screener/logout", (ctx: any) => {
-  ctx.logout();
-  ctx.redirect("/");
+  if (ctx.isAuthenticated()) {
+    ctx.logout();
+    ctx.redirect("/");
+  } else {
+    ctx.body = { success: false };
+    ctx.throw(401);
+  }
 });
 
 router.post("/student/login", async (ctx) => {
@@ -51,12 +83,12 @@ router.post("/student/logout", async (ctx) => {
   ctx.body = await myQueue.remove(email);
 });
 
-router.post("/student/jobInfo", async (ctx) => {
-  const { email } = ctx.request.body;
+router.get("/student/jobInfo", async (ctx) => {
+  const { email } = ctx.request.query;
   ctx.body = await myQueue.getJobWithPosition(email);
 });
 
-router.post("/student/changeStatus", async (ctx) => {
+router.post("/student/changeStatus", requireAuth, async (ctx) => {
   const { email, status } = ctx.request.body;
   if (!email || !status) {
     ctx.body = "Could not change status of student.";
@@ -66,7 +98,7 @@ router.post("/student/changeStatus", async (ctx) => {
   ctx.body = await myQueue.changeStatus(email, status);
 });
 
-router.post("/student/complete", async (ctx) => {
+router.post("/student/complete", requireAuth, async (ctx) => {
   const { email, isVerified } = ctx.request.body;
   if (!email || typeof isVerified !== "boolean") {
     ctx.body = "Could not verify student.";
@@ -79,12 +111,12 @@ router.post("/student/complete", async (ctx) => {
   );
 });
 
-router.post("/queue/reset", async (ctx) => {
+router.post("/queue/reset", requireAuth, async (ctx) => {
   await myQueue.reset();
   ctx.body = await myQueue.list();
 });
 
-router.post("/queue/jobs", async (ctx) => {
+router.get("/queue/jobs", requireAuth, async (ctx) => {
   ctx.body = await myQueue.listInfo();
 });
 

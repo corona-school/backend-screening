@@ -4,8 +4,8 @@ import bcrypt from "bcrypt";
 import { Screener, getScreener } from "./database/models/Screener";
 const LocalStrategy = PassportLocal.Strategy;
 
-passport.serializeUser((user: Screener, done) => {
-  done(null, user.email);
+passport.serializeUser((email: string, done: Function) => {
+  done(null, email);
 });
 
 passport.deserializeUser((email: string, done: Function) => {
@@ -17,14 +17,17 @@ passport.deserializeUser((email: string, done: Function) => {
 const comparePassword = (
   password: string,
   screener: Screener
-): Promise<boolean> => {
+): Promise<Screener> => {
   return new Promise((resolve, reject) => {
-    bcrypt.compare(password, screener.passwordHash, (err, ok) => {
+    bcrypt.compare(password, screener.password, (err, ok) => {
       if (err) {
         console.error(err);
         reject(err);
       }
-      resolve(ok);
+      if (!ok) {
+        reject("Password not correct.");
+      }
+      resolve(screener);
     });
   });
 };
@@ -35,7 +38,7 @@ passport.use(
     (email: string, password: string, done: Function) => {
       getScreener(email)
         .then((screener) => comparePassword(password, screener))
-        .then((success) => done(null, success))
+        .then((screener) => done(null, screener.email))
         .catch((err) => done(err, null));
     }
   )
