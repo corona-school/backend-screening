@@ -21,5 +21,5 @@
 		"sourceType": "module"
 	},
 	"plugins": ["react", "@typescript-eslint"],
-	"rules": {}
+	"rules": { "explicit-function-return-type": 1 }
 }

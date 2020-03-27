@@ -40,7 +40,7 @@
     "watch-ts": "tsc -w",
     "test": "jest",
     "coverage": "jest --coverage",
-    "lint": "eslint './**/*.{ts,tsx}'"
+    "lint": "eslint 'src/**/*.{ts,tsx}'"
   },
   "devDependencies": {
     "@types/jest": "^25.1.4",
@@ -55,15 +55,17 @@
     "ts-jest": "^25.2.1",
     "ts-node-dev": "^1.0.0-pre.44"
   },
-  "lint-staged": [
-    "prettier --write",
-    "yarn lint",
-    "yarn run test"
-  ],
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged",
       "pre-push": "lint-staged"
     }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "yarn lint",
+      "yarn run test"
+    ]
   }
 }
