@@ -1,6 +1,6 @@
 import redis from "redis";
-import redis_mock from "redis-mock";
-jest.spyOn(redis, "createClient").mockImplementation(redis_mock.createClient);
+import RedisMock from "redis-mock";
+jest.spyOn(redis, "createClient").mockImplementation(RedisMock.createClient);
 import Queue, { Job } from "../src/queue";
 
 describe("Testing queue functionality", () => {
