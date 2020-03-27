@@ -67,15 +67,14 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "lint-staged"
+      "pre-commit": "lint-staged && yarn run test",
+      "pre-push": "lint-staged && yarn run test"
     }
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "prettier --write",
-      "yarn lint",
-      "yarn run test"
+      "yarn lint"
     ]
   }
 }
