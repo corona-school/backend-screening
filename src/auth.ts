@@ -19,7 +19,10 @@ const comparePassword = (
   screener: Screener
 ): Promise<Screener> => {
   return new Promise((resolve, reject) => {
-    bcrypt.compare(password, screener.password, (err, ok) => {
+    // Workaround: https://stackoverflow.com/questions/23015043/verify-password-hash-in-nodejs-which-was-generated-in-php
+    const hash = screener.password.replace(/^\$2y(.+)$/i, "$2a$1");
+
+    bcrypt.compare(password, hash, (err, ok) => {
       if (err) {
         console.error(err);
         reject(err);
