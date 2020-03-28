@@ -22,15 +22,7 @@ app.use(cors());
 
 // sessions
 app.keys = [process.env.COOKIE_SESSION_SECRET];
-app.use(
-  session(
-    {
-      renew: true,
-      store: redisStore({}),
-    },
-    app
-  )
-);
+app.use(session({}, app));
 
 // authentication
 require("./auth");
