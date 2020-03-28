@@ -2,6 +2,13 @@ import redis, { RedisClient } from "redis";
 
 export type Status = "waiting" | "active" | "completed" | "rejected";
 
+export type Operation = "addedJob" | "changedStatus" | "removedJob";
+
+export interface Message {
+  operation: Operation;
+  email: string;
+}
+
 export interface Job {
   firstname: string;
   lastname: string;
@@ -15,27 +22,39 @@ export interface JobInfo extends Job {
 }
 
 export default class Queue {
-  private client: RedisClient;
+  client: RedisClient;
+  publisher: RedisClient;
   private key: string;
 
   constructor(url: string, key: string) {
     this.client = redis.createClient({ url: url });
+    this.publisher = this.client.duplicate();
     this.key = key;
   }
 
+  publish = (operation: Operation, email: string) => {
+    const message: Message = {
+      operation: operation,
+      email: email,
+    };
+    this.publisher.publish("queue", JSON.stringify(message));
+  };
+
   add = async (job: Job): Promise<JobInfo> => {
-    return (
-      (await this.getJobWithPosition(job.email)) ??
-      new Promise((resolve, reject) => {
-        this.client.rpush(this.key, JSON.stringify(job), (err) => {
-          if (err) {
-            return reject(err);
-          } else {
-            resolve(this.getJobWithPosition(job.email));
-          }
-        });
-      })
-    );
+    return new Promise((resolve, reject) => {
+      this.client.rpush(this.key, JSON.stringify(job), (err) => {
+        if (err) {
+          return reject(err);
+        } else {
+          this.getJobWithPosition(job.email)
+            .then((jobInfo) => {
+              this.publish("addedJob", jobInfo.email);
+              resolve(jobInfo);
+            })
+            .catch((err) => reject(err));
+        }
+      });
+    });
   };
 
   remove = async (email: string): Promise<boolean> => {
@@ -52,6 +71,7 @@ export default class Queue {
         if (err) {
           return reject(err);
         }
+        this.publish("removedJob", job.email);
         return resolve(true);
       });
     });
@@ -74,6 +94,8 @@ export default class Queue {
     const { position, ...job } = await this.getJobWithPosition(email);
     job.status = status;
     this.client.lset(this.key, position, JSON.stringify(job));
+
+    this.publish("changedStatus", job.email);
     return { ...job, position };
   };
 
