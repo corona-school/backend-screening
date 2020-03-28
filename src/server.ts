@@ -2,10 +2,9 @@ import Koa from "koa";
 import Router from "koa-router";
 import koaBody from "koa-body";
 import session from "koa-session";
-import redisStore from "koa-redis";
 import passport from "koa-passport";
 import cors from "@koa/cors";
-
+import redisStore from "koa-redis";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -21,8 +20,20 @@ app.use(koaBody());
 app.use(cors());
 
 // sessions
+const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 app.keys = [process.env.COOKIE_SESSION_SECRET];
-app.use(session({}, app));
+app.use(
+  session(
+    {
+      store: redisStore({
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        enable_offline_queue: false,
+        url: REDIS_URL,
+      }),
+    },
+    app
+  )
+);
 
 // authentication
 require("./auth");
