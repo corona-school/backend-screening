@@ -79,7 +79,7 @@ router.get("/student/jobInfo", async (ctx) => {
   ctx.body = await myQueue.getJobWithPosition(email);
 });
 
-router.post("/student/changeStatus", async (ctx) => {
+router.post("/student/changeStatus", requireAuth, async (ctx) => {
   const { email, status } = ctx.request.body;
   if (!email || !status) {
     ctx.body = "Could not change status of student.";
@@ -89,7 +89,7 @@ router.post("/student/changeStatus", async (ctx) => {
   ctx.body = await myQueue.changeStatus(email, status);
 });
 
-router.post("/student/complete", async (ctx) => {
+router.post("/student/complete", requireAuth, async (ctx) => {
   const { email, isVerified } = ctx.request.body;
   if (!email || typeof isVerified !== "boolean") {
     ctx.body = "Could not verify student.";
@@ -102,7 +102,7 @@ router.post("/student/complete", async (ctx) => {
   );
 });
 
-router.get("/screener/info", async (ctx) => {
+router.get("/screener/info", requireAuth, async (ctx) => {
   const { email } = ctx.request.query;
   const screener = await Screener.findOne({
     where: {
@@ -117,12 +117,12 @@ router.get("/screener/info", async (ctx) => {
   ctx.body = screener;
 });
 
-router.post("/queue/reset", async (ctx) => {
+router.post("/queue/reset", requireAuth, async (ctx) => {
   await myQueue.reset();
   ctx.body = await myQueue.list();
 });
 
-router.get("/queue/jobs", async (ctx) => {
+router.get("/queue/jobs", requireAuth, async (ctx) => {
   ctx.body = await myQueue.listInfo();
 });
 
