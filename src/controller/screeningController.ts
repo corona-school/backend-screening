@@ -102,6 +102,21 @@ router.post("/student/complete", async (ctx) => {
   );
 });
 
+router.get("/screener/info", async (ctx) => {
+  const { email } = ctx.request.query;
+  const screener = await Screener.findOne({
+    where: {
+      email,
+    },
+  });
+  if (!screener) {
+    ctx.body = "Could not find screenre";
+    ctx.status = 400;
+    return;
+  }
+  ctx.body = screener;
+});
+
 router.post("/queue/reset", async (ctx) => {
   await myQueue.reset();
   ctx.body = await myQueue.list();
