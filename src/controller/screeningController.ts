@@ -2,11 +2,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Router from "koa-router";
 import passport from "koa-passport";
-import { Student } from "../database/models/Student";
 import Queue from "../queue";
-import { createJob } from "../utils/jobUtils";
 import { Screener } from "../database/models/Screener";
 import { Next } from "koa";
+import ScreeningService from "../service/screeningService";
 
 const router = new Router();
 
@@ -56,23 +55,15 @@ router.get("/screener/logout", (ctx: any) => {
   }
 });
 
+const screeningService = new ScreeningService();
+
 router.post("/student/login", async (ctx) => {
   const { email } = ctx.request.body;
 
-  const student = await Student.findOne({
-    where: {
-      email,
-    },
-  });
-  if (student === null) {
-    ctx.body = `Could not find a student with email: ${email}`;
+  const jobInfo = await screeningService.login(email);
+  if (!jobInfo) {
+    ctx.body = "Could not login the student.";
     ctx.status = 400;
-    return;
-  }
-  const jobInfo = await myQueue.add(createJob(student));
-  if (jobInfo === null) {
-    ctx.body = "Could not add job to queue. Please try again later.";
-    ctx.status = 500;
     return;
   }
   ctx.body = jobInfo;
