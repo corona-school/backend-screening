@@ -6,6 +6,7 @@ import Queue from "../queue";
 import { Screener } from "../database/models/Screener";
 import { Next } from "koa";
 import ScreeningService from "../service/screeningService";
+import bcrypt from "bcrypt";
 
 const router = new Router();
 
@@ -23,12 +24,12 @@ const requireAuth = async (ctx: any, next: Next) => {
 
 router.post("/screener/create", async (ctx) => {
   const { firstname, lastname, email, password } = ctx.request.body;
-
+  const hash = await bcrypt.hash(password, 10);
   const screener = await Screener.build({
     firstname,
     lastname,
     email,
-    password,
+    password: hash,
   }).save();
 
   ctx.body = screener;
