@@ -89,7 +89,7 @@ router.post("/student/changeStatus", requireAuth, async (ctx) => {
   ctx.body = await myQueue.changeStatus(email, status);
 });
 
-router.post("/student/complete", requireAuth, async (ctx) => {
+router.post("/student/complete", async (ctx) => {
   const { email, isVerified } = ctx.request.body;
   if (!email || typeof isVerified !== "boolean") {
     ctx.body = "Could not verify student.";
@@ -102,12 +102,12 @@ router.post("/student/complete", requireAuth, async (ctx) => {
   );
 });
 
-router.post("/queue/reset", requireAuth, async (ctx) => {
+router.post("/queue/reset", async (ctx) => {
   await myQueue.reset();
   ctx.body = await myQueue.list();
 });
 
-router.get("/queue/jobs", requireAuth, async (ctx) => {
+router.get("/queue/jobs", async (ctx) => {
   ctx.body = await myQueue.listInfo();
 });
 
