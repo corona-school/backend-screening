@@ -28,14 +28,22 @@ app.use(
   })
 );
 
+let sessionConfig = {};
+
+if (process.env.NODE_ENV === "production") {
+  sessionConfig = {
+    secure: true,
+    sameSite: "none",
+  };
+}
+
 // sessions
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 app.keys = [process.env.COOKIE_SESSION_SECRET];
 app.use(
   session(
     {
-      secure: true,
-      sameSite: "none",
+      ...sessionConfig,
       rolling: true,
       renew: true,
       store: redisStore({
