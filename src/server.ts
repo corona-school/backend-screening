@@ -32,11 +32,11 @@ app.keys = [process.env.COOKIE_SESSION_SECRET];
 app.use(
   session(
     {
-      store: redisStore({
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        enable_offline_queue: false,
-        url: REDIS_URL,
-      }),
+      // store: redisStore({
+      //   // eslint-disable-next-line @typescript-eslint/camelcase
+      //   enable_offline_queue: false,
+      //   url: REDIS_URL,
+      // }),
     },
     app
   )
