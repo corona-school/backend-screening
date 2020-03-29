@@ -34,6 +34,7 @@ app.keys = [process.env.COOKIE_SESSION_SECRET];
 app.use(
   session(
     {
+      secure: true,
       sameSite: "none",
       rolling: true,
       renew: true,
@@ -47,10 +48,7 @@ app.use(
   )
 );
 
-app.use((ctx, next) => {
-  ctx.cookies.secure = true;
-  return next();
-});
+app.proxy = true;
 
 // authentication
 require("./auth");
