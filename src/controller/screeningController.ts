@@ -14,8 +14,6 @@ const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 const myQueue = new Queue(REDIS_URL, "StudentQueue");
 
 const requireAuth = async (ctx: any, next: Next) => {
-  console.log("passport: ", ctx.session.passport);
-  console.log("session: ", ctx.session);
   if (ctx.isAuthenticated()) {
     return next();
   } else {
