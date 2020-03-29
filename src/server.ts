@@ -34,6 +34,7 @@ app.keys = [process.env.COOKIE_SESSION_SECRET];
 app.use(
   session(
     {
+      sameSite: "lax",
       rolling: true,
       renew: true,
       httpOnly: false,
