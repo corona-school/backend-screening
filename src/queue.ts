@@ -7,6 +7,7 @@ export type Operation = "addedJob" | "changedStatus" | "removedJob";
 export interface Message {
   operation: Operation;
   email: string;
+  screenerEmail?: string;
 }
 
 export interface Job {
@@ -32,10 +33,15 @@ export default class Queue {
     this.key = key;
   }
 
-  publish = (operation: Operation, email: string) => {
+  publish = (
+    operation: Operation,
+    email: string,
+    screenerEmail?: string
+  ): void => {
     const message: Message = {
-      operation: operation,
-      email: email,
+      operation,
+      email,
+      screenerEmail,
     };
     this.publisher.publish("queue", JSON.stringify(message));
   };
@@ -90,12 +96,16 @@ export default class Queue {
       : null;
   };
 
-  changeStatus = async (email: string, status: Status): Promise<JobInfo> => {
+  changeStatus = async (
+    email: string,
+    status: Status,
+    screenerEmail?: string
+  ): Promise<JobInfo> => {
     const { position, ...job } = await this.getJobWithPosition(email);
     job.status = status;
     this.client.lset(this.key, position, JSON.stringify(job));
 
-    this.publish("changedStatus", job.email);
+    this.publish("changedStatus", job.email, screenerEmail);
     return { ...job, position };
   };
 

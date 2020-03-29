@@ -17,7 +17,7 @@ import screeningControllerSocket from "./controller/screeningControllerSocket";
 
 const app = new Koa();
 app.use(koaBody());
-app.use(cors());
+app.use(cors({ credentials: true }));
 
 // sessions
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";

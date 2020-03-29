@@ -80,14 +80,16 @@ router.get("/student/jobInfo", async (ctx) => {
   ctx.body = await myQueue.getJobWithPosition(email);
 });
 
-router.post("/student/changeStatus", requireAuth, async (ctx) => {
+router.post("/student/changeStatus", requireAuth, async (ctx: any) => {
   const { email, status } = ctx.request.body;
   if (!email || !status) {
     ctx.body = "Could not change status of student.";
     ctx.status = 400;
     return;
   }
-  ctx.body = await myQueue.changeStatus(email, status);
+  const from = ctx.session.passport.user;
+
+  ctx.body = await myQueue.changeStatus(email, status, from);
 });
 
 router.post("/student/complete", requireAuth, async (ctx) => {

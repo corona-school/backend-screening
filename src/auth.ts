@@ -9,8 +9,10 @@ passport.serializeUser((email: string, done: Function) => {
 });
 
 passport.deserializeUser((email: string, done: Function) => {
-  getScreener(email)
-    .then((screener) => done(null, screener))
+  return getScreener(email)
+    .then((screener) => {
+      return done(null, screener);
+    })
     .catch((err) => done(err, null));
 });
 
