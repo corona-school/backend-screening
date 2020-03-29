@@ -18,6 +18,9 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
 
       io.sockets.in(data.email).emit("login", { success: true, jobInfo });
     });
+    socket.on("logout", async (data) => {
+      screeningService.logout(data.email);
+    });
     screeningService.subcriber.on("message", async (channel, data) => {
       const message: Message = JSON.parse(data);
       switch (message.operation) {

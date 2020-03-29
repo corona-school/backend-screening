@@ -33,7 +33,6 @@ describe("Testing queue functionality", () => {
     await myQueue.add(job);
 
     const list = await myQueue.list();
-    console.log(list);
 
     expect(list).toEqual([
       {

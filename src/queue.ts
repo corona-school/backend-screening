@@ -85,6 +85,7 @@ export default class Queue {
 
   getJobWithPosition = async (email: string): Promise<JobInfo | null> => {
     const currentList = await this.list();
+
     const position: number = currentList.findIndex(
       (job) => job.email === email
     );
@@ -100,13 +101,14 @@ export default class Queue {
     email: string,
     status: Status,
     screenerEmail?: string
-  ): Promise<JobInfo> => {
-    const { position, ...job } = await this.getJobWithPosition(email);
+  ): Promise<JobInfo | null> => {
+    const job = await this.getJobWithPosition(email);
+
     job.status = status;
-    this.client.lset(this.key, position, JSON.stringify(job));
+    this.client.lset(this.key, job.position, JSON.stringify(job));
 
     this.publish("changedStatus", job.email, screenerEmail);
-    return { ...job, position };
+    return job;
   };
 
   reset = (): Promise<[]> => {

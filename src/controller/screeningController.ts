@@ -72,7 +72,13 @@ router.post("/student/login", async (ctx) => {
 
 router.post("/student/logout", async (ctx) => {
   const { email } = ctx.request.body;
-  ctx.body = await myQueue.remove(email);
+  try {
+    await screeningService.logout(email);
+    ctx.body = "Student successfully logged out.";
+  } catch (err) {
+    ctx.body = "Could not logout student.";
+    ctx.status = 400;
+  }
 });
 
 router.get("/student/jobInfo", async (ctx) => {
