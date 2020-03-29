@@ -17,8 +17,10 @@ const requireAuth = async (ctx: any, next: Next) => {
   if (ctx.isAuthenticated()) {
     return next();
   } else {
+    console.log(ctx.session.passport);
+
     ctx.body = { success: false };
-    return ctx.throw(401);
+    ctx.throw(401);
   }
 };
 
