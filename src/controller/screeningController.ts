@@ -17,7 +17,8 @@ const requireAuth = async (ctx: any, next: Next) => {
   if (ctx.isAuthenticated()) {
     return next();
   } else {
-    console.log(ctx.session.passport);
+    console.log("passport: ", ctx.session.passport);
+    console.log("session: ", ctx.session);
 
     ctx.body = { success: false };
     ctx.throw(401);
