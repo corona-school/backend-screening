@@ -34,6 +34,9 @@ app.keys = [process.env.COOKIE_SESSION_SECRET];
 app.use(
   session(
     {
+      rolling: true,
+      renew: true,
+      httpOnly: false,
       store: redisStore({
         // eslint-disable-next-line @typescript-eslint/camelcase
         enable_offline_queue: false,
