@@ -22,7 +22,7 @@ export interface Job {
   lastname: string;
   email: string;
   verified: boolean;
-  subjects?: string;
+  subjects: string[];
   phone?: string;
   birthday?: Date;
   msg?: string;
