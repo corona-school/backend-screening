@@ -16,5 +16,4 @@ export class Student extends Model<Student> {
   @Column invited: boolean;
   @Column feedback: string;
   @Column({ field: "comment_screener" }) commentScreener: string;
-  @Column({ field: "knowscsfrom" }) knowsCoronaSchoolFrom: string;
 }

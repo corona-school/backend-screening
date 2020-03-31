@@ -95,29 +95,34 @@ router.get("/student/jobInfo", async (ctx) => {
   ctx.body = await myQueue.getJobWithPosition(email);
 });
 
-router.post("/student/changeStatus", requireAuth, async (ctx: any) => {
-  const { email, status } = ctx.request.body;
-  if (!email || !status) {
+router.post("/student/changeJob", requireAuth, async (ctx: any) => {
+  const job = ctx.request.body;
+  if (!job) {
     ctx.body = "Could not change status of student.";
     ctx.status = 400;
     return;
   }
   const from = ctx.session.passport.user;
+  const screener: Screener = await Screener.findOne({
+    where: {
+      email: from,
+    },
+  });
 
-  ctx.body = await myQueue.changeStatus(email, status, from);
-});
-
-router.post("/student/complete", requireAuth, async (ctx) => {
-  const { email, isVerified } = ctx.request.body;
-  if (!email || typeof isVerified !== "boolean") {
-    ctx.body = "Could not verify student.";
+  if (!screener) {
+    ctx.body = "Could not change status of student.";
     ctx.status = 400;
     return;
   }
-  ctx.body = await myQueue.changeStatus(
-    email,
-    isVerified ? "completed" : "rejected"
-  );
+
+  const screenerInfo = {
+    firstname: screener.firstname,
+    lastname: screener.lastname,
+    email: screener.email,
+    time: Date.now(),
+  };
+
+  ctx.body = await myQueue.changeJob(job.email, job, screenerInfo);
 });
 
 router.get("/screener/info", requireAuth, async (ctx) => {

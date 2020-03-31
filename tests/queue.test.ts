@@ -12,6 +12,7 @@ describe("Testing queue functionality", () => {
     email: "max@müller.de",
     jitsi: "some_link",
     time,
+    verified: false,
     status: "waiting",
   };
 
@@ -25,6 +26,7 @@ describe("Testing queue functionality", () => {
       jitsi: "some_link",
       time,
       status: "waiting",
+      verified: false,
       position: 0,
     });
   });
@@ -41,6 +43,7 @@ describe("Testing queue functionality", () => {
         email: "max@müller.de",
         lastname: "Müller",
         status: "waiting",
+        verified: false,
         time,
       },
     ]);
@@ -58,6 +61,7 @@ describe("Testing queue functionality", () => {
         email: "max@müller.de",
         lastname: "Müller",
         status: "waiting",
+        verified: false,
         position: 0,
         time,
       },
@@ -70,7 +74,7 @@ describe("Testing queue functionality", () => {
   });
   it("can change the status of a job from the queue", async () => {
     await myQueue.add(job);
-    const changedJob = await myQueue.changeStatus(job.email, "active");
+    const changedJob = await myQueue.changeJob(job.email, { status: "active" });
     expect(changedJob).toEqual({
       firstname: "Max",
       lastname: "Müller",
@@ -78,6 +82,7 @@ describe("Testing queue functionality", () => {
       jitsi: "some_link",
       time,
       status: "active",
+      verified: false,
       position: 0,
     });
   });
@@ -96,6 +101,7 @@ describe("Testing queue functionality", () => {
       jitsi: "some_link",
       time,
       status: "waiting",
+      verified: false,
       position: 0,
     });
   });

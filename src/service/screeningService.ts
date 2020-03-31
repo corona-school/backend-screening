@@ -26,6 +26,7 @@ export default class ScreeningService {
       Student.findOne({
         where: {
           email,
+          verified: false,
         },
       })
         .then((student) => {

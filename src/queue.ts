@@ -10,10 +10,26 @@ export interface Message {
   screenerEmail?: string;
 }
 
+export interface ScreenerInfo {
+  firstname: string;
+  lastname: string;
+  email: string;
+  time: number;
+}
+
 export interface Job {
   firstname: string;
   lastname: string;
   email: string;
+  verified: boolean;
+  subjects?: string;
+  phone?: string;
+  birthday?: Date;
+  msg?: string;
+  screener?: ScreenerInfo;
+  invited?: boolean;
+  feedback?: string;
+  commentScreener?: string;
   time: number;
   jitsi: string;
   status: Status;
@@ -97,18 +113,25 @@ export default class Queue {
       : null;
   };
 
-  changeStatus = async (
+  changeJob = async (
     email: string,
-    status: Status,
-    screenerEmail?: string
+    job: Partial<Job>,
+    screener: ScreenerInfo
   ): Promise<JobInfo | null> => {
-    const job = await this.getJobWithPosition(email);
+    const oldJob = await this.getJobWithPosition(email);
 
-    job.status = status;
-    this.client.lset(this.key, job.position, JSON.stringify(job));
+    this.client.lset(
+      this.key,
+      oldJob.position,
+      JSON.stringify({ ...oldJob, job, screener })
+    );
 
-    this.publish("changedStatus", job.email, screenerEmail);
-    return job;
+    this.publish("changedStatus", job.email, screener.email);
+    return {
+      ...oldJob,
+      ...job,
+      screener,
+    };
   };
 
   reset = (): Promise<[]> => {
