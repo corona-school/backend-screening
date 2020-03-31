@@ -1,7 +1,7 @@
 import redis from "redis";
 import RedisMock from "redis-mock";
 jest.spyOn(redis, "createClient").mockImplementation(RedisMock.createClient);
-import Queue, { Job } from "../src/queue";
+import Queue, { Job, ScreenerInfo } from "../src/queue";
 
 describe("Testing queue functionality", () => {
   const myQueue = new Queue("", "StudentQueue");
@@ -14,6 +14,13 @@ describe("Testing queue functionality", () => {
     time,
     verified: false,
     status: "waiting",
+  };
+
+  const screenerInfo: ScreenerInfo = {
+    firstname: "Leon",
+    lastname: "Erath",
+    email: "leon-erath@hotmail.de",
+    time,
   };
 
   it("can add a job to the queue", async () => {
@@ -74,7 +81,11 @@ describe("Testing queue functionality", () => {
   });
   it("can change the status of a job from the queue", async () => {
     await myQueue.add(job);
-    const changedJob = await myQueue.changeJob(job.email, { status: "active" });
+    const changedJob = await myQueue.changeJob(
+      job.email,
+      { status: "active" },
+      screenerInfo
+    );
     expect(changedJob).toEqual({
       firstname: "Max",
       lastname: "Müller",
@@ -84,6 +95,12 @@ describe("Testing queue functionality", () => {
       status: "active",
       verified: false,
       position: 0,
+      screener: {
+        firstname: "Leon",
+        lastname: "Erath",
+        email: "leon-erath@hotmail.de",
+        time,
+      },
     });
   });
   it("can reset the jobs from the queue", async () => {
