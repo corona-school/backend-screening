@@ -7,7 +7,7 @@ export const createJob = (student: Student): Job => {
     lastname: student.lastname,
     email: student.email,
     verified: student.verified,
-    subjects: student.subjects,
+    subjects: JSON.parse(student.subjects),
     phone: student.phone,
     birthday: student.birthday,
     msg: student.msg,
