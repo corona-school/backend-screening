@@ -11,7 +11,6 @@ export const createJob = (student: Student): Job => {
     phone: student.phone,
     birthday: student.birthday,
     msg: student.msg,
-    screener: student.screener,
     invited: student.invited,
     feedback: student.feedback,
     commentScreener: student.commentScreener,
