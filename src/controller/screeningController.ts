@@ -35,6 +35,15 @@ router.post("/screener/create", async (ctx) => {
   ctx.body = screener;
 });
 
+router.get("/screener/status", async (ctx: any) => {
+  if (ctx.isAuthenticated()) {
+    ctx.body = { success: true };
+  } else {
+    ctx.body = { success: false };
+    ctx.throw(401);
+  }
+});
+
 router.post("/screener/login", async (ctx: any, next) => {
   return passport.authenticate("local", (err, user) => {
     if (!user || err) {
