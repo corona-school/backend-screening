@@ -123,7 +123,7 @@ export default class Queue {
     this.client.lset(
       this.key,
       oldJob.position,
-      JSON.stringify({ ...oldJob, job, screener })
+      JSON.stringify({ ...oldJob, ...job, screener })
     );
 
     this.publish("changedStatus", job.email, screener.email);

@@ -97,6 +97,7 @@ router.get("/student/jobInfo", async (ctx) => {
 
 router.post("/student/changeJob", requireAuth, async (ctx: any) => {
   const job = ctx.request.body;
+
   if (!job) {
     ctx.body = "Could not change status of student.";
     ctx.status = 400;
