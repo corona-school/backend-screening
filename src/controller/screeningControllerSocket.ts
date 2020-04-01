@@ -39,19 +39,32 @@ const updateStudent = (
 };
 
 const allStudents: Map<string, string> = new Map([]);
+const allScreener: Map<string, string> = new Map([]);
+const isStudent: Map<string, boolean> = new Map([]);
 const screeningControllerSocket = (io: SocketIO.Server): void => {
   io.on("connection", (socket) => {
+    socket.on("loginScreener", async (data) => {
+      allScreener.set(socket.id, data.email);
+      isStudent.set(socket.id, false);
+      console.log(`New Screener Login from ${data.email}`);
+    });
     socket.on("disconnect", async () => {
       const email = allStudents.get(socket.id);
-      const job = await screeningService.myQueue.getJobWithPosition(email);
-      if (job && job.status !== "completed" && job.status !== "rejected") {
-        allStudents.delete(socket.id);
-        await screeningService.myQueue.remove(email);
+      if (isStudent.get(socket.id)) {
+        const job = await screeningService.myQueue.getJobWithPosition(email);
+        if (job && job.status !== "completed" && job.status !== "rejected") {
+          allStudents.delete(socket.id);
+          await screeningService.myQueue.remove(email);
+        }
+        console.log(`Student ${email} logged out!`);
+      } else {
+        allScreener.delete(socket.id);
+        console.log(`Screener ${email} logged out!`);
       }
-      console.log(`Student ${email} logged out!`);
     });
     socket.on("login", async (data) => {
       allStudents.set(socket.id, data.email);
+      isStudent.set(socket.id, true);
       console.log(`New Student Login from ${data.email}`);
 
       socket.join(data.email);
