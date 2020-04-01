@@ -11,6 +11,7 @@ describe("Testing queue functionality", () => {
     lastname: "Müller",
     email: "max@müller.de",
     jitsi: "some_link",
+    subjects: [],
     time,
     verified: false,
     status: "waiting",
@@ -31,10 +32,11 @@ describe("Testing queue functionality", () => {
       lastname: "Müller",
       email: "max@müller.de",
       jitsi: "some_link",
+      subjects: [],
       time,
       status: "waiting",
       verified: false,
-      position: 0,
+      position: 1,
     });
   });
   it("can list all jobs from the queue", async () => {
@@ -51,6 +53,7 @@ describe("Testing queue functionality", () => {
         lastname: "Müller",
         status: "waiting",
         verified: false,
+        subjects: [],
         time,
       },
     ]);
@@ -69,7 +72,8 @@ describe("Testing queue functionality", () => {
         lastname: "Müller",
         status: "waiting",
         verified: false,
-        position: 0,
+        subjects: [],
+        position: 1,
         time,
       },
     ]);
@@ -94,7 +98,8 @@ describe("Testing queue functionality", () => {
       time,
       status: "active",
       verified: false,
-      position: 0,
+      subjects: [],
+      position: 1,
       screener: {
         firstname: "Leon",
         lastname: "Erath",
@@ -119,7 +124,8 @@ describe("Testing queue functionality", () => {
       time,
       status: "waiting",
       verified: false,
-      position: 0,
+      position: 1,
+      subjects: [],
     });
   });
 });
