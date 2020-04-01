@@ -35,7 +35,7 @@ export interface Job {
   status: Status;
 }
 export interface JobInfo extends Job {
-  position: number;
+  position?: number;
 }
 
 export default class Queue {
@@ -100,17 +100,13 @@ export default class Queue {
   };
 
   getJobWithPosition = async (email: string): Promise<JobInfo | null> => {
-    const currentList = await this.list();
+    const currentList = await this.listInfo();
 
-    const position: number = currentList.findIndex(
-      (job) => job.email === email
-    );
-    if (position === -1) {
+    const job: JobInfo | null = currentList.find((job) => job.email === email);
+    if (!job) {
       return null;
     }
-    return currentList[position]
-      ? { ...currentList[position], position }
-      : null;
+    return job;
   };
 
   changeJob = async (
@@ -160,9 +156,18 @@ export default class Queue {
 
   listInfo = async (): Promise<JobInfo[]> => {
     return new Promise((resolve, reject) => {
+      let position = 0;
       this.list()
         .then((list) => {
-          resolve(list.map((job, position) => ({ ...job, position })));
+          resolve(
+            list.map((job) => {
+              if (job.status === "waiting") {
+                position += 1;
+                return { ...job, position };
+              }
+              return job;
+            })
+          );
         })
         .catch((err) => {
           reject(err);
