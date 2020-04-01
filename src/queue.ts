@@ -37,16 +37,20 @@ export interface Job {
 export interface JobInfo extends Job {
   position?: number;
 }
+const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
+
+const client = redis.createClient({ url: REDIS_URL });
+const publisher = client.duplicate();
 
 export default class Queue {
-  client: RedisClient;
-  publisher: RedisClient;
   private key: string;
 
-  constructor(url: string, key: string) {
-    this.client = redis.createClient({ url: url });
-    this.publisher = this.client.duplicate();
+  constructor(key: string) {
     this.key = key;
+  }
+
+  getClient(): RedisClient {
+    return client;
   }
 
   publish = (
@@ -59,7 +63,7 @@ export default class Queue {
       email,
       screenerEmail,
     };
-    this.publisher.publish("queue", JSON.stringify(message));
+    publisher.publish("queue", JSON.stringify(message));
   };
 
   add = async (job: Job): Promise<JobInfo> => {
@@ -69,7 +73,7 @@ export default class Queue {
       if (list.some((j) => j.email === job.email)) {
         reject("Duplicate Job");
       }
-      this.client.rpush(this.key, JSON.stringify(job), (err) => {
+      client.rpush(this.key, JSON.stringify(job), (err) => {
         if (err) {
           return reject(err);
         } else {
@@ -94,7 +98,7 @@ export default class Queue {
         reject("No job found.");
       }
 
-      this.client.lrem(this.key, 0, JSON.stringify(job), (err) => {
+      client.lrem(this.key, 0, JSON.stringify(job), (err) => {
         if (err) {
           return reject(err);
         }
@@ -120,10 +124,16 @@ export default class Queue {
     screener: ScreenerInfo
   ): Promise<JobInfo | null> => {
     const oldJob = await this.getJobWithPosition(email);
+    const list = await this.list();
+    const index = list.findIndex((j) => j.email === oldJob.email);
 
-    this.client.lset(
+    if (index === -1) {
+      return null;
+    }
+
+    client.lset(
       this.key,
-      oldJob.position,
+      index,
       JSON.stringify({ ...oldJob, ...job, screener })
     );
 
@@ -137,7 +147,7 @@ export default class Queue {
 
   reset = (): Promise<[]> => {
     return new Promise((resolve, reject) => {
-      this.client.del(this.key, (err) => {
+      client.del(this.key, (err) => {
         if (err) {
           reject("Could not delete list.");
         }
@@ -148,7 +158,7 @@ export default class Queue {
 
   list = (): Promise<Job[]> => {
     return new Promise((resolve, reject) => {
-      this.client.lrange(this.key, 0, -1, (err, res) => {
+      client.lrange(this.key, 0, -1, (err, res) => {
         if (err) {
           reject(err);
         } else {

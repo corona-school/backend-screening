@@ -4,11 +4,14 @@ import { Screener } from "../database/models/Screener";
 
 const screeningService = new ScreeningService();
 
+const subcriber = screeningService.myQueue.getClient().duplicate();
+subcriber.subscribe("queue");
+
 const updateStudent = (
   message: Message,
   jobInfo: JobInfo,
   io: SocketIO.Server
-) => {
+): void => {
   if (!message.screenerEmail) {
     io.sockets.in(message.email).emit("updateJob", jobInfo);
     return;
@@ -41,7 +44,7 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
     socket.on("disconnect", async () => {
       const email = allStudents.get(socket.id);
       const job = await screeningService.myQueue.getJobWithPosition(email);
-      if (job.status !== "completed" && job.status !== "rejected") {
+      if (job && job.status !== "completed" && job.status !== "rejected") {
         allStudents.delete(socket.id);
         await screeningService.myQueue.remove(email);
       }
@@ -63,7 +66,7 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
     socket.on("logout", async (data) => {
       screeningService.logout(data.email);
     });
-    screeningService.subcriber.on("message", async (channel, data) => {
+    subcriber.on("message", async (channel, data) => {
       const message: Message = JSON.parse(data);
       switch (message.operation) {
         case "addedJob": {
@@ -75,6 +78,8 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
           const jobList = await screeningService.myQueue.listInfo();
           for (const jobInfo of jobList) {
             if (jobInfo.email === message.email) {
+              console.log(jobInfo.status, jobInfo.email);
+
               updateStudent(message, jobInfo, io);
             } else if (jobInfo.status === "waiting") {
               io.sockets.in(jobInfo.email).emit("updateJob", jobInfo);

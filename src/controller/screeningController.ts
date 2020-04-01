@@ -6,12 +6,10 @@ import Queue from "../queue";
 import { Screener } from "../database/models/Screener";
 import { Next } from "koa";
 import ScreeningService from "../service/screeningService";
-import bcrypt from "bcrypt";
 
 const router = new Router();
 
-const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
-const myQueue = new Queue(REDIS_URL, "StudentQueue");
+const myQueue = new Queue("StudentQueue");
 
 const requireAuth = async (ctx: any, next: Next) => {
   if (ctx.isAuthenticated()) {
