@@ -34,9 +34,21 @@ const updateStudent = (
       io.sockets.in(message.email).emit("updateJob", jobInfo);
     });
 };
+
+const allStudents: Map<string, string> = new Map([]);
 const screeningControllerSocket = (io: SocketIO.Server): void => {
   io.on("connection", (socket) => {
+    socket.on("disconnect", async () => {
+      const email = allStudents.get(socket.id);
+      const job = await screeningService.myQueue.getJobWithPosition(email);
+      if (job.status !== "completed" && job.status !== "rejected") {
+        allStudents.delete(socket.id);
+        await screeningService.myQueue.remove(email);
+      }
+      console.log(`Student ${email} logged out!`);
+    });
     socket.on("login", async (data) => {
+      allStudents.set(socket.id, data.email);
       console.log(`New Student Login from ${data.email}`);
 
       socket.join(data.email);

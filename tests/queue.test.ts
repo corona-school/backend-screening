@@ -79,12 +79,11 @@ describe("Testing queue functionality", () => {
     ]);
   });
   it("can remove a job from the queue", async () => {
-    await myQueue.add(job);
     const hasRemoved = await myQueue.remove(job.email);
     expect(hasRemoved).toBe(true);
   });
   it("can change the status of a job from the queue", async () => {
-    await myQueue.add(job);
+    const addedJob = await myQueue.add(job);
     const changedJob = await myQueue.changeJob(
       job.email,
       { status: "active" },
@@ -109,11 +108,11 @@ describe("Testing queue functionality", () => {
     });
   });
   it("can reset the jobs from the queue", async () => {
-    await myQueue.add(job);
     const list = await myQueue.reset();
     expect(list).toEqual([]);
   });
   it("can get the info from a job of the queue", async () => {
+    await myQueue.reset();
     await myQueue.add(job);
     const foundJob = await myQueue.getJobWithPosition(job.email);
     expect(foundJob).toEqual({
