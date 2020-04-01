@@ -61,15 +61,15 @@ router.get("/screener/status", async (ctx: any) => {
 });
 
 router.post("/screener/login", async (ctx: any, next) => {
-  return passport.authenticate("local", async (err, user) => {
-    if (!user || err) {
+  return passport.authenticate("local", async (err, email) => {
+    if (!email || err) {
       ctx.body = { success: false };
       ctx.throw(401);
     }
-    const from = ctx.session.passport.user;
+
     const screener: Screener = await Screener.findOne({
       where: {
-        email: from,
+        email,
       },
     });
     ctx.body = {
@@ -77,7 +77,7 @@ router.post("/screener/login", async (ctx: any, next) => {
       lastname: screener.lastname,
       email: screener.email,
     };
-    return ctx.login(user);
+    return ctx.login(email);
   })(ctx, next);
 });
 
