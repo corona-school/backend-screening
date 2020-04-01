@@ -24,15 +24,21 @@ const requireAuth = async (ctx: any, next: Next) => {
 
 router.post("/screener/create", async (ctx) => {
   const { firstname, lastname, email, password } = ctx.request.body;
-  const hash = await bcrypt.hash(password, 10);
-  const screener = await Screener.build({
-    firstname,
-    lastname,
-    email,
-    password: hash,
-  }).save();
 
-  ctx.body = screener;
+  try {
+    const screener = await Screener.build({
+      firstname,
+      lastname,
+      email,
+      password,
+    }).save();
+
+    ctx.body = screener;
+  } catch (err) {
+    console.error(err);
+    ctx.body = "Could not create Screener";
+    ctx.status = 400;
+  }
 });
 
 router.get("/screener/status", async (ctx: any) => {
