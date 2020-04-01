@@ -19,6 +19,7 @@ export class Screener extends Model<Screener> {
   @Column({ field: "nachname" }) lastname: string;
   @Column email: string;
   @Column({ field: "passwort" }) password: string;
+  @Column verified: boolean;
 
   @BeforeUpdate
   @BeforeCreate
@@ -34,6 +35,7 @@ export const getScreener = async (email: string): Promise<Screener> => {
   return Screener.findOne({
     where: {
       email,
+      verified: true,
     },
   });
 };
