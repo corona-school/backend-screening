@@ -43,7 +43,17 @@ router.post("/screener/create", async (ctx) => {
 
 router.get("/screener/status", async (ctx: any) => {
   if (ctx.isAuthenticated()) {
-    ctx.body = { success: true };
+    const from = ctx.session.passport.user;
+    const screener: Screener = await Screener.findOne({
+      where: {
+        email: from,
+      },
+    });
+    ctx.body = {
+      firstname: screener.firstname,
+      lastname: screener.lastname,
+      email: screener.email,
+    };
   } else {
     ctx.body = { success: false };
     ctx.throw(401);
@@ -51,12 +61,22 @@ router.get("/screener/status", async (ctx: any) => {
 });
 
 router.post("/screener/login", async (ctx: any, next) => {
-  return passport.authenticate("local", (err, user) => {
+  return passport.authenticate("local", async (err, user) => {
     if (!user || err) {
       ctx.body = { success: false };
       ctx.throw(401);
     }
-    ctx.body = { success: true };
+    const from = ctx.session.passport.user;
+    const screener: Screener = await Screener.findOne({
+      where: {
+        email: from,
+      },
+    });
+    ctx.body = {
+      firstname: screener.firstname,
+      lastname: screener.lastname,
+      email: screener.email,
+    };
     return ctx.login(user);
   })(ctx, next);
 });
