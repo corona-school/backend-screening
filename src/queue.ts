@@ -63,7 +63,12 @@ export default class Queue {
   };
 
   add = async (job: Job): Promise<JobInfo> => {
+    const list = await this.list();
+
     return new Promise((resolve, reject) => {
+      if (list.some((j) => j.email === job.email)) {
+        reject("Duplicate Job");
+      }
       this.client.rpush(this.key, JSON.stringify(job), (err) => {
         if (err) {
           return reject(err);
