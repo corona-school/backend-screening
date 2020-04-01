@@ -1,9 +1,39 @@
 import ScreeningService from "../service/screeningService";
-import { Message } from "../queue";
+import { Message, JobInfo } from "../queue";
 import { Screener } from "../database/models/Screener";
 
 const screeningService = new ScreeningService();
 
+const updateStudent = (
+  message: Message,
+  jobInfo: JobInfo,
+  io: SocketIO.Server
+) => {
+  if (!message.screenerEmail) {
+    io.sockets.in(message.email).emit("updateJob", jobInfo);
+    return;
+  }
+
+  Screener.findOne({
+    where: {
+      email: message.screenerEmail,
+    },
+  })
+    .then((screener) => {
+      const answer = {
+        ...jobInfo,
+        screener: {
+          firstname: screener.firstname,
+          lastname: screener.lastname,
+        },
+      };
+      io.sockets.in(message.email).emit("updateJob", answer);
+    })
+    .catch((err) => {
+      console.error(err);
+      io.sockets.in(message.email).emit("updateJob", jobInfo);
+    });
+};
 const screeningControllerSocket = (io: SocketIO.Server): void => {
   io.on("connection", (socket) => {
     socket.on("login", async (data) => {
@@ -30,33 +60,14 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
           break;
         }
         case "changedStatus": {
-          const jobInfo = await screeningService.myQueue.getJobWithPosition(
-            message.email
-          );
-          if (!message.screenerEmail) {
-            io.sockets.in(message.email).emit("updateJob", jobInfo);
-            break;
+          const jobList = await screeningService.myQueue.listInfo();
+          for (const jobInfo of jobList) {
+            if (jobInfo.email === message.email) {
+              updateStudent(message, jobInfo, io);
+            } else if (jobInfo.status === "waiting") {
+              io.sockets.in(jobInfo.email).emit("updateJob", jobInfo);
+            }
           }
-
-          Screener.findOne({
-            where: {
-              email: message.screenerEmail,
-            },
-          })
-            .then((screener) => {
-              const answer = {
-                ...jobInfo,
-                screener: {
-                  firstname: screener.firstname,
-                  lastname: screener.lastname,
-                },
-              };
-              io.sockets.in(message.email).emit("updateJob", answer);
-            })
-            .catch((err) => {
-              console.error(err);
-              io.sockets.in(message.email).emit("updateJob", jobInfo);
-            });
           break;
         }
         case "removedJob": {
