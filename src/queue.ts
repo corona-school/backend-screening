@@ -17,12 +17,18 @@ export interface ScreenerInfo {
   time: number;
 }
 
+export interface Subject {
+  subject: string;
+  min: number;
+  max: number;
+}
+
 export interface Job {
   firstname: string;
   lastname: string;
   email: string;
   verified: boolean;
-  subjects: string[];
+  subjects: Subject[];
   phone?: string;
   birthday?: Date;
   msg?: string;
