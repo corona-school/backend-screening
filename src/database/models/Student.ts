@@ -16,4 +16,11 @@ export class Student extends Model<Student> {
   @Column invited: boolean;
   @Column feedback: string;
   @Column({ field: "comment_screener" }) commentScreener: string;
+  @Column({ field: "knowcsfrom" }) knowsUsFrom: string;
+}
+
+export interface Subject {
+  subject: string;
+  min: number;
+  max: number;
 }

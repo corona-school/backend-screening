@@ -4,7 +4,7 @@ import Router from "koa-router";
 import passport from "koa-passport";
 import Queue from "../queue";
 import { Screener } from "../database/models/Screener";
-import { Student } from "../database/models/Student";
+import { Student, Subject } from "../database/models/Student";
 import { Next } from "koa";
 import ScreeningService from "../service/screeningService";
 
@@ -155,6 +155,12 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
         verified: false,
       },
     });
+    student.feedback = job.feedback;
+    student.knowsUsFrom = job.knowscsfrom;
+    student.commentScreener = job.commentScreener;
+    student.subjects = JSON.stringify(
+      job.subjects.map((s: Subject) => `${s.subject}${s.min}:${s.max}`)
+    );
     student.verified = job.status === "completed";
     await student.save();
   }
