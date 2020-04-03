@@ -112,6 +112,17 @@ router.post("/student/logout", async (ctx) => {
   }
 });
 
+router.post("/student/remove", async (ctx) => {
+  const { email } = ctx.request.body;
+  try {
+    await myQueue.remove(email);
+    ctx.body = "Student Job successfully removed out.";
+  } catch (err) {
+    ctx.body = "Could not remove student.";
+    ctx.status = 400;
+  }
+});
+
 router.get("/student/jobInfo", async (ctx) => {
   const { email } = ctx.request.query;
   ctx.body = await myQueue.getJobWithPosition(email);
