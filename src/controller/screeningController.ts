@@ -63,11 +63,7 @@ router.post("/screener/login", async (ctx: any, next) => {
       ctx.throw(401);
     }
 
-    const screener: Screener = await Screener.findOne({
-      where: {
-        email,
-      },
-    });
+    const screener: Screener = await getScreener(email);
     ctx.body = {
       firstname: screener.firstname,
       lastname: screener.lastname,
@@ -92,7 +88,7 @@ const screeningService = new ScreeningService();
 router.post("/student/login", async (ctx) => {
   const { email } = ctx.request.body;
 
-  const jobInfo = await screeningService.login(email);
+  const jobInfo: JobInfo = await screeningService.login(email);
   if (!jobInfo) {
     ctx.body = "Could not login the student.";
     ctx.status = 400;
