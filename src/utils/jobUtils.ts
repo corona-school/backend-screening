@@ -5,15 +5,25 @@ export const createJob = (student: Student): Job => {
   const getSubject = (subject: string): string =>
     subject.replace(/[0-9]+|:/g, "");
 
-  const getValues = (subject: string): number[] => {
-    const matchGroup = subject.match(/[0-9]+:[0-9]+/g);
-    if (matchGroup) {
-      return matchGroup[0].split(":").map((s) => parseInt(s));
+  const getValues = (subject: string | null): number[] => {
+    try {
+      const matchGroup = subject.match(/[0-9]+:[0-9]+/g);
+      if (matchGroup) {
+        return matchGroup[0].split(":").map((s) => parseInt(s));
+      }
+      return [1, 13];
+    } catch (err) {
+      console.error(err);
+      return [1, 13];
     }
-    return [1, 13];
   };
 
-  const subjects = JSON.parse(student.subjects);
+  let subjects = [];
+  try {
+    subjects = JSON.parse(student.subjects);
+  } catch (err) {
+    console.log("could not parse subjects");
+  }
 
   return {
     firstname: student.firstname,

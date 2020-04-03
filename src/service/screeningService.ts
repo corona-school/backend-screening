@@ -24,6 +24,10 @@ export default class ScreeningService {
         },
       })
         .then((student) => {
+          if (!student) {
+            reject("Could not find student");
+          }
+
           return this.myQueue.add(createJob(student));
         })
         .then((jobInfo) => {

@@ -69,12 +69,14 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
 
       socket.join(data.email);
 
-      const jobInfo = await screeningService.login(data.email);
-      if (!jobInfo) {
-        io.sockets.in(data.email).emit("login", { success: false });
-      }
-
-      io.sockets.in(data.email).emit("login", { success: true, jobInfo });
+      screeningService
+        .login(data.email)
+        .then((jobInfo) => {
+          io.sockets.in(data.email).emit("login", { success: true, jobInfo });
+        })
+        .catch((err) => {
+          io.sockets.in(data.email).emit("login", { success: false });
+        });
     });
     socket.on("logout", async (data) => {
       screeningService.logout(data.email);
