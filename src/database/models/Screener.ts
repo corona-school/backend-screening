@@ -2,8 +2,6 @@ import {
   Model,
   Table,
   Column,
-  AutoIncrement,
-  PrimaryKey,
   BeforeUpdate,
   BeforeCreate,
 } from "sequelize-typescript";

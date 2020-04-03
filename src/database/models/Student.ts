@@ -1,4 +1,4 @@
-import { Model, Table, Column, AllowNull } from "sequelize-typescript";
+import { Model, Table, Column } from "sequelize-typescript";
 
 @Table({
   timestamps: false,

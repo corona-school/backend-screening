@@ -35,6 +35,7 @@ export const createJob = (student: Student): Job => {
       max: getValues(s)[1],
     })),
     phone: student.phone,
+    knowcsfrom: student.knowsUsFrom,
     birthday: student.birthday,
     msg: student.msg,
     invited: student.invited,

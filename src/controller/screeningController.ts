@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Router from "koa-router";
 import passport from "koa-passport";
-import Queue, { Subject } from "../queue";
+import Queue, { Subject, JobInfo } from "../queue";
 import { Screener, getScreener } from "../database/models/Screener";
 import { Student, getUnverifiedStudent } from "../database/models/Student";
 import { Next } from "koa";
@@ -118,7 +118,7 @@ router.get("/student/jobInfo", async (ctx) => {
 });
 
 router.post("/student/changeJob", requireAuth, async (ctx: any) => {
-  const job = ctx.request.body;
+  const job: JobInfo = ctx.request.body;
 
   if (!job) {
     ctx.body = "Could not change status of student.";
@@ -144,7 +144,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
   if (job.status === "completed" || job.status === "rejected") {
     const student: Student = await getUnverifiedStudent(job.email);
     student.feedback = job.feedback;
-    student.knowsUsFrom = job.knowscsfrom;
+    student.knowsUsFrom = job.knowcsfrom;
     student.commentScreener = job.commentScreener;
     student.subjects = JSON.stringify(
       job.subjects.map((s: Subject) => `${s.subject}${s.min}:${s.max}`)
