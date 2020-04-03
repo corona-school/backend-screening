@@ -4,6 +4,7 @@ import Router from "koa-router";
 import passport from "koa-passport";
 import Queue from "../queue";
 import { Screener } from "../database/models/Screener";
+import { Student } from "../database/models/Student";
 import { Next } from "koa";
 import ScreeningService from "../service/screeningService";
 
@@ -147,6 +148,17 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
     time: Date.now(),
   };
 
+  if (job.status === "completed" || job.status === "rejected") {
+    const student: Student = await Student.findOne({
+      where: {
+        email: job.email,
+        verified: false,
+      },
+    });
+    student.verified = job.status === "completed";
+    await student.save();
+  }
+
   ctx.body = await myQueue.changeJob(job.email, job, screenerInfo);
 });
 
@@ -158,7 +170,7 @@ router.get("/screener/info", requireAuth, async (ctx) => {
     },
   });
   if (!screener) {
-    ctx.body = "Could not find screenre";
+    ctx.body = "Could not find screener.";
     ctx.status = 400;
     return;
   }

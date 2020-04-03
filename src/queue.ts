@@ -27,7 +27,6 @@ export interface Job {
   firstname: string;
   lastname: string;
   email: string;
-  verified: boolean;
   subjects: Subject[];
   phone?: string;
   birthday?: Date;

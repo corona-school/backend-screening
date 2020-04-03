@@ -4,7 +4,7 @@ jest.spyOn(redis, "createClient").mockImplementation(RedisMock.createClient);
 import Queue, { Job, ScreenerInfo } from "../src/queue";
 
 describe("Testing queue functionality", () => {
-  const myQueue = new Queue("", "StudentQueue");
+  const myQueue = new Queue("StudentQueue");
   const time = Date.now();
   const job: Job = {
     firstname: "Max",
@@ -13,7 +13,6 @@ describe("Testing queue functionality", () => {
     jitsi: "some_link",
     subjects: [],
     time,
-    verified: false,
     status: "waiting",
   };
 
@@ -35,7 +34,6 @@ describe("Testing queue functionality", () => {
       subjects: [],
       time,
       status: "waiting",
-      verified: false,
       position: 1,
     });
   });
@@ -52,7 +50,6 @@ describe("Testing queue functionality", () => {
         email: "max@müller.de",
         lastname: "Müller",
         status: "waiting",
-        verified: false,
         subjects: [],
         time,
       },
@@ -71,7 +68,6 @@ describe("Testing queue functionality", () => {
         email: "max@müller.de",
         lastname: "Müller",
         status: "waiting",
-        verified: false,
         subjects: [],
         position: 1,
         time,
@@ -96,7 +92,6 @@ describe("Testing queue functionality", () => {
       jitsi: "some_link",
       time,
       status: "active",
-      verified: false,
       subjects: [],
       position: 1,
       screener: {
@@ -122,7 +117,6 @@ describe("Testing queue functionality", () => {
       jitsi: "some_link",
       time,
       status: "waiting",
-      verified: false,
       position: 1,
       subjects: [],
     });

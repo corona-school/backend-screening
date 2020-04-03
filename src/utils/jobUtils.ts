@@ -19,7 +19,6 @@ export const createJob = (student: Student): Job => {
     firstname: student.firstname,
     lastname: student.lastname,
     email: student.email,
-    verified: student.verified,
     subjects: subjects.map((s: string) => ({
       subject: getSubject(s),
       min: getValues(s)[0],
