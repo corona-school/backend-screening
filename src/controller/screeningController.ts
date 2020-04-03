@@ -161,7 +161,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
     student.subjects = JSON.stringify(
       job.subjects.map((s: Subject) => `${s.subject}${s.min}:${s.max}`)
     );
-    student.verified = job.status === "completed";
+    student.verified = job.status === "completed" ? true : false;
     await student.save();
   }
 
