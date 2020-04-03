@@ -103,7 +103,12 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
           break;
         }
         case "removedJob": {
-          console.log("removed Job");
+          const jobList = await screeningService.myQueue.listInfo();
+          for (const jobInfo of jobList) {
+            if (jobInfo.status === "waiting") {
+              io.sockets.in(jobInfo.email).emit("updateJob", jobInfo);
+            }
+          }
           break;
         }
       }
