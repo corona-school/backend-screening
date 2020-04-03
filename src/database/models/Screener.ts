@@ -31,11 +31,41 @@ export class Screener extends Model<Screener> {
   }
 }
 
+export const getVerifiedScreener = async (email: string): Promise<Screener> => {
+  return new Promise((resolve, reject) => {
+    Screener.findOne({
+      where: {
+        email,
+        verified: true,
+      },
+    })
+      .then((screener) => {
+        if (screener) {
+          resolve(screener);
+        }
+        reject("Could not find screener");
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
 export const getScreener = async (email: string): Promise<Screener> => {
-  return Screener.findOne({
-    where: {
-      email,
-      verified: true,
-    },
+  return new Promise((resolve, reject) => {
+    Screener.findOne({
+      where: {
+        email,
+      },
+    })
+      .then((screener) => {
+        if (screener) {
+          resolve(screener);
+        }
+        reject("Could not find screener");
+      })
+      .catch((err) => {
+        reject(err);
+      });
   });
 };

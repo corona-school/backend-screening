@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Router from "koa-router";
 import passport from "koa-passport";
-import Queue from "../queue";
-import { Screener } from "../database/models/Screener";
-import { Student, Subject } from "../database/models/Student";
+import Queue, { Subject } from "../queue";
+import { Screener, getScreener } from "../database/models/Screener";
+import { Student, getUnverifiedStudent } from "../database/models/Student";
 import { Next } from "koa";
 import ScreeningService from "../service/screeningService";
 
@@ -43,11 +43,8 @@ router.post("/screener/create", async (ctx) => {
 router.get("/screener/status", async (ctx: any) => {
   if (ctx.isAuthenticated()) {
     const from = ctx.session.passport.user;
-    const screener: Screener = await Screener.findOne({
-      where: {
-        email: from,
-      },
-    });
+    const screener: Screener = await getScreener(from);
+
     ctx.body = {
       firstname: screener.firstname,
       lastname: screener.lastname,
@@ -129,11 +126,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
     return;
   }
   const from = ctx.session.passport.user;
-  const screener: Screener = await Screener.findOne({
-    where: {
-      email: from,
-    },
-  });
+  const screener: Screener = await getScreener(from);
 
   if (!screener) {
     ctx.body = "Could not change status of student.";
@@ -149,12 +142,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
   };
 
   if (job.status === "completed" || job.status === "rejected") {
-    const student: Student = await Student.findOne({
-      where: {
-        email: job.email,
-        verified: false,
-      },
-    });
+    const student: Student = await getUnverifiedStudent(job.email);
     student.feedback = job.feedback;
     student.knowsUsFrom = job.knowscsfrom;
     student.commentScreener = job.commentScreener;
@@ -170,11 +158,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
 
 router.get("/screener/info", requireAuth, async (ctx) => {
   const { email } = ctx.request.query;
-  const screener = await Screener.findOne({
-    where: {
-      email,
-    },
-  });
+  const screener = await getScreener(email);
   if (!screener) {
     ctx.body = "Could not find screener.";
     ctx.status = 400;

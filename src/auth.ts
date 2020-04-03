@@ -1,7 +1,7 @@
 import passport from "koa-passport";
 import PassportLocal from "passport-local";
 import bcrypt from "bcrypt";
-import { Screener, getScreener } from "./database/models/Screener";
+import { Screener, getVerifiedScreener } from "./database/models/Screener";
 const LocalStrategy = PassportLocal.Strategy;
 
 passport.serializeUser((email: string, done: Function) => {
@@ -9,7 +9,7 @@ passport.serializeUser((email: string, done: Function) => {
 });
 
 passport.deserializeUser((email: string, done: Function) => {
-  return getScreener(email)
+  return getVerifiedScreener(email)
     .then((screener) => {
       return done(null, screener);
     })
@@ -41,7 +41,7 @@ passport.use(
   new LocalStrategy(
     { usernameField: "email" },
     (email: string, password: string, done: Function) => {
-      getScreener(email)
+      getVerifiedScreener(email)
         .then((screener) => comparePassword(password, screener))
         .then((screener) => done(null, screener.email))
         .catch((err) => done(err, null));

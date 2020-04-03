@@ -1,4 +1,4 @@
-import { Student } from "../database/models/Student";
+import { Student, getUnverifiedStudent } from "../database/models/Student";
 import { createJob } from "../utils/jobUtils";
 import Queue, { JobInfo } from "../queue";
 
@@ -17,19 +17,8 @@ export default class ScreeningService {
     }
 
     return new Promise((resolve, reject) => {
-      Student.findOne({
-        where: {
-          email,
-          verified: false,
-        },
-      })
-        .then((student) => {
-          if (!student) {
-            reject("Could not find student");
-          }
-
-          return this.myQueue.add(createJob(student));
-        })
+      getUnverifiedStudent(email)
+        .then((student: Student | null) => this.myQueue.add(createJob(student)))
         .then((jobInfo) => {
           resolve(jobInfo);
         })

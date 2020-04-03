@@ -19,8 +19,41 @@ export class Student extends Model<Student> {
   @Column({ field: "knowcsfrom" }) knowsUsFrom: string;
 }
 
-export interface Subject {
-  subject: string;
-  min: number;
-  max: number;
-}
+export const getUnverifiedStudent = async (email: string): Promise<Student> => {
+  return new Promise((resolve, reject) => {
+    Student.findOne({
+      where: {
+        email,
+        verified: false,
+      },
+    })
+      .then((student) => {
+        if (student) {
+          resolve(student);
+        }
+        reject("Could not find student");
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const getStudent = async (email: string): Promise<Student> => {
+  return new Promise((resolve, reject) => {
+    Student.findOne({
+      where: {
+        email,
+      },
+    })
+      .then((student) => {
+        if (student) {
+          resolve(student);
+        }
+        reject("Could not find student");
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
