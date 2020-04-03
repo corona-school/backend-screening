@@ -4,7 +4,11 @@ import Router from "koa-router";
 import passport from "koa-passport";
 import Queue, { Subject, JobInfo } from "../queue";
 import { Screener, getScreener } from "../database/models/Screener";
-import { Student, getUnverifiedStudent } from "../database/models/Student";
+import {
+  Student,
+  getUnverifiedStudent,
+  getStudent,
+} from "../database/models/Student";
 import { Next } from "koa";
 import ScreeningService from "../service/screeningService";
 
@@ -138,7 +142,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
   };
 
   if (job.status === "completed" || job.status === "rejected") {
-    const student: Student = await getUnverifiedStudent(job.email);
+    const student: Student = await getStudent(job.email);
     student.feedback = job.feedback;
     student.knowsUsFrom = job.knowcsfrom;
     student.commentScreener = job.commentScreener;
