@@ -7,7 +7,7 @@ export class Student extends Model<Student> {
   @Column firstname: string;
   @Column lastname: string;
   @Column({ primaryKey: true }) email: string;
-  @AllowNull(false) @Column verified: boolean;
+  @Column verified: boolean;
   @Column subjects: string;
   @Column phone: string;
   @Column birthday: Date;
@@ -24,7 +24,7 @@ export const getUnverifiedStudent = async (email: string): Promise<Student> => {
     Student.findOne({
       where: {
         email,
-        verified: false,
+        verified: null,
       },
     })
       .then((student) => {
