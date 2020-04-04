@@ -19,12 +19,12 @@ const app = new Koa();
 app.use(koaBody());
 
 const validOrigins = [
-  `https://corona-school-admin-dev.herokuapp.com/`,
-  "https://corona-school-admin.herokuapp.com/",
+  `https://corona-school-admin-dev.herokuapp.com`,
+  "https://corona-school-admin.herokuapp.com",
   "https://authentication.corona-school.de",
   "https://screeners.corona-school.de",
-  "https://corona-student-dev.herokuapp.com/",
-  "https://corona-student-app.herokuapp.com/",
+  "https://corona-student-dev.herokuapp.com",
+  "https://corona-student-app.herokuapp.com",
 ];
 function originIsValid(origin: any): any {
   return validOrigins.indexOf(origin) != -1;
