@@ -17,10 +17,28 @@ import screeningControllerSocket from "./controller/screeningControllerSocket";
 
 const app = new Koa();
 app.use(koaBody());
+
+const validOrigins = [
+  `https://corona-school-admin-dev.herokuapp.com/`,
+  "https://corona-school-admin.herokuapp.com/",
+  "https://authentication.corona-school.de",
+  "https://screeners.corona-school.de",
+  "https://corona-student-dev.herokuapp.com/",
+  "https://corona-student-app.herokuapp.com/",
+];
+function originIsValid(origin: any): any {
+  return validOrigins.indexOf(origin) != -1;
+}
+
+function verifyOrigin(ctx: any): any {
+  const origin = ctx.headers.origin;
+  if (!originIsValid(origin)) return false;
+  return origin;
+}
+
 app.use(
   cors({
-    origin:
-      "https://corona-school-admin-dev.herokuapp.com/ https://corona-school-admin.herokuapp.com/ https://authentication.corona-school.de https://screeners.corona-school.de https://corona-student-dev.herokuapp.com/ https://corona-student-app.herokuapp.com/",
+    origin: verifyOrigin,
     credentials: true,
     allowMethods: ["*"],
     allowHeaders: [
