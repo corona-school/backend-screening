@@ -66,8 +66,6 @@ app.use(
       ...sessionConfig,
       rolling: true,
       renew: true,
-      secure: true,
-      sameSite: "none",
       store: redisStore({
         // eslint-disable-next-line @typescript-eslint/camelcase
         enable_offline_queue: false,
