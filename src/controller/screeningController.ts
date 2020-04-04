@@ -150,19 +150,29 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
   };
 
   if (job.status === "completed" || job.status === "rejected") {
-    const student: Student = await getStudent(job.email);
-    student.feedback = job.feedback;
-    student.screener = screener.id.toString();
-    student.knowsUsFrom = job.knowcsfrom;
-    student.commentScreener = job.commentScreener;
-    student.subjects = JSON.stringify(
-      job.subjects.map((s: Subject) => `${s.subject}${s.min}:${s.max}`)
-    );
-    student.verified = job.status === "completed" ? true : false;
-    await student.save();
+    try {
+      const student: Student = await getStudent(job.email);
+      student.feedback = job.feedback;
+      student.screener = screener.id.toString();
+      student.knowsUsFrom = job.knowcsfrom;
+      student.commentScreener = job.commentScreener;
+      student.subjects = JSON.stringify(
+        job.subjects.map((s: Subject) => `${s.subject}${s.min}:${s.max}`)
+      );
+      student.verified = job.status === "completed" ? true : false;
+
+      await student.save();
+    } catch (err) {
+      console.error(err);
+      console.log("Student Job could not be saved in Database!");
+    }
   }
 
-  ctx.body = await myQueue.changeJob(job.email, job, screenerInfo);
+  try {
+    ctx.body = await myQueue.changeJob(job.email, job, screenerInfo);
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 router.get("/screener/info", requireAuth, async (ctx) => {
