@@ -21,11 +21,6 @@ app.use(
   cors({
     origin: "*",
     credentials: true,
-    allowMethods: ["*"],
-    allowHeaders: [
-      "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept",
-    ],
-    keepHeadersOnError: true,
   })
 );
 
