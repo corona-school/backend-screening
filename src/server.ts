@@ -19,7 +19,6 @@ const app = new Koa();
 app.use(koaBody());
 app.use(
   cors({
-    origin: "*",
     credentials: true,
     allowMethods: ["*"],
     allowHeaders: [
