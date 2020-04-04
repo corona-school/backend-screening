@@ -114,6 +114,7 @@ router.post("/student/remove", requireAuth, async (ctx) => {
     await myQueue.remove(email);
     ctx.body = "Student Job successfully removed out.";
   } catch (err) {
+    console.error(err);
     ctx.body = "Could not remove student.";
     ctx.status = 400;
   }
