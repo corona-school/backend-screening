@@ -83,6 +83,7 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
     });
     subcriber.on("message", async (channel, data) => {
       const message: Message = JSON.parse(data);
+
       switch (message.operation) {
         case "addedJob": {
           console.log("added Job");
@@ -103,7 +104,11 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
           break;
         }
         case "removedJob": {
+          console.log("removedJob");
+
           const jobList = await screeningService.myQueue.listInfo();
+
+          io.sockets.in(message.email).emit("removedJob", message.email);
           for (const jobInfo of jobList) {
             if (jobInfo.status === "waiting") {
               io.sockets.in(jobInfo.email).emit("updateJob", jobInfo);

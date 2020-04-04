@@ -69,6 +69,7 @@ export default class Queue {
       email,
       screenerEmail,
     };
+
     publisher.publish("queue", JSON.stringify(message));
   };
 
@@ -108,7 +109,8 @@ export default class Queue {
         if (err) {
           return reject(err);
         }
-        this.publish("removedJob", job.email);
+
+        this.publish("removedJob", email);
         return resolve(true);
       });
     });
