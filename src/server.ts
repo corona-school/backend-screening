@@ -19,6 +19,8 @@ const app = new Koa();
 app.use(koaBody());
 app.use(
   cors({
+    origin:
+      "https://corona-school-admin-dev.herokuapp.com/ https://corona-school-admin.herokuapp.com/ https://authentication.corona-school.de https://screeners.corona-school.de https://corona-student-dev.herokuapp.com/ https://corona-student-app.herokuapp.com/",
     credentials: true,
     allowMethods: ["*"],
     allowHeaders: [
