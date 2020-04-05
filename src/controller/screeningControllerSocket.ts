@@ -42,6 +42,38 @@ const allStudents: Map<string, string> = new Map([]);
 const allScreener: Map<string, string> = new Map([]);
 const isStudent: Map<string, boolean> = new Map([]);
 
+const findInMap = (map: Map<string, string>, val: string) => {
+  for (const [k, v] of map) {
+    if (v === val) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const logoutStudent = async (
+  email: string,
+  id: string,
+  forced = false
+): Promise<void> => {
+  console.log("Try loggin out", email, id, forced);
+
+  const job = await screeningService.myQueue.getJobWithPosition(email);
+
+  if (job && job.status === "waiting") {
+    allStudents.delete(id);
+    if (forced) {
+      await screeningService.myQueue.remove(email);
+    } else {
+      setTimeout(() => {
+        if (!findInMap(allStudents, email)) {
+          screeningService.myQueue.remove(email);
+        }
+      }, 1000);
+    }
+  }
+};
+
 const screeningControllerSocket = (io: SocketIO.Server): void => {
   io.on("connection", (socket) => {
     socket.on("loginScreener", async (data) => {
@@ -51,15 +83,12 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
     });
 
     socket.on("disconnect", async () => {
-      const email = allStudents.get(socket.id);
-      if (isStudent.get(socket.id)) {
-        const job = await screeningService.myQueue.getJobWithPosition(email);
-        if (job && job.status === "waiting") {
-          allStudents.delete(socket.id);
-          await screeningService.myQueue.remove(email);
-        }
-        console.log(`Student ${email} logged out!`);
-      } else {
+      if (isStudent.get(socket.id) && allStudents.get(socket.id)) {
+        const email = allStudents.get(socket.id);
+        logoutStudent(email, socket.id);
+      }
+      if (!isStudent.get(socket.id) && allScreener.get(socket.id)) {
+        const email = allScreener.get(socket.id);
         allScreener.delete(socket.id);
         console.log(`Screener ${email} logged out!`);
       }
@@ -83,46 +112,48 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
     });
 
     socket.on("logout", async (data) => {
-      screeningService.logout(data.email);
+      const email = allStudents.get(socket.id);
+      await logoutStudent(email, socket.id, true);
     });
+  });
+  subcriber.on("message", async (channel, data) => {
+    const message: Message = JSON.parse(data);
 
-    subcriber.on("message", async (channel, data) => {
-      const message: Message = JSON.parse(data);
+    switch (message.operation) {
+      case "addedJob": {
+        console.log("added Job");
 
-      switch (message.operation) {
-        case "addedJob": {
-          console.log("added Job");
-
-          break;
-        }
-        case "changedStatus": {
-          const jobList = await screeningService.myQueue.listInfo();
-          for (const jobInfo of jobList) {
-            if (jobInfo.email === message.email) {
-              console.log(jobInfo.status, jobInfo.email);
-
-              updateStudent(message, jobInfo, io);
-            } else if (jobInfo.status === "waiting") {
-              io.sockets.in(jobInfo.email).emit("updateJob", jobInfo);
-            }
-          }
-          break;
-        }
-        case "removedJob": {
-          console.log("removedJob");
-
-          const jobList = await screeningService.myQueue.listInfo();
-
-          io.sockets.in(message.email).emit("removedJob", message.email);
-          for (const jobInfo of jobList) {
-            if (jobInfo.status === "waiting") {
-              io.sockets.in(jobInfo.email).emit("updateJob", jobInfo);
-            }
-          }
-          break;
-        }
+        break;
       }
-    });
+      case "changedStatus": {
+        const jobList = await screeningService.myQueue.listInfo();
+        for (const jobInfo of jobList) {
+          if (jobInfo.email === message.email) {
+            console.log(jobInfo.status, jobInfo.email);
+
+            updateStudent(message, jobInfo, io);
+          } else if (jobInfo.status === "waiting") {
+            io.sockets.in(jobInfo.email).emit("updateJob", jobInfo);
+          }
+        }
+        break;
+      }
+      case "removedJob": {
+        console.log("removedJob");
+
+        const jobList = await screeningService.myQueue.listInfo();
+
+        io.sockets.in(message.email).emit("removedJob", message.email);
+        for (const jobInfo of jobList) {
+          if (jobInfo.status === "waiting") {
+            console.log("updated", jobInfo.email);
+
+            io.sockets.in(jobInfo.email).emit("updateJob", jobInfo);
+          }
+        }
+        break;
+      }
+    }
   });
 };
 
