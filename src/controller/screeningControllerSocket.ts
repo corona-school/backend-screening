@@ -1,6 +1,6 @@
 import ScreeningService from "../service/screeningService";
 import { Message, JobInfo } from "../queue";
-import { Screener } from "../database/models/Screener";
+import { Screener, getScreener } from "../database/models/Screener";
 
 const screeningService = new ScreeningService();
 
@@ -38,8 +38,15 @@ const updateStudent = (
     });
 };
 
+interface ScreenerInfo {
+  firstname: string;
+  lastname: string;
+  email: string;
+}
+
 const allStudents: Map<string, string> = new Map([]);
 const allScreener: Map<string, string> = new Map([]);
+let onlineScreenerList: ScreenerInfo[] = [];
 const isStudent: Map<string, boolean> = new Map([]);
 
 const findInMap = (map: Map<string, string>, val: string) => {
@@ -75,14 +82,38 @@ const logoutStudent = async (
 };
 
 const screeningControllerSocket = (io: SocketIO.Server): void => {
+  const addScreener = (screener: ScreenerInfo): void => {
+    if (!onlineScreenerList.some((s) => s.email === screener.email)) {
+      onlineScreenerList.push(screener);
+    }
+    io.sockets.in("screener").emit("screenerUpdate", onlineScreenerList);
+  };
+
+  const removeScreener = (email: string): void => {
+    const newList: ScreenerInfo[] = [];
+    for (const screener of onlineScreenerList) {
+      if (screener.email !== email) {
+        newList.push(screener);
+      }
+    }
+    onlineScreenerList = newList;
+    io.sockets.in("screener").emit("screenerUpdate", newList);
+  };
+
   io.on("connection", (socket) => {
     socket.on("loginScreener", async (data) => {
-      allScreener.set(socket.id, data.email);
+      if (!data) {
+        return;
+      }
       isStudent.set(socket.id, false);
-      console.log(`New Screener Login from ${data.email}`);
-      socket.join("screener");
+      allScreener.set(socket.id, data.email);
+
       const jobList = await screeningService.myQueue.listInfo();
+      socket.join("screener");
       socket.emit("updateQueue", jobList);
+      addScreener(data);
+
+      console.log(`New Screener Login from ${data.email}`);
     });
 
     socket.on("disconnect", async () => {
@@ -93,7 +124,7 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
       if (!isStudent.get(socket.id) && allScreener.get(socket.id)) {
         const email = allScreener.get(socket.id);
         allScreener.delete(socket.id);
-        console.log(`Screener ${email} logged out!`);
+        removeScreener(email);
       }
     });
 
@@ -117,6 +148,12 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
     socket.on("logout", async (data) => {
       const email = allStudents.get(socket.id);
       await logoutStudent(email, socket.id, true);
+    });
+
+    socket.on("logoutScreener", async (data) => {
+      allScreener.delete(socket.id);
+      removeScreener(data.email);
+      console.log(`Screener ${data.email} logged out!`);
     });
   });
   subcriber.on("message", async (channel, data) => {
