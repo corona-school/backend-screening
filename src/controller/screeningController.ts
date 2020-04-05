@@ -149,6 +149,16 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
     time: Date.now(),
   };
 
+  if (
+    job.status === "active" &&
+    job.screener &&
+    job.screener.email !== screener.email
+  ) {
+    ctx.status = 400;
+    ctx.body = "Ein Screener verifiziert diesen Studenten schon.";
+    return;
+  }
+
   if (job.status === "completed" || job.status === "rejected") {
     try {
       const student: Student = await getStudent(job.email);

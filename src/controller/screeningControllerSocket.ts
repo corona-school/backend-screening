@@ -80,6 +80,9 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
       allScreener.set(socket.id, data.email);
       isStudent.set(socket.id, false);
       console.log(`New Screener Login from ${data.email}`);
+      socket.join("screener");
+      const jobList = await screeningService.myQueue.listInfo();
+      socket.emit("updateQueue", jobList);
     });
 
     socket.on("disconnect", async () => {
@@ -122,11 +125,13 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
     switch (message.operation) {
       case "addedJob": {
         console.log("added Job");
-
+        const jobList = await screeningService.myQueue.listInfo();
+        io.sockets.in("screener").emit("updateQueue", jobList);
         break;
       }
       case "changedStatus": {
         const jobList = await screeningService.myQueue.listInfo();
+        io.sockets.in("screener").emit("updateQueue", jobList);
         for (const jobInfo of jobList) {
           if (jobInfo.email === message.email) {
             console.log(jobInfo.status, jobInfo.email);
@@ -142,6 +147,7 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
         console.log("removedJob");
 
         const jobList = await screeningService.myQueue.listInfo();
+        io.sockets.in("screener").emit("updateQueue", jobList);
 
         io.sockets.in(message.email).emit("removedJob", message.email);
         for (const jobInfo of jobList) {
