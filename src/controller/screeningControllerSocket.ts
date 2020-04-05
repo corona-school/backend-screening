@@ -41,6 +41,7 @@ const updateStudent = (
 const allStudents: Map<string, string> = new Map([]);
 const allScreener: Map<string, string> = new Map([]);
 const isStudent: Map<string, boolean> = new Map([]);
+
 const screeningControllerSocket = (io: SocketIO.Server): void => {
   io.on("connection", (socket) => {
     socket.on("loginScreener", async (data) => {
@@ -48,11 +49,12 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
       isStudent.set(socket.id, false);
       console.log(`New Screener Login from ${data.email}`);
     });
+
     socket.on("disconnect", async () => {
       const email = allStudents.get(socket.id);
       if (isStudent.get(socket.id)) {
         const job = await screeningService.myQueue.getJobWithPosition(email);
-        if (job && job.status !== "completed" && job.status !== "rejected") {
+        if (job && job.status === "waiting") {
           allStudents.delete(socket.id);
           await screeningService.myQueue.remove(email);
         }
@@ -62,6 +64,7 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
         console.log(`Screener ${email} logged out!`);
       }
     });
+
     socket.on("login", async (data) => {
       allStudents.set(socket.id, data.email);
       isStudent.set(socket.id, true);
@@ -78,9 +81,11 @@ const screeningControllerSocket = (io: SocketIO.Server): void => {
           io.sockets.in(data.email).emit("login", { success: false });
         });
     });
+
     socket.on("logout", async (data) => {
       screeningService.logout(data.email);
     });
+
     subcriber.on("message", async (channel, data) => {
       const message: Message = JSON.parse(data);
 
