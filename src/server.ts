@@ -38,7 +38,6 @@ function verifyOrigin(ctx: any): any {
 
 app.use(
   cors({
-    origin: verifyOrigin,
     credentials: true,
     allowMethods: ["*"],
     allowHeaders: [
