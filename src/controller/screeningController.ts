@@ -203,6 +203,25 @@ router.post("/queue/reset", requireAuth, async (ctx) => {
   ctx.body = await myQueue.list();
 });
 
+router.get("/queue/statistics", async (ctx) => {
+  const list = await myQueue.listInfo();
+  let countCompleted = 0;
+  let countRejected = 0;
+  list.forEach((j) => {
+    if (j.status === "completed") {
+      countCompleted++;
+    }
+    if (j.status === "rejected") {
+      countRejected++;
+    }
+  });
+  ctx.body = {
+    countCompleted,
+    countRejected,
+    total: countCompleted + countRejected,
+  };
+});
+
 router.get("/queue/jobs", requireAuth, async (ctx) => {
   ctx.body = await myQueue.listInfo();
 });
