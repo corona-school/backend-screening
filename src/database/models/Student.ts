@@ -20,6 +20,7 @@ export class Student extends Model<Student> {
 }
 
 export const getUnverifiedStudent = async (email: string): Promise<Student> => {
+  // ToDo: use getStudent and filter by ???
   return new Promise((resolve, reject) => {
     Student.findOne({
       where: {
@@ -41,6 +42,7 @@ export const getUnverifiedStudent = async (email: string): Promise<Student> => {
 
 export const getStudent = async (email: string): Promise<Student> => {
   return new Promise((resolve, reject) => {
+    // ToDo: grab Student data from api, map if object found Question: how to set (or not set) verified property
     Student.findOne({
       where: {
         email,

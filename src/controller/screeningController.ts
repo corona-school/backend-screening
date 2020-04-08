@@ -171,6 +171,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
       );
       student.verified = job.status === "completed" ? true : false;
 
+      //ToDo: use API, once implemented
       await student.save();
     } catch (err) {
       console.error(err);
