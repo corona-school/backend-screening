@@ -12,11 +12,11 @@ import bcrypt from "bcrypt";
   tableName: "screener",
 })
 export class Screener extends Model<Screener> {
-  @Column({ autoIncrement: true, primaryKey: true }) id: number;
-  @Column({ field: "vorname" }) firstname: string;
-  @Column({ field: "nachname" }) lastname: string;
-  @Column email: string;
-  @Column({ field: "passwort" }) password: string;
+  @Column({ autoIncrement: true, primaryKey: true }) id: number; //Person.id
+  @Column({ field: "vorname" }) firstname: string; //Person.firstname
+  @Column({ field: "nachname" }) lastname: string; //Person.lastname
+  @Column email: string; //Person.email
+  @Column({ field: "passwort" }) password: string; //Screener.password
   @Column verified: boolean;
 
   @BeforeUpdate

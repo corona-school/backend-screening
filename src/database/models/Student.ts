@@ -4,19 +4,19 @@ import { Model, Table, Column } from "sequelize-typescript";
   timestamps: false,
 })
 export class Student extends Model<Student> {
-  @Column firstname: string;
-  @Column lastname: string;
-  @Column({ primaryKey: true }) email: string;
-  @Column verified: boolean;
-  @Column subjects: string;
-  @Column phone: string;
-  @Column birthday: Date;
-  @Column msg: string;
-  @Column screener: string;
-  @Column invited: boolean;
-  @Column feedback: string;
-  @Column({ field: "comment_screener" }) commentScreener: string;
-  @Column({ field: "knowcsfrom" }) knowsUsFrom: string;
+  @Column firstname: string; //Person.firstname
+  @Column lastname: string; //Person.lastname
+  @Column({ primaryKey: true }) email: string; //Person.email
+  @Column verified: boolean; //Student.screening(.success)
+  @Column subjects: string; //Student.subjects
+  @Column phone: string; //Student.phone
+  @Column birthday: Date; //Student.birthday
+  @Column msg: string; //Student.msg
+  @Column screener: string; //Student.screening.screener(.id?)
+  @Column invited: boolean; //?
+  @Column feedback: string;//?
+  @Column({ field: "comment_screener" }) commentScreener: string; //Student.screening.comment
+  @Column({ field: "knowcsfrom" }) knowsUsFrom: string; //Student.screening.knowsCoronaSchoolFrom
 }
 
 export const getUnverifiedStudent = async (email: string): Promise<Student> => {
