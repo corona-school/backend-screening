@@ -28,10 +28,12 @@ export default class BackendApiService {
                 student.birthday = data.birthday;
                 student.msg = data.msg;
                 resolve(student);
+              } else {
+                reject("API response missing student data");
               }
-              reject("API response missing student data");
+            } else {
+              reject("API non-200 return code: " + status);
             }
-            reject("API non-200 return code");
           })
           .catch((err) => {
             console.error("Get student data failed: ", err);
