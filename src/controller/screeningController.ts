@@ -89,7 +89,14 @@ const screeningService = new ScreeningService();
 router.post("/student/login", async (ctx) => {
   const { email } = ctx.request.body;
 
-  const jobInfo: JobInfo = await screeningService.login(email);
+  let jobInfo: JobInfo;
+  try {
+    jobInfo = await screeningService.login(email);
+  } catch (e) {
+    ctx.body = "Could not login the student: " + e;
+    ctx.status = 400;
+    return;
+  }
   if (!jobInfo) {
     ctx.body = "Could not login the student.";
     ctx.status = 400;
