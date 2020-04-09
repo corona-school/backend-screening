@@ -49,8 +49,9 @@ export default class BackendApiService {
           .then((student) => {
             if (student && !student.verified) {
               resolve(student);
+            } else {
+              reject("Could not find student");
             }
-            reject("Could not find student");
           })
           .catch((err) => {
             reject(err);
