@@ -4,9 +4,10 @@ import Router from "koa-router";
 import passport from "koa-passport";
 import Queue, { Subject, JobInfo } from "../queue";
 import { Screener, getScreener } from "../database/models/Screener";
-import { Student, getStudent } from "../database/models/Student";
+import { Student } from "../database/models/Student";
 import { Next } from "koa";
 import ScreeningService from "../service/screeningService";
+import BackendApiService from '../service/backendApiService';
 
 const router = new Router();
 
@@ -125,6 +126,8 @@ router.get("/student/jobInfo", async (ctx) => {
   ctx.body = await myQueue.getJobWithPosition(email);
 });
 
+const apiService = new BackendApiService();
+
 router.post("/student/changeJob", requireAuth, async (ctx: any) => {
   const job: JobInfo = ctx.request.body;
 
@@ -161,7 +164,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
 
   if (job.status === "completed" || job.status === "rejected") {
     try {
-      const student: Student = await getStudent(job.email);
+      const student: Student = await apiService.getStudent(job.email);
       student.feedback = job.feedback;
       student.screener = screener.id.toString();
       student.knowsUsFrom = job.knowcsfrom;
@@ -172,6 +175,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
       student.verified = job.status === "completed" ? true : false;
 
       //ToDo: use API, once implemented
+      // await apiService.updateStudent(student);
       await student.save();
     } catch (err) {
       console.error(err);
