@@ -40,6 +40,7 @@ export interface Job {
   jitsi: string;
   status: Status;
 }
+
 export interface JobInfo extends Job {
   position?: number;
 }

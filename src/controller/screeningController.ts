@@ -7,6 +7,7 @@ import { Screener, getScreener } from "../database/models/Screener";
 import { Student, getStudent } from "../database/models/Student";
 import { Next } from "koa";
 import ScreeningService from "../service/screeningService";
+import StatisticService from "../service/statisticService";
 
 const router = new Router();
 
@@ -43,13 +44,8 @@ router.post("/screener/create", async (ctx) => {
 router.get("/screener/status", async (ctx: any) => {
   if (ctx.isAuthenticated()) {
     const from = ctx.session.passport.user;
-    const screener: Screener = await getScreener(from);
 
-    ctx.body = {
-      firstname: screener.firstname,
-      lastname: screener.lastname,
-      email: screener.email,
-    };
+    ctx.body = await getScreener(from);
   } else {
     ctx.body = { success: false };
     ctx.throw(401);
@@ -63,12 +59,7 @@ router.post("/screener/login", async (ctx: any, next) => {
       ctx.throw(401);
     }
 
-    const screener: Screener = await getScreener(email);
-    ctx.body = {
-      firstname: screener.firstname,
-      lastname: screener.lastname,
-      email: screener.email,
-    };
+    ctx.body = await getScreener(email);
     return ctx.login(email);
   })(ctx, next);
 });
@@ -143,9 +134,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
   }
 
   const screenerInfo = {
-    firstname: screener.firstname,
-    lastname: screener.lastname,
-    email: screener.email,
+    ...screener,
     time: Date.now(),
   };
 
@@ -224,6 +213,19 @@ router.get("/queue/statistics", async (ctx) => {
 
 router.get("/queue/jobs", requireAuth, async (ctx) => {
   ctx.body = await myQueue.listInfo();
+});
+
+const statisticService = new StatisticService(myQueue);
+
+router.get("/statistics/logs", requireAuth, async (ctx) => {
+  const logs = await statisticService.getDatabaseQueueLogs();
+
+  if (!logs) {
+    ctx.body = "Could not find queue logs.";
+    ctx.status = 400;
+    return;
+  }
+  ctx.body = logs;
 });
 
 export default router;
