@@ -34,7 +34,7 @@ export interface Job {
   screener?: ScreenerInfo;
   invited?: boolean;
   feedback?: string;
-  knowcsfrom: string;
+  knowcsfrom?: string;
   commentScreener?: string;
   time: number;
   jitsi: string;
