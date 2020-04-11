@@ -134,7 +134,10 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
   }
 
   const screenerInfo = {
-    ...screener,
+    id: screener.id,
+    firstname: screener.firstname,
+    lastname: screener.lastname,
+    email: screener.email,
     time: Date.now(),
   };
 
