@@ -11,6 +11,7 @@ export interface Message {
 }
 
 export interface ScreenerInfo {
+  id: number;
   firstname: string;
   lastname: string;
   email: string;
@@ -140,11 +141,15 @@ export default class Queue {
       return null;
     }
 
-    client.lset(
-      this.key,
-      index,
-      JSON.stringify({ ...oldJob, ...job, screener })
-    );
+    const newJob = {
+      ...oldJob,
+      ...job,
+      screener,
+    };
+
+    const jobString: string = JSON.stringify(newJob);
+
+    client.lset(this.key, index, jobString);
 
     this.publish("changedStatus", job.email, screener.email);
     return {
