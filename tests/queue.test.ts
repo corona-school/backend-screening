@@ -79,7 +79,7 @@ describe("Testing queue functionality", () => {
     expect(hasRemoved).toBe(true);
   });
   it("can change the status of a job from the queue", async () => {
-    const addedJob = await myQueue.add(job);
+    await myQueue.add(job);
     const changedJob = await myQueue.changeJob(
       job.email,
       { status: "active" },

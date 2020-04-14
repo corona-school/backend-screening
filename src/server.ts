@@ -14,6 +14,7 @@ import http from "http";
 import { sequelize } from "./database";
 import screeningRouter from "./controller/screeningController";
 import screeningControllerSocket from "./controller/screeningControllerSocket";
+import { startStudentSocket } from "./controller/studentSocket";
 
 const app = new Koa();
 app.use(koaBody());
@@ -95,9 +96,10 @@ app
   .use(router.allowedMethods());
 
 const server = http.createServer(app.callback());
-const io = socket(server);
+export const io: SocketIO.Server = socket(server);
 
-screeningControllerSocket(io);
+screeningControllerSocket();
+// startStudentSocket();
 
 sequelize
   .sync()

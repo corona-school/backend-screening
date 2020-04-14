@@ -4,6 +4,12 @@ export type Status = "waiting" | "active" | "completed" | "rejected";
 
 export type Operation = "addedJob" | "changedStatus" | "removedJob";
 
+export enum QueueChanges {
+  ADDED_JOB = "addedJob",
+  REMOVED_JOB = "removedJob",
+  CHANGED_STATUS = "changedStatus",
+}
+
 export interface Message {
   operation: Operation;
   email: string;
@@ -11,7 +17,6 @@ export interface Message {
 }
 
 export interface ScreenerInfo {
-  id: number;
   firstname: string;
   lastname: string;
   email: string;

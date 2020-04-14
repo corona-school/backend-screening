@@ -1,6 +1,7 @@
 import ScreeningService from "../service/screeningService";
 import { Message, JobInfo } from "../queue";
 import { Screener, getScreener } from "../database/models/Screener";
+import { io } from "../server";
 
 const screeningService = new ScreeningService();
 
@@ -81,7 +82,7 @@ const logoutStudent = async (
   }
 };
 
-const screeningControllerSocket = (io: SocketIO.Server): void => {
+const screeningControllerSocket = (): void => {
   const addScreener = (screener: ScreenerInfo): void => {
     if (!onlineScreenerList.some((s) => s.email === screener.email)) {
       onlineScreenerList.push(screener);
