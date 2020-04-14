@@ -15,6 +15,7 @@ import { sequelize } from "./database";
 import screeningRouter from "./controller/screeningController";
 import screeningControllerSocket from "./controller/screeningControllerSocket";
 import { startStudentSocket } from "./controller/studentSocket";
+import startScreenerSocket from "./controller/screenerSocket";
 
 const app = new Koa();
 app.use(koaBody());
@@ -100,6 +101,7 @@ export const io: SocketIO.Server = socket(server);
 
 screeningControllerSocket();
 // startStudentSocket();
+// startScreenerSocket();
 
 sequelize
   .sync()
