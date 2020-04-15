@@ -187,7 +187,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
   }
 
   try {
-    ctx.body = await myQueue.changeJob(job.email, job, null);
+    ctx.body = await myQueue.changeJob(job.email, job, screenerInfo);
   } catch (err) {
     ctx.status = 400;
     ctx.body = "Something went wrong! ";
