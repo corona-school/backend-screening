@@ -7,6 +7,7 @@ export class StudentScreeningResult {
   knowscsfrom?: string;
   screenerEmail: string;
   subjects?: string;
+  feedback?: string;
 
   constructor(job: JobInfo) {
     this.verified = job.status === "completed";
@@ -15,5 +16,6 @@ export class StudentScreeningResult {
     this.knowscsfrom = job.knowcsfrom;
     this.screenerEmail = job.screener.email;
     this.subjects = JSON.stringify(job.subjects.map((s: Subject) => `${s.subject}${s.min}:${s.max}`));
+    this.feedback = job.feedback;
   }
 }
