@@ -1,6 +1,7 @@
 import {Student} from '../database/models/Student';
 import axios from 'axios';
 import dotenv from "dotenv";
+import {StudentScreeningResult} from '../controller/dto/StudentScreeningResult';
 dotenv.config();
 const apiUri = process.env.CORONA_BACKEND_API_URL;
 const apiToken = process.env.CORONA_BACKEND_API_TOKEN;
@@ -10,26 +11,24 @@ export default class BackendApiService {
 
   getStudent = async (email: string): Promise<Student> => {
     return new Promise((resolve, reject) => {
-      // TODO: Question: how to set (or not set) verified property (verified or presence of screening)?
       axios
           .get(apiUri + email)
-          // TODO: types for data?
           .then(({status, data}) => {
             if (status == 200) {
-              if (data) {
+              if (data && data.email) {
                 // TODO: if property names where identical, we could do this with a simple Object.assign
                 const student = new Student();
                 student.firstname = data.firstName;
                 student.lastname = data.lastName;
                 student.email = data.email;
-                student.verified = data.verified;
+                student.verified = data.alreadyScreened == false ? undefined : data.verified;
                 student.subjects = data.subjects;
                 student.phone = data.phone;
                 student.birthday = data.birthday;
                 student.msg = data.msg;
                 resolve(student);
               } else {
-                reject("API response missing student data");
+                reject("API response with missing or invalid student data");
               }
             } else {
               reject("API non-200 return code: " + status);
@@ -59,10 +58,23 @@ export default class BackendApiService {
     });
   };
 
-  updateStudent = async (student: Student): Promise<boolean> => {
+  updateStudent = async (studentScreeningResult: StudentScreeningResult): Promise<boolean> => {
     return new Promise((resolve, reject) => {
-      // TODO: send to api
-            reject("WIP not sending data yet");
+      axios
+          .put(apiUri + studentScreeningResult.email, studentScreeningResult)
+          .then(({status, data}) => {
+            if (status == 200) {
+              resolve(true);
+            } else {
+              reject("API non-200 return code: " + status);
+            }
+          })
+          .catch((err) => {
+            console.error("update student data failed: ", err);
+            reject(err);
+          });
     });
   };
 }
+
+

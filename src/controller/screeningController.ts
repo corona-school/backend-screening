@@ -9,6 +9,7 @@ import { Next } from "koa";
 import ScreeningService from "../service/screeningService";
 import BackendApiService from '../service/backendApiService';
 import StatisticService from "../service/statisticService";
+import {StudentScreeningResult} from './dto/StudentScreeningResult';
 
 const router = new Router();
 
@@ -163,27 +164,30 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
 
   if (job.status === "completed" || job.status === "rejected") {
     try {
-      const student: Student = await apiService.getStudent(job.email);
-      student.feedback = job.feedback;
-      student.screener = screener.id.toString();
-      student.knowsUsFrom = job.knowcsfrom;
-      student.commentScreener = job.commentScreener;
-      student.subjects = JSON.stringify(
-        job.subjects.map((s: Subject) => `${s.subject}${s.min}:${s.max}`)
-      );
-      student.verified = job.status === "completed" ? true : false;
+      await apiService.updateStudent(new StudentScreeningResult(job));
 
-      //ToDo: use API, once implemented
-      // await apiService.updateStudent(student);
-      await student.save();
+      // update local database for backwards compatibility
+      const student: Student = await Student.findOne({ where: { email: job.email } });
+      if (student) {
+        student.feedback = job.feedback;
+        student.screener = screener.id.toString();
+        student.knowsUsFrom = job.knowcsfrom;
+        student.commentScreener = job.commentScreener;
+        student.subjects = JSON.stringify(
+            job.subjects.map((s: Subject) => `${s.subject}${s.min}:${s.max}`)
+        );
+        student.verified = job.status === "completed" ? true : false;
+
+        await student.save();
+      }
     } catch (err) {
       console.error(err);
-      console.log("Student Job could not be saved in Database!");
+      console.log("Student data could not be updated!");
     }
   }
 
   try {
-    ctx.body = await myQueue.changeJob(job.email, job, screenerInfo);
+    ctx.body = await myQueue.changeJob(job.email, job, null);
   } catch (err) {
     ctx.status = 400;
     ctx.body = "Something went wrong! ";
