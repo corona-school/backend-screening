@@ -164,22 +164,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
 
   if (job.status === "completed" || job.status === "rejected") {
     try {
-      await apiService.updateStudent(new StudentScreeningResult(job));
-
-      // update local database for backwards compatibility
-      const student: Student = await Student.findOne({ where: { email: job.email } });
-      if (student) {
-        student.feedback = job.feedback;
-        student.screener = screener.id.toString();
-        student.knowsUsFrom = job.knowcsfrom;
-        student.commentScreener = job.commentScreener;
-        student.subjects = JSON.stringify(
-            job.subjects.map((s: Subject) => `${s.subject}${s.min}:${s.max}`)
-        );
-        student.verified = job.status === "completed" ? true : false;
-
-        await student.save();
-      }
+      await apiService.updateStudent(new StudentScreeningResult(job), job.email);
     } catch (err) {
       console.error(err);
       console.log("Student data could not be updated!");

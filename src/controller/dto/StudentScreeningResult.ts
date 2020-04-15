@@ -1,7 +1,6 @@
 import {JobInfo, Subject} from '../../queue';
 
 export class StudentScreeningResult {
-  email: string;
   verified: boolean;
   birthday?: Date;
   commentScreener?: string;
@@ -10,7 +9,6 @@ export class StudentScreeningResult {
   subjects?: string;
 
   constructor(job: JobInfo) {
-    this.email = job.email;
     this.verified = job.status === "completed";
     this.birthday = job.birthday;
     this.commentScreener = job.commentScreener;
