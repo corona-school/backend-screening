@@ -21,7 +21,7 @@ export default class BackendApiService {
                 student.firstname = data.firstName;
                 student.lastname = data.lastName;
                 student.email = data.email;
-                student.verified = data.alreadyScreened == false ? undefined : data.verified;
+                student.verified = data.alreadyScreened === false ? undefined : data.verified;
                 student.subjects = data.subjects;
                 student.phone = data.phone;
                 student.birthday = data.birthday;
@@ -42,7 +42,6 @@ export default class BackendApiService {
   };
 
   getUnverifiedStudent = async (email: string): Promise<Student> => {
-    // TODO: s.a.
     return new Promise((resolve, reject) => {
       this.getStudent(email)
           .then((student) => {

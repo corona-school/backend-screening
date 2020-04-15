@@ -33,8 +33,8 @@ Additionally create an ".env" file in the root of the project with the following
 DATABASE_URL=postgresql://localhost:5432/dev_corona_school
 REDIS_URL=redis://127.0.0.1:6379
 COOKIE_SESSION_SECRET=oYz2bYa2MBDqiqQE7T80bmoFikIpamkHvxEVnYPpAxlFTV5F5JWHbckS04Xd
-CORONA_BACKEND_API_URL=http://localhost:5000/api/student/ (for locally running backend app)
-CORONA_BACKEND_API_TOKEN=[security token of a verified screener]
+CORONA_BACKEND_API_URL=http://localhost:5000/api/student/ (for locally running backend app) app
+CORONA_BACKEND_API_TOKEN=[security token for screening api as provided in backend]
 
 ```
 
