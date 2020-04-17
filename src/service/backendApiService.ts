@@ -89,8 +89,9 @@ export default class BackendApiService {
                 screener.firstname = data.firstname;
                 screener.lastname = data.lastname;
                 screener.email = data.email;
-                screener.password = data.password;
+                screener.password = data.passwordHash;
                 screener.verified = data.verified;
+                screener.active =data.active;
                 resolve(screener);
               } else {
                 reject("Get screener response with missing or invalid screener data");
@@ -110,7 +111,7 @@ export default class BackendApiService {
     return new Promise((resolve, reject) => {
       this.getScreener(email, includePassword)
           .then((screener) => {
-            if (screener.verified) {
+            if (screener.verified && screener.active) {
               resolve(screener);
             } else {
               reject("Screener is not verified");
