@@ -36,8 +36,8 @@ export class Screener extends Model<Screener> {
 
   @Column({ field: "passwort" }) password: string;
   @Column verified: boolean;
-
   @HasMany(() => QueueLog, { sourceKey: "email" }) queueLogs: QueueLog[];
+  @Column active: boolean;
 
   @BeforeUpdate
   @BeforeCreate

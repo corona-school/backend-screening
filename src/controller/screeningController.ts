@@ -2,9 +2,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Router from "koa-router";
 import passport from "koa-passport";
-import Queue, { Subject, JobInfo } from "../queue";
+import Queue, { JobInfo } from "../queue";
 import { Screener, getScreener } from "../database/models/Screener";
-import { Student } from "../database/models/Student";
 import { Next } from "koa";
 import ScreeningService from "../service/screeningService";
 import BackendApiService from '../service/backendApiService';
@@ -14,6 +13,8 @@ import {StudentScreeningResult} from './dto/StudentScreeningResult';
 const router = new Router();
 
 const myQueue = new Queue("StudentQueue");
+
+const apiService = new BackendApiService();
 
 const requireAuth = async (ctx: any, next: Next) => {
   if (ctx.isAuthenticated()) {
@@ -47,7 +48,7 @@ router.get("/screener/status", async (ctx: any) => {
   if (ctx.isAuthenticated()) {
     const from = ctx.session.passport.user;
 
-    ctx.body = await getScreener(from);
+    ctx.body = await apiService.getScreener(from, false);
   } else {
     ctx.body = { success: false };
     ctx.throw(401);
@@ -61,7 +62,7 @@ router.post("/screener/login", async (ctx: any, next) => {
       ctx.throw(401);
     }
 
-    ctx.body = await getScreener(email);
+    ctx.body = await apiService.getScreener(email, false);
     return ctx.login(email);
   })(ctx, next);
 });
@@ -124,8 +125,6 @@ router.get("/student/jobInfo", async (ctx) => {
   const { email } = ctx.request.query;
   ctx.body = await myQueue.getJobWithPosition(email);
 });
-
-const apiService = new BackendApiService();
 
 router.post("/student/changeJob", requireAuth, async (ctx: any) => {
   const job: JobInfo = ctx.request.body;
