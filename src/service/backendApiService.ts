@@ -91,7 +91,6 @@ export default class BackendApiService {
                 screener.email = data.email;
                 screener.password = data.password;
                 screener.verified = data.verified;
-                // TODO: what about queueLogs?
                 resolve(screener);
               } else {
                 reject("Get screener response with missing or invalid screener data");
