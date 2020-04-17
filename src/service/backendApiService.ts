@@ -2,6 +2,8 @@ import {Student} from '../database/models/Student';
 import axios from 'axios';
 import dotenv from "dotenv";
 import {StudentScreeningResult} from '../controller/dto/StudentScreeningResult';
+import {Screener} from '../database/models/Screener';
+
 dotenv.config();
 const apiUriStudent = process.env.CORONA_BACKEND_API_URL + 'student/';
 const apiUriScreener = process.env.CORONA_BACKEND_API_URL + 'screener/';
@@ -70,6 +72,52 @@ export default class BackendApiService {
           })
           .catch((err) => {
             console.error("Update student data failed: ", err);
+            reject(err);
+          });
+    });
+  };
+
+  getScreener = async (email: string, includePassword: boolean): Promise<Screener> => {
+    return new Promise((resolve, reject) => {
+      axios
+          .get(apiUriScreener + email + '/' + includePassword)
+          .then(({status, data}) => {
+            if (status == 200) {
+              if (data && data.email) {
+                const screener = new Screener();
+                screener.id = data.id;
+                screener.firstname = data.firstname;
+                screener.lastname = data.lastname;
+                screener.email = data.email;
+                screener.password = data.password;
+                screener.verified = data.verified;
+                // TODO: what about queueLogs?
+                resolve(screener);
+              } else {
+                reject("Get screener response with missing or invalid screener data");
+              }
+            } else {
+              reject("Get screener response with non-200 return code: " + status);
+            }
+          })
+          .catch((err) => {
+            console.error("Get screener data failed: ", err);
+            reject(err);
+          });
+    });
+  };
+
+  getVerifiedScreener = async (email: string, includePassword: boolean): Promise<Screener> => {
+    return new Promise((resolve, reject) => {
+      this.getScreener(email, includePassword)
+          .then((screener) => {
+            if (screener.verified) {
+              resolve(screener);
+            } else {
+              reject("Screener is not verified");
+            }
+          })
+          .catch((err) => {
             reject(err);
           });
     });
