@@ -130,15 +130,6 @@ export default class BackendApiService {
     await Screener.hashPassword(screener);
 
     return new Promise((resolve, reject) => {
-      const screenerDTO = {
-        firstname: screener.firstname,
-        lastname: screener.lastname,
-        email: screener.email,
-        verified: false,
-        passwordHash: screener.password,
-        active: false
-
-    };
       axios
           .post(apiUriScreener, screener)
           .then(({status, data}) => {

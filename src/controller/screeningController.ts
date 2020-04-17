@@ -163,7 +163,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
 
   if (job.status === "completed" || job.status === "rejected") {
     try {
-      await apiService.updateStudent(new StudentScreeningResult(job), job.email, ctx);
+      await apiService.updateStudent(new StudentScreeningResult(job), job.email);
     } catch (err) {
       console.error(err);
       console.log("Student data could not be updated!");
