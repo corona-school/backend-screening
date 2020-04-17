@@ -232,9 +232,3 @@ router.get("/statistics/logs", requireAuth, async (ctx) => {
 });
 
 export default router;
-
-
-// curl -c /tmp/cookies -H "Content-Type: application/json" -d '{"email":"anja@scoyo.de","password":"test"}' -X POST http://localhost:3001/screener/login
-// curl  -b /tmp/cookies -c /tmp/cookies -H "Content-Type: application/json" -d '{"email":"anja@scoyo.com"}' -X POST http://localhost:3001/student/remove
-// curl  -b /tmp/cookies -c /tmp/cookies -X GET http://localhost:3001/screener/status
-// curl -b /tmp/cookies -c /tmp/cookies -H "Content-Type: application/json" -d '{"firstname":"Neu", "lastname":"Screener","email":"neu@screener.de","password":"test2"}' -X POST http://localhost:3001/screener/create
