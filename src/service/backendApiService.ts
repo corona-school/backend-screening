@@ -3,7 +3,8 @@ import axios from 'axios';
 import dotenv from "dotenv";
 import {StudentScreeningResult} from '../controller/dto/StudentScreeningResult';
 dotenv.config();
-const apiUri = process.env.CORONA_BACKEND_API_URL;
+const apiUriStudent = process.env.CORONA_BACKEND_API_URL + 'student/';
+const apiUriScreener = process.env.CORONA_BACKEND_API_URL + 'screener/';
 const apiToken = process.env.CORONA_BACKEND_API_TOKEN;
 axios.defaults.headers.common['Token'] = apiToken;
 
@@ -12,11 +13,10 @@ export default class BackendApiService {
   getStudent = async (email: string): Promise<Student> => {
     return new Promise((resolve, reject) => {
       axios
-          .get(apiUri + email)
+          .get(apiUriStudent + email)
           .then(({status, data}) => {
             if (status == 200) {
               if (data && data.email) {
-                // TODO: if property names where identical, we could do this with a simple Object.assign
                 const student = new Student();
                 student.firstname = data.firstName;
                 student.lastname = data.lastName;
@@ -60,7 +60,7 @@ export default class BackendApiService {
   updateStudent = async (studentScreeningResult: StudentScreeningResult, studentEmail: string): Promise<boolean> => {
     return new Promise((resolve, reject) => {
       axios
-          .put(apiUri + studentEmail, studentScreeningResult)
+          .put(apiUriStudent + studentEmail, studentScreeningResult)
           .then(({status, data}) => {
             if (status == 200) {
               resolve(true);
