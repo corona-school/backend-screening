@@ -2,16 +2,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Router from "koa-router";
 import passport from "koa-passport";
-import Queue, { Subject, JobInfo } from "../queue";
+import Queue, { JobInfo } from "../queue";
 import { Screener, getScreener } from "../database/models/Screener";
-import { Student, getStudent } from "../database/models/Student";
 import { Next } from "koa";
 import ScreeningService from "../service/screeningService";
+import BackendApiService from '../service/backendApiService';
 import StatisticService from "../service/statisticService";
+import {StudentScreeningResult} from './dto/StudentScreeningResult';
 
 const router = new Router();
 
 const myQueue = new Queue("StudentQueue");
+
+const apiService = new BackendApiService();
 
 const requireAuth = async (ctx: any, next: Next) => {
   if (ctx.isAuthenticated()) {
@@ -45,7 +48,7 @@ router.get("/screener/status", async (ctx: any) => {
   if (ctx.isAuthenticated()) {
     const from = ctx.session.passport.user;
 
-    ctx.body = await getScreener(from);
+    ctx.body = await apiService.getScreener(from, false);
   } else {
     ctx.body = { success: false };
     ctx.throw(401);
@@ -59,7 +62,7 @@ router.post("/screener/login", async (ctx: any, next) => {
       ctx.throw(401);
     }
 
-    ctx.body = await getScreener(email);
+    ctx.body = await apiService.getScreener(email, false);
     return ctx.login(email);
   })(ctx, next);
 });
@@ -79,7 +82,14 @@ const screeningService = new ScreeningService();
 router.post("/student/login", async (ctx) => {
   const { email } = ctx.request.body;
 
-  const jobInfo: JobInfo = await screeningService.login(email);
+  let jobInfo: JobInfo;
+  try {
+    jobInfo = await screeningService.login(email);
+  } catch (e) {
+    ctx.body = "Could not login the student: " + e;
+    ctx.status = 400;
+    return;
+  }
   if (!jobInfo) {
     ctx.body = "Could not login the student.";
     ctx.status = 400;
@@ -153,20 +163,10 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
 
   if (job.status === "completed" || job.status === "rejected") {
     try {
-      const student: Student = await getStudent(job.email);
-      student.feedback = job.feedback;
-      student.screener = screener.id.toString();
-      student.knowsUsFrom = job.knowcsfrom;
-      student.commentScreener = job.commentScreener;
-      student.subjects = JSON.stringify(
-        job.subjects.map((s: Subject) => `${s.subject}${s.min}:${s.max}`)
-      );
-      student.verified = job.status === "completed" ? true : false;
-
-      await student.save();
+      await apiService.updateStudent(new StudentScreeningResult(job), job.email);
     } catch (err) {
       console.error(err);
-      console.log("Student Job could not be saved in Database!");
+      console.log("Student data could not be updated!");
     }
   }
 
