@@ -4,7 +4,7 @@ import Router from "koa-router";
 import passport from "koa-passport";
 import Queue, { JobInfo } from "../queue";
 import { Screener, getScreener } from "../database/models/Screener";
-import { Next } from "koa";
+import { Context, Next } from "koa";
 import ScreeningService from "../service/screeningService";
 import BackendApiService from '../service/backendApiService';
 import StatisticService from "../service/statisticService";
@@ -16,7 +16,7 @@ const myQueue = new Queue("StudentQueue");
 
 const apiService = new BackendApiService();
 
-const requireAuth = async (ctx: any, next: Next) => {
+const requireAuth = async (ctx: Context, next: Next) => {
   if (ctx.isAuthenticated()) {
     return next();
   } else {
@@ -25,7 +25,7 @@ const requireAuth = async (ctx: any, next: Next) => {
   }
 };
 
-router.post("/screener/create", async (ctx) => {
+router.post("/screener/create", requireAuth, async (ctx) => {
   const { firstname, lastname, email, password } = ctx.request.body;
 
   try {
@@ -34,12 +34,12 @@ router.post("/screener/create", async (ctx) => {
       lastname,
       email,
       password,
-    }).save();
-
+    });
+    await apiService.createScreener(screener);
     ctx.body = screener;
   } catch (err) {
     console.error(err);
-    ctx.body = "Could not create Screener";
+    ctx.body = "Could not create Screener: " + err.toString();
     ctx.status = 400;
   }
 });
@@ -163,7 +163,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
 
   if (job.status === "completed" || job.status === "rejected") {
     try {
-      await apiService.updateStudent(new StudentScreeningResult(job), job.email);
+      await apiService.updateStudent(new StudentScreeningResult(job), job.email, ctx);
     } catch (err) {
       console.error(err);
       console.log("Student data could not be updated!");
@@ -232,3 +232,9 @@ router.get("/statistics/logs", requireAuth, async (ctx) => {
 });
 
 export default router;
+
+
+// curl -c /tmp/cookies -H "Content-Type: application/json" -d '{"email":"anja@scoyo.de","password":"test"}' -X POST http://localhost:3001/screener/login
+// curl  -b /tmp/cookies -c /tmp/cookies -H "Content-Type: application/json" -d '{"email":"anja@scoyo.com"}' -X POST http://localhost:3001/student/remove
+// curl  -b /tmp/cookies -c /tmp/cookies -X GET http://localhost:3001/screener/status
+// curl -b /tmp/cookies -c /tmp/cookies -H "Content-Type: application/json" -d '{"firstname":"Neu", "lastname":"Screener","email":"neu@screener.de","password":"test2"}' -X POST http://localhost:3001/screener/create

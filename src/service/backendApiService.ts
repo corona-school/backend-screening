@@ -1,8 +1,9 @@
-import {Student} from '../database/models/Student';
 import axios from 'axios';
 import dotenv from "dotenv";
-import {StudentScreeningResult} from '../controller/dto/StudentScreeningResult';
-import {Screener} from '../database/models/Screener';
+
+import { Student } from '../database/models/Student';
+import { StudentScreeningResult } from '../controller/dto/StudentScreeningResult';
+import { Screener } from '../database/models/Screener';
 
 dotenv.config();
 const apiUriStudent = process.env.CORONA_BACKEND_API_URL + 'student/';
@@ -89,7 +90,9 @@ export default class BackendApiService {
                 screener.firstname = data.firstname;
                 screener.lastname = data.lastname;
                 screener.email = data.email;
-                screener.password = data.passwordHash;
+                if (includePassword) {
+                  screener.password = data.passwordHash;
+                }
                 screener.verified = data.verified;
                 screener.active =data.active;
                 resolve(screener);
@@ -118,6 +121,35 @@ export default class BackendApiService {
             }
           })
           .catch((err) => {
+            reject(err);
+          });
+    });
+  };
+
+  createScreener = async (screener: Screener): Promise<boolean> => {
+    await Screener.hashPassword(screener);
+
+    return new Promise((resolve, reject) => {
+      const screenerDTO = {
+        firstname: screener.firstname,
+        lastname: screener.lastname,
+        email: screener.email,
+        verified: false,
+        passwordHash: screener.password,
+        active: false
+
+    };
+      axios
+          .post(apiUriScreener, screener)
+          .then(({status, data}) => {
+            if (status == 200) {
+              resolve(true);
+            } else {
+              reject("Create screener response with non-200 return code: " + status);
+            }
+          })
+          .catch((err) => {
+            console.error("Create screener failed: {} (status {})", err.response.data, err.response.status);
             reject(err);
           });
     });
