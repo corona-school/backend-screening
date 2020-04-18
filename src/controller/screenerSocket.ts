@@ -1,11 +1,11 @@
 import ScreeningService from "../service/screeningService";
-import { Message, QueueChanges } from "../queue";
 import { io } from "../server";
 
 enum screenerSocketEvents {
   LOGIN = "loginScreener",
   LOGOUT = "logoutScreener",
 }
+
 enum screenerSocketActions {
   UPDATE_QUEUE = "updateQueue",
   UPDATE_SCREENER = "screenerUpdate",

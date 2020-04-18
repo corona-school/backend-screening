@@ -3,12 +3,11 @@
 import Router from "koa-router";
 import passport from "koa-passport";
 import Queue, { JobInfo } from "../queue";
-import { Screener, getScreener } from "../database/models/Screener";
 import { Next } from "koa";
 import ScreeningService from "../service/screeningService";
-import BackendApiService from '../service/backendApiService';
+import BackendApiService from "../service/backendApiService";
 import StatisticService from "../service/statisticService";
-import {StudentScreeningResult} from './dto/StudentScreeningResult';
+import { StudentScreeningResult } from "./dto/StudentScreeningResult";
 
 const router = new Router();
 
@@ -163,7 +162,10 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
 
   if (job.status === "completed" || job.status === "rejected") {
     try {
-      await apiService.updateStudent(new StudentScreeningResult(job), job.email);
+      await apiService.updateStudent(
+        new StudentScreeningResult(job),
+        job.email
+      );
     } catch (err) {
       console.error(err);
       console.log("Student data could not be updated!");

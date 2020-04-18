@@ -1,7 +1,5 @@
 import { Sequelize } from "sequelize-typescript";
-import { Student } from "./models/Student";
 import dotenv from "dotenv";
-import { Screener } from "./models/Screener";
 import QueueLog from "./models/QueueLog";
 dotenv.config();
 
@@ -13,5 +11,5 @@ export const sequelize = new Sequelize(uri, {
   dialect: "postgres",
   ssl: true,
   native: true,
-  models: [Student, Screener, QueueLog],
+  models: [QueueLog],
 });
