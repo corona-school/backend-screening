@@ -1,35 +1,13 @@
 /* eslint-disable @typescript-eslint/interface-name-prefix */
 import axios from "axios";
-import { Screener, ScreenerRequest } from "../models/Screener";
-import { Student } from "../models/Student";
+import { Screener, ScreenerRequest, IRawScreener } from "../models/Screener";
+import { Student, IRawStudent } from "../models/Student";
 import { IStudentScreeningResult } from "../models/StudentScreeningResult";
 
 const apiUriStudent = process.env.CORONA_BACKEND_API_URL + "student/";
 const apiUriScreener = process.env.CORONA_BACKEND_API_URL + "screener/";
 const apiToken = process.env.CORONA_BACKEND_API_TOKEN;
 axios.defaults.headers.common["Token"] = apiToken;
-
-interface IRawStudent {
-  firstName: string;
-  lastName: string;
-  email: string;
-  subjects: string;
-  msg?: string;
-  verified: boolean;
-  alreadyScreened: boolean;
-  phone?: string;
-  birthday?: Date;
-}
-
-interface IRawScreener {
-  id?: number;
-  firstname: string;
-  lastname: string;
-  email: string;
-  verified: boolean;
-  active: boolean;
-  passwordHash?: string;
-}
 
 export const apiService = {
   getStudent: async (email: string): Promise<Student> => {

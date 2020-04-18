@@ -1,7 +1,7 @@
 import ScreeningService from "../service/screeningService";
-import { Message, JobInfo, QueueChanges } from "../queue";
 import { io, studentQueue } from "../server";
 import { RedisClient } from "redis";
+import { Message, JobInfo, QueueChanges } from "../models/Queue";
 
 const updateStudent = (
   message: Message,

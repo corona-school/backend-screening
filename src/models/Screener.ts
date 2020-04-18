@@ -14,3 +14,13 @@ export interface ScreenerRequest {
   email: string;
   password?: string;
 }
+
+export interface IRawScreener {
+  id?: number;
+  firstname: string;
+  lastname: string;
+  email: string;
+  verified: boolean;
+  active: boolean;
+  passwordHash?: string;
+}

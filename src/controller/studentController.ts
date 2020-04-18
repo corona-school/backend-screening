@@ -1,11 +1,11 @@
 import Router from "koa-router";
-import { JobInfo } from "../queue";
 import { requireAuth } from "./auth";
 import ScreeningService from "../service/screeningService";
 import { apiService } from "../api/backendApiService";
 import { Screener } from "../models/Screener";
 import { createStudentScreeningResult } from "../utils/studentScreenResult";
 import { studentQueue } from "../server";
+import { JobInfo } from "../models/Queue";
 
 const studentRouter = new Router();
 
