@@ -7,7 +7,7 @@ import Queue, { JobInfo } from "../queue";
 
 import { Context, Next } from "koa";
 import ScreeningService from "../service/screeningService";
-import BackendApiService from "../service/backendApiService";
+import { apiService } from "../service/backendApiService";
 import StatisticService from "../service/statisticService";
 import { StudentScreeningResult } from "./dto/StudentScreeningResult";
 import { Screener, ScreenerRequest } from "../typings/Screener";
@@ -15,8 +15,6 @@ import { Screener, ScreenerRequest } from "../typings/Screener";
 const router = new Router();
 
 const myQueue = new Queue("StudentQueue");
-
-const apiService = new BackendApiService();
 
 const requireAuth = async (ctx: Context, next: Next) => {
   if (ctx.isAuthenticated()) {

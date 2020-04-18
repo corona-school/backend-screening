@@ -33,8 +33,8 @@ interface IRawScreener {
   passwordHash?: string;
 }
 
-export default class BackendApiService {
-  getStudent = async (email: string): Promise<Student> => {
+export const apiService = {
+  getStudent: async (email: string): Promise<Student> => {
     return new Promise((resolve, reject) => {
       axios
         .get(apiUriStudent + email)
@@ -68,11 +68,12 @@ export default class BackendApiService {
           reject(err);
         });
     });
-  };
+  },
 
-  getUnverifiedStudent = async (email: string): Promise<Student> => {
+  getUnverifiedStudent: async (email: string): Promise<Student> => {
     return new Promise((resolve, reject) => {
-      this.getStudent(email)
+      apiService
+        .getStudent(email)
         .then((student) => {
           if (student.verified == null) {
             resolve(student);
@@ -84,9 +85,9 @@ export default class BackendApiService {
           reject(err);
         });
     });
-  };
+  },
 
-  updateStudent = async (
+  updateStudent: async (
     studentScreeningResult: IStudentScreeningResult,
     studentEmail: string
   ): Promise<boolean> => {
@@ -107,12 +108,8 @@ export default class BackendApiService {
           reject(err);
         });
     });
-  };
-
-  getScreener = async (
-    email: string,
-    includePassword = false
-  ): Promise<Screener> => {
+  },
+  getScreener: (email: string, includePassword = false): Promise<Screener> => {
     return new Promise((resolve, reject) => {
       axios
         .get(apiUriScreener + email + "/" + includePassword)
@@ -144,14 +141,14 @@ export default class BackendApiService {
           reject(err);
         });
     });
-  };
-
-  getVerifiedScreener = async (
+  },
+  getVerifiedScreener: async (
     email: string,
     includePassword: boolean
   ): Promise<Screener> => {
     return new Promise((resolve, reject) => {
-      this.getScreener(email, includePassword)
+      apiService
+        .getScreener(email, includePassword)
         .then((screener) => {
           if (screener.verified && screener.active) {
             resolve(screener);
@@ -163,9 +160,9 @@ export default class BackendApiService {
           reject(err);
         });
     });
-  };
+  },
 
-  createScreener = async (screener: ScreenerRequest): Promise<boolean> => {
+  createScreener: (screener: ScreenerRequest): Promise<boolean> => {
     return new Promise((resolve, reject) => {
       axios
         .post(apiUriScreener, screener)
@@ -187,5 +184,5 @@ export default class BackendApiService {
           reject(err);
         });
     });
-  };
-}
+  },
+};

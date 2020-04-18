@@ -1,15 +1,13 @@
 import { createJob } from "../utils/jobUtils";
 import Queue, { JobInfo } from "../queue";
-import BackendApiService from "./backendApiService";
+import { apiService } from "./backendApiService";
 import { Student } from "../typings/Student";
 
 export default class ScreeningService {
   myQueue: Queue;
-  apiService: BackendApiService;
 
   constructor() {
     this.myQueue = new Queue("StudentQueue");
-    this.apiService = new BackendApiService();
   }
 
   login = async (email: string): Promise<JobInfo> => {
@@ -20,10 +18,10 @@ export default class ScreeningService {
     }
 
     return new Promise((resolve, reject) => {
-      this.apiService
+      apiService
         .getUnverifiedStudent(email)
         .then((student: Student | null) => this.myQueue.add(createJob(student)))
-        .then((jobInfo) => {
+        .then((jobInfo: JobInfo) => {
           resolve(jobInfo);
         })
         .catch((err) => {
