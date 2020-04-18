@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/interface-name-prefix */
 import axios from "axios";
 import { Screener, ScreenerRequest, IRawScreener } from "../models/Screener";
 import { Student, IRawStudent } from "../models/Student";
