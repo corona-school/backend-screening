@@ -1,6 +1,6 @@
 import ScreeningService from "../service/screeningService";
 import { studentSubscriber } from "../subscriber/studentSubscriber";
-import { io } from "../server";
+import { io, studentQueue } from "../server";
 
 enum StudentSocketEvents {
   LOGIN = "login",
@@ -27,16 +27,16 @@ export const logoutStudent = async (
 ): Promise<void> => {
   console.log("Try loggin out", email, id, forced);
 
-  const job = await screeningService.myQueue.getJobWithPosition(email);
+  const job = await studentQueue.getJobWithPosition(email);
 
   if (job && job.status === "waiting") {
     allStudents.delete(id);
     if (forced) {
-      await screeningService.myQueue.remove(email);
+      await studentQueue.remove(email);
     } else {
       setTimeout(() => {
         if (!findInMap(allStudents, email)) {
-          screeningService.myQueue.remove(email);
+          studentQueue.remove(email);
         }
       }, 1000);
     }

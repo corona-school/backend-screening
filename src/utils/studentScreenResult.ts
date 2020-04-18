@@ -1,17 +1,7 @@
-/* eslint-disable @typescript-eslint/interface-name-prefix */
-import { JobInfo, Subject } from "../../queue";
+import { JobInfo, Subject } from "../queue";
+import { IStudentScreeningResult } from "../models/StudentScreeningResult";
 
-export interface IStudentScreeningResult {
-  verified: boolean;
-  birthday?: Date;
-  commentScreener?: string;
-  knowscsfrom?: string;
-  subjects?: string;
-  feedback?: string;
-  screenerEmail: string;
-}
-
-export const StudentScreeningResult = (
+export const createStudentScreeningResult = (
   job: JobInfo
 ): IStudentScreeningResult => ({
   verified: job.status === "completed",

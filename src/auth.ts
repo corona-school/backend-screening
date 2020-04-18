@@ -1,8 +1,8 @@
 import passport from "koa-passport";
 import PassportLocal from "passport-local";
 import bcrypt from "bcrypt";
-import { apiService } from "./service/backendApiService";
-import { Screener } from "./typings/Screener";
+import { apiService } from "./api/backendApiService";
+import { Screener } from "./models/Screener";
 
 const LocalStrategy = PassportLocal.Strategy;
 

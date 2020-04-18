@@ -1,5 +1,5 @@
 import { Job } from "../queue";
-import { Student } from "../typings/Student";
+import { Student } from "../models/Student";
 
 export const createJob = (student: Student): Job => {
   const getSubject = (subject: string): string =>

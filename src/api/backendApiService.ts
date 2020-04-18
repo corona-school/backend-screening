@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/interface-name-prefix */
 import axios from "axios";
-import { Screener, ScreenerRequest } from "../typings/Screener";
-import { Student } from "../typings/Student";
-import { IStudentScreeningResult } from "../controller/dto/StudentScreeningResult";
+import { Screener, ScreenerRequest } from "../models/Screener";
+import { Student } from "../models/Student";
+import { IStudentScreeningResult } from "../models/StudentScreeningResult";
 
 const apiUriStudent = process.env.CORONA_BACKEND_API_URL + "student/";
 const apiUriScreener = process.env.CORONA_BACKEND_API_URL + "screener/";

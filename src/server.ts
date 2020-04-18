@@ -12,9 +12,15 @@ import socket from "socket.io";
 import http from "http";
 
 import { sequelize } from "./database";
-import screeningRouter from "./controller/screeningController";
+import {
+  screenerRouter,
+  studentRouter,
+  queueRouter,
+  statisticsRouter,
+} from "./controller";
 import { startStudentSocket } from "./controller/studentSocket";
 import startScreenerSocket from "./controller/screenerSocket";
+import Queue from "./queue";
 
 const app = new Koa();
 app.use(koaBody());
@@ -72,9 +78,14 @@ router.get("/", async (ctx) => {
   ctx.body = "Hello World";
 });
 
+export const studentQueue = new Queue("StudentQueue");
+
 app
   .use(router.routes())
-  .use(screeningRouter.routes())
+  .use(screenerRouter.routes())
+  .use(studentRouter.routes())
+  .use(queueRouter.routes())
+  .use(statisticsRouter.routes())
   .use(router.allowedMethods());
 
 const server = http.createServer(app.callback());

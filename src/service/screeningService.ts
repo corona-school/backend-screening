@@ -1,17 +1,12 @@
 import { createJob } from "../utils/jobUtils";
-import Queue, { JobInfo } from "../queue";
-import { apiService } from "./backendApiService";
-import { Student } from "../typings/Student";
+import { JobInfo } from "../queue";
+import { apiService } from "../api/backendApiService";
+import { Student } from "../models/Student";
+import { studentQueue } from "../server";
 
 export default class ScreeningService {
-  myQueue: Queue;
-
-  constructor() {
-    this.myQueue = new Queue("StudentQueue");
-  }
-
   login = async (email: string): Promise<JobInfo> => {
-    const list = await this.myQueue.listInfo();
+    const list = await studentQueue.listInfo();
 
     if (list.some((job) => job.email === email)) {
       return list.find((job) => job.email === email);
@@ -20,7 +15,7 @@ export default class ScreeningService {
     return new Promise((resolve, reject) => {
       apiService
         .getUnverifiedStudent(email)
-        .then((student: Student | null) => this.myQueue.add(createJob(student)))
+        .then((student: Student | null) => studentQueue.add(createJob(student)))
         .then((jobInfo: JobInfo) => {
           resolve(jobInfo);
         })
@@ -31,6 +26,6 @@ export default class ScreeningService {
   };
 
   logout = async (email: string): Promise<boolean> => {
-    return this.myQueue.remove(email);
+    return studentQueue.remove(email);
   };
 }

@@ -1,6 +1,6 @@
 import ScreeningService from "../service/screeningService";
 import { Message, JobInfo, QueueChanges } from "../queue";
-import { io } from "../server";
+import { io, studentQueue } from "../server";
 import { RedisClient } from "redis";
 
 const updateStudent = (
@@ -11,11 +11,8 @@ const updateStudent = (
   io.sockets.in(message.email).emit("updateJob", jobInfo);
 };
 
-const changeStatus = async (
-  message: Message,
-  screeningService: ScreeningService
-): Promise<void> => {
-  const jobList = await screeningService.myQueue.listInfo();
+const changeStatus = async (message: Message): Promise<void> => {
+  const jobList = await studentQueue.listInfo();
 
   for (const jobInfo of jobList) {
     if (jobInfo.email === message.email) {
@@ -28,13 +25,10 @@ const changeStatus = async (
   }
 };
 
-const removeJob = async (
-  message: Message,
-  screeningService: ScreeningService
-): Promise<void> => {
+const removeJob = async (message: Message): Promise<void> => {
   console.log("removedJob");
 
-  const jobList = await screeningService.myQueue.listInfo();
+  const jobList = await studentQueue.listInfo();
 
   io.sockets.in(message.email).emit("removedJob", message.email);
   for (const jobInfo of jobList) {
@@ -47,7 +41,6 @@ const removeJob = async (
 };
 
 let subcriber: null | RedisClient = null;
-let service: null | ScreeningService = null;
 
 interface StudentSubscriber {
   init: (screeningService: ScreeningService) => StudentSubscriber;
@@ -55,15 +48,14 @@ interface StudentSubscriber {
 }
 
 export const studentSubscriber: StudentSubscriber = {
-  init: (screeningService: ScreeningService): StudentSubscriber => {
-    service = screeningService;
-    subcriber = screeningService.myQueue.getClient().duplicate();
+  init: (): StudentSubscriber => {
+    subcriber = studentQueue.getClient().duplicate();
     subcriber.subscribe("queue");
     return studentSubscriber;
   },
 
   listen: (): void => {
-    if (!subcriber || !service) {
+    if (!subcriber) {
       console.error("Could not start StudentSubscriber");
       return;
     }
@@ -77,12 +69,12 @@ export const studentSubscriber: StudentSubscriber = {
         }
         case QueueChanges.CHANGED_STATUS: {
           console.log("Student Subscriber: changed Status");
-          changeStatus(message, service);
+          changeStatus(message);
           break;
         }
         case QueueChanges.REMOVED_JOB: {
           console.log("Student Subscriber: removed Job");
-          removeJob(message, service);
+          removeJob(message);
           break;
         }
       }
