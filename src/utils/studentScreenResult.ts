@@ -1,5 +1,5 @@
-import { JobInfo, Subject } from "../queue";
 import { IStudentScreeningResult } from "../models/StudentScreeningResult";
+import { JobInfo, Subject } from "../models/Queue";
 
 export const createStudentScreeningResult = (
   job: JobInfo

@@ -1,6 +1,6 @@
 import Router from "koa-router";
-import { requireAuth } from "./auth";
 import { studentQueue } from "../server";
+import { requireAuth } from "../auth";
 
 const queueRouter = new Router();
 

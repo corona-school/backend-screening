@@ -3,6 +3,7 @@ import PassportLocal from "passport-local";
 import bcrypt from "bcrypt";
 import { apiService } from "./api/backendApiService";
 import { Screener } from "./models/Screener";
+import { Context, Next } from "koa";
 
 const LocalStrategy = PassportLocal.Strategy;
 
@@ -52,3 +53,12 @@ passport.use(
     }
   )
 );
+
+export const requireAuth = async (ctx: Context, next: Next) => {
+  if (ctx.isAuthenticated()) {
+    return next();
+  } else {
+    ctx.body = { success: false };
+    ctx.throw(401);
+  }
+};

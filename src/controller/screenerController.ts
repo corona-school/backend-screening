@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Router from "koa-router";
 import passport from "koa-passport";
 import bcrypt from "bcrypt";
 import { apiService } from "../api/backendApiService";
 import { ScreenerRequest } from "../models/Screener";
-import { requireAuth } from "./auth";
+import { requireAuth } from "../auth";
 
 const screenerRouter = new Router();
 

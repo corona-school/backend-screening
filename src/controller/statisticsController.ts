@@ -1,5 +1,5 @@
 import Router from "koa-router";
-import { requireAuth } from "./auth";
+import { requireAuth } from "../auth";
 import { studentQueue } from "../server";
 import StatisticService from "../service/statisticService";
 

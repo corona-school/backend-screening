@@ -1,5 +1,5 @@
 import Router from "koa-router";
-import { requireAuth } from "./auth";
+import { requireAuth } from "../auth";
 import ScreeningService from "../service/screeningService";
 import { apiService } from "../api/backendApiService";
 import { Screener } from "../models/Screener";
