@@ -1,8 +1,8 @@
 import { createJob } from "../utils/jobUtils";
-import { JobInfo } from "../queue";
 import { apiService } from "../api/backendApiService";
 import { Student } from "../models/Student";
 import { studentQueue } from "../server";
+import { JobInfo } from "../models/Queue";
 
 export default class ScreeningService {
   login = async (email: string): Promise<JobInfo> => {
