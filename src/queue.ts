@@ -38,7 +38,6 @@ export interface Job {
   birthday?: Date;
   msg?: string;
   screener?: ScreenerInfo;
-  invited?: boolean;
   feedback?: string;
   knowcsfrom?: string;
   commentScreener?: string;

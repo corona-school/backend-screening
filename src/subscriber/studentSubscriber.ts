@@ -8,10 +8,7 @@ const updateStudent = (
   jobInfo: JobInfo,
   io: SocketIO.Server
 ): void => {
-  if (!message.screenerEmail) {
-    io.sockets.in(message.email).emit("updateJob", jobInfo);
-    return;
-  }
+  io.sockets.in(message.email).emit("updateJob", jobInfo);
 };
 
 const changeStatus = async (
@@ -75,14 +72,16 @@ export const studentSubscriber: StudentSubscriber = {
 
       switch (message.operation) {
         case QueueChanges.ADDED_JOB: {
-          console.log("added Job");
+          console.log("Student Subscriber: added Job");
           break;
         }
         case QueueChanges.CHANGED_STATUS: {
+          console.log("Student Subscriber: changed Status");
           changeStatus(message, service);
           break;
         }
         case QueueChanges.REMOVED_JOB: {
+          console.log("Student Subscriber: removed Job");
           removeJob(message, service);
           break;
         }

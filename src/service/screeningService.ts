@@ -1,7 +1,7 @@
-import { Student } from "../database/models/Student";
 import { createJob } from "../utils/jobUtils";
 import Queue, { JobInfo } from "../queue";
-import BackendApiService from './backendApiService';
+import BackendApiService from "./backendApiService";
+import { Student } from "../typings/Student";
 
 export default class ScreeningService {
   myQueue: Queue;
@@ -20,7 +20,8 @@ export default class ScreeningService {
     }
 
     return new Promise((resolve, reject) => {
-      this.apiService.getUnverifiedStudent(email)
+      this.apiService
+        .getUnverifiedStudent(email)
         .then((student: Student | null) => this.myQueue.add(createJob(student)))
         .then((jobInfo) => {
           resolve(jobInfo);

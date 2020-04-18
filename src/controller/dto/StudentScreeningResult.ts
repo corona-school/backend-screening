@@ -1,21 +1,26 @@
-import {JobInfo, Subject} from '../../queue';
+/* eslint-disable @typescript-eslint/interface-name-prefix */
+import { JobInfo, Subject } from "../../queue";
 
-export class StudentScreeningResult {
+export interface IStudentScreeningResult {
   verified: boolean;
   birthday?: Date;
   commentScreener?: string;
   knowscsfrom?: string;
-  screenerEmail: string;
   subjects?: string;
   feedback?: string;
-
-  constructor(job: JobInfo) {
-    this.verified = job.status === "completed";
-    this.birthday = job.birthday;
-    this.commentScreener = job.commentScreener;
-    this.knowscsfrom = job.knowcsfrom;
-    this.screenerEmail = job.screener.email;
-    this.subjects = JSON.stringify(job.subjects.map((s: Subject) => `${s.subject}${s.min}:${s.max}`));
-    this.feedback = job.feedback;
-  }
+  screenerEmail: string;
 }
+
+export const StudentScreeningResult = (
+  job: JobInfo
+): IStudentScreeningResult => ({
+  verified: job.status === "completed",
+  birthday: job.birthday,
+  commentScreener: job.commentScreener,
+  knowscsfrom: job.knowcsfrom,
+  subjects: JSON.stringify(
+    job.subjects.map((s: Subject) => `${s.subject}${s.min}:${s.max}`)
+  ),
+  feedback: job.feedback,
+  screenerEmail: job.screener.email,
+});

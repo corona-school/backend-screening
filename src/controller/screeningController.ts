@@ -8,6 +8,7 @@ import ScreeningService from "../service/screeningService";
 import BackendApiService from "../service/backendApiService";
 import StatisticService from "../service/statisticService";
 import { StudentScreeningResult } from "./dto/StudentScreeningResult";
+import { Screener } from "../typings/Screener";
 
 const router = new Router();
 
@@ -25,22 +26,7 @@ const requireAuth = async (ctx: any, next: Next) => {
 };
 
 router.post("/screener/create", async (ctx) => {
-  const { firstname, lastname, email, password } = ctx.request.body;
-
-  try {
-    const screener = await Screener.build({
-      firstname,
-      lastname,
-      email,
-      password,
-    }).save();
-
-    ctx.body = screener;
-  } catch (err) {
-    console.error(err);
-    ctx.body = "Could not create Screener";
-    ctx.status = 400;
-  }
+  // TODO
 });
 
 router.get("/screener/status", async (ctx: any) => {
@@ -134,7 +120,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
     return;
   }
   const from = ctx.session.passport.user;
-  const screener: Screener = await getScreener(from);
+  const screener: Screener = await apiService.getScreener(from);
 
   if (!screener) {
     ctx.body = "Could not change status of student.";
@@ -162,10 +148,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
 
   if (job.status === "completed" || job.status === "rejected") {
     try {
-      await apiService.updateStudent(
-        new StudentScreeningResult(job),
-        job.email
-      );
+      await apiService.updateStudent(StudentScreeningResult(job), job.email);
     } catch (err) {
       console.error(err);
       console.log("Student data could not be updated!");
@@ -183,7 +166,7 @@ router.post("/student/changeJob", requireAuth, async (ctx: any) => {
 
 router.get("/screener/info", requireAuth, async (ctx) => {
   const { email } = ctx.request.query;
-  const screener = await getScreener(email);
+  const screener = await apiService.getScreener(email);
   if (!screener) {
     ctx.body = "Could not find screener.";
     ctx.status = 400;

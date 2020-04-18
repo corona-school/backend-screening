@@ -13,30 +13,11 @@ import http from "http";
 
 import { sequelize } from "./database";
 import screeningRouter from "./controller/screeningController";
-import screeningControllerSocket from "./controller/screeningControllerSocket";
 import { startStudentSocket } from "./controller/studentSocket";
 import startScreenerSocket from "./controller/screenerSocket";
 
 const app = new Koa();
 app.use(koaBody());
-
-const validOrigins = [
-  `https://corona-school-admin-dev.herokuapp.com`,
-  "https://corona-school-admin.herokuapp.com",
-  "https://authentication.corona-school.de",
-  "https://screeners.corona-school.de",
-  "https://corona-student-dev.herokuapp.com",
-  "https://corona-student-app.herokuapp.com",
-];
-function originIsValid(origin: any): any {
-  return validOrigins.indexOf(origin) != -1;
-}
-
-function verifyOrigin(ctx: any): any {
-  const origin = ctx.headers.origin;
-  if (!originIsValid(origin)) return false;
-  return origin;
-}
 
 app.use(
   cors({
@@ -99,9 +80,8 @@ app
 const server = http.createServer(app.callback());
 export const io: SocketIO.Server = socket(server);
 
-screeningControllerSocket();
-// startStudentSocket();
-// startScreenerSocket();
+startStudentSocket();
+startScreenerSocket();
 
 sequelize
   .sync()
