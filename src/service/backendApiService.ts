@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/interface-name-prefix */
 import axios from "axios";
 import dotenv from "dotenv";
-import { Screener } from "../typings/Screener";
+import { Screener, ScreenerRequest } from "../typings/Screener";
 import { Student } from "../typings/Student";
 import { IStudentScreeningResult } from "../controller/dto/StudentScreeningResult";
 
@@ -160,6 +160,30 @@ export default class BackendApiService {
           }
         })
         .catch((err) => {
+          reject(err);
+        });
+    });
+  };
+
+  createScreener = async (screener: ScreenerRequest): Promise<boolean> => {
+    return new Promise((resolve, reject) => {
+      axios
+        .post(apiUriScreener, screener)
+        .then(({ status, data }) => {
+          if (status == 200) {
+            resolve(true);
+          } else {
+            reject(
+              "Create screener response with non-200 return code: " + status
+            );
+          }
+        })
+        .catch((err) => {
+          console.error(
+            "Create screener failed: {} (status {})",
+            err.response.data,
+            err.response.status
+          );
           reject(err);
         });
     });

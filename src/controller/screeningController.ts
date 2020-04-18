@@ -2,13 +2,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Router from "koa-router";
 import passport from "koa-passport";
+import bcrypt from "bcrypt";
 import Queue, { JobInfo } from "../queue";
-import { Next } from "koa";
+
+import { Context, Next } from "koa";
 import ScreeningService from "../service/screeningService";
 import BackendApiService from "../service/backendApiService";
 import StatisticService from "../service/statisticService";
 import { StudentScreeningResult } from "./dto/StudentScreeningResult";
-import { Screener } from "../typings/Screener";
+import { Screener, ScreenerRequest } from "../typings/Screener";
 
 const router = new Router();
 
@@ -16,7 +18,7 @@ const myQueue = new Queue("StudentQueue");
 
 const apiService = new BackendApiService();
 
-const requireAuth = async (ctx: any, next: Next) => {
+const requireAuth = async (ctx: Context, next: Next) => {
   if (ctx.isAuthenticated()) {
     return next();
   } else {
@@ -25,8 +27,23 @@ const requireAuth = async (ctx: any, next: Next) => {
   }
 };
 
-router.post("/screener/create", async (ctx) => {
-  // TODO
+router.post("/screener/create", requireAuth, async (ctx) => {
+  const { firstname, lastname, email, password } = ctx.request.body;
+
+  try {
+    const screener: ScreenerRequest = {
+      firstname,
+      lastname,
+      email,
+      password: await bcrypt.hash(password, bcrypt.genSaltSync(8)),
+    };
+    await apiService.createScreener(screener);
+    ctx.body = screener;
+  } catch (err) {
+    console.error(err);
+    ctx.body = "Could not create Screener: " + err.toString();
+    ctx.status = 400;
+  }
 });
 
 router.get("/screener/status", async (ctx: any) => {

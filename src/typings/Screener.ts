@@ -7,3 +7,10 @@ export interface Screener {
   verified: boolean;
   active: boolean;
 }
+
+export interface ScreenerRequest {
+  firstname: string;
+  lastname: string;
+  email: string;
+  password?: string;
+}
