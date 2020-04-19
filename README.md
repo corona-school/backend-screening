@@ -64,3 +64,19 @@ DATABASE_URL=postgresql://postgres@localhost:5432/dev_corona_school
 ```
 
 Then use `yarn install` and `yarn run dev` as usual.
+
+## Contributing
+
+### Folder Structur
+
+**/controller**
+
+All routes must be exposed in a `\*Controller.ts`-File. All routes should also be documenteted in Postman.
+
+**/models**
+
+All local interfaces are defined in the models folder. This will prevent large Files with multiple Interfaces. All interfaces should be assigned a meaningful name. Interfaces with similar semantics should be in the same file. Only externally used interfaces should be exported. Only named exports are allowed.
+
+**/database**
+
+This is a temporary folder for connecting with the database.

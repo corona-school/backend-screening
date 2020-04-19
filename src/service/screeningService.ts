@@ -1,28 +1,22 @@
-import { Student } from "../database/models/Student";
 import { createJob } from "../utils/jobUtils";
-import Queue, { JobInfo } from "../queue";
-import BackendApiService from './backendApiService';
+import { apiService } from "../api/backendApiService";
+import { Student } from "../models/Student";
+import { studentQueue } from "../server";
+import { JobInfo } from "../models/Queue";
 
 export default class ScreeningService {
-  myQueue: Queue;
-  apiService: BackendApiService;
-
-  constructor() {
-    this.myQueue = new Queue("StudentQueue");
-    this.apiService = new BackendApiService();
-  }
-
   login = async (email: string): Promise<JobInfo> => {
-    const list = await this.myQueue.listInfo();
+    const list = await studentQueue.listInfo();
 
     if (list.some((job) => job.email === email)) {
       return list.find((job) => job.email === email);
     }
 
     return new Promise((resolve, reject) => {
-      this.apiService.getUnverifiedStudent(email)
-        .then((student: Student | null) => this.myQueue.add(createJob(student)))
-        .then((jobInfo) => {
+      apiService
+        .getUnverifiedStudent(email)
+        .then((student: Student | null) => studentQueue.add(createJob(student)))
+        .then((jobInfo: JobInfo) => {
           resolve(jobInfo);
         })
         .catch((err) => {
@@ -32,6 +26,6 @@ export default class ScreeningService {
   };
 
   logout = async (email: string): Promise<boolean> => {
-    return this.myQueue.remove(email);
+    return studentQueue.remove(email);
   };
 }

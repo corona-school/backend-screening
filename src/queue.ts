@@ -1,50 +1,6 @@
 import redis, { RedisClient } from "redis";
+import { Operation, Message, Job, JobInfo, ScreenerInfo } from "./models/Queue";
 
-export type Status = "waiting" | "active" | "completed" | "rejected";
-
-export type Operation = "addedJob" | "changedStatus" | "removedJob";
-
-export interface Message {
-  operation: Operation;
-  email: string;
-  screenerEmail?: string;
-}
-
-export interface ScreenerInfo {
-  id: number;
-  firstname: string;
-  lastname: string;
-  email: string;
-  time: number;
-}
-
-export interface Subject {
-  subject: string;
-  min: number;
-  max: number;
-}
-
-export interface Job {
-  firstname: string;
-  lastname: string;
-  email: string;
-  subjects: Subject[];
-  phone?: string;
-  birthday?: Date;
-  msg?: string;
-  screener?: ScreenerInfo;
-  invited?: boolean;
-  feedback?: string;
-  knowcsfrom?: string;
-  commentScreener?: string;
-  time: number;
-  jitsi: string;
-  status: Status;
-}
-
-export interface JobInfo extends Job {
-  position?: number;
-}
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
 const client = redis.createClient({ url: REDIS_URL });

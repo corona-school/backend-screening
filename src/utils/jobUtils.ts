@@ -1,5 +1,5 @@
-import { Student } from "../database/models/Student";
-import { Job } from "../queue";
+import { Job } from "../models/Queue";
+import { Student } from "../models/Student";
 
 export const createJob = (student: Student): Job => {
   const getSubject = (subject: string): string =>
@@ -35,12 +35,11 @@ export const createJob = (student: Student): Job => {
       max: getValues(s)[1],
     })),
     phone: student.phone,
-    knowcsfrom: student.knowsUsFrom,
+    knowcsfrom: "",
     birthday: student.birthday,
     msg: student.msg,
-    invited: student.invited,
     feedback: student.feedback,
-    commentScreener: student.commentScreener,
+    commentScreener: "",
     time: Date.now(),
     jitsi: `https://meet.jit.si/${student.firstname}_${
       student.lastname
