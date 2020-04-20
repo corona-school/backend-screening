@@ -1,5 +1,7 @@
 import { Job } from "../models/Queue";
 import { Student } from "../models/Student";
+import LoggerService from "../utils/Logger";
+const Logger = LoggerService("jobUtils.ts");
 
 export const createJob = (student: Student): Job => {
   const getSubject = (subject: string): string =>
