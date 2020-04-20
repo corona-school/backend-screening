@@ -1,14 +1,19 @@
 import ScreeningService from "../service/screeningService";
 import { io, studentQueue } from "../server";
 import { RedisClient } from "redis";
-import { Message, JobInfo, QueueChanges } from "../models/Queue";
+import { Message, JobInfo, QueueChanges, ScreenerInfo } from "../models/Queue";
+import {
+  ScreenerEmitter,
+  screenerEmitterEvents,
+} from "../socket/screenerSocket";
+import { StudentSocketActions } from "../socket/studentSocket";
 
 const updateStudent = (
   message: Message,
   jobInfo: JobInfo,
   io: SocketIO.Server
 ): void => {
-  io.sockets.in(message.email).emit("updateJob", jobInfo);
+  io.sockets.in(message.email).emit(StudentSocketActions.UPDATE_JOB, jobInfo);
 };
 
 const changeStatus = async (message: Message): Promise<void> => {
@@ -20,7 +25,9 @@ const changeStatus = async (message: Message): Promise<void> => {
 
       updateStudent(message, jobInfo, io);
     } else if (jobInfo.status === "waiting") {
-      io.sockets.in(jobInfo.email).emit("updateJob", jobInfo);
+      io.sockets
+        .in(jobInfo.email)
+        .emit(StudentSocketActions.UPDATE_JOB, jobInfo);
     }
   }
 };
@@ -30,12 +37,16 @@ const removeJob = async (message: Message): Promise<void> => {
 
   const jobList = await studentQueue.listInfo();
 
-  io.sockets.in(message.email).emit("removedJob", message.email);
+  io.sockets
+    .in(message.email)
+    .emit(StudentSocketActions.REMOVED_JOB, message.email);
   for (const jobInfo of jobList) {
     if (jobInfo.status === "waiting") {
       console.log("updated", jobInfo.email);
 
-      io.sockets.in(jobInfo.email).emit("updateJob", jobInfo);
+      io.sockets
+        .in(jobInfo.email)
+        .emit(StudentSocketActions.UPDATE_JOB, jobInfo);
     }
   }
 };
@@ -59,6 +70,22 @@ export const studentSubscriber: StudentSubscriber = {
       console.error("Could not start StudentSubscriber");
       return;
     }
+
+    ScreenerEmitter.on(
+      screenerEmitterEvents.UPDATE_SCREENER,
+      async (screenerCount: number) => {
+        const jobList = await studentQueue.listInfo();
+
+        jobList
+          .filter((j) => j.status === "waiting")
+          .map((j) =>
+            io.sockets.in(j.email).emit(StudentSocketActions.UPDATE_SCREENER, {
+              screenerCount,
+            })
+          );
+      }
+    );
+
     subcriber.on("message", async (_, data) => {
       const message: Message = JSON.parse(data);
 

@@ -1,8 +1,16 @@
 import { io, studentQueue } from "../server";
+import { EventEmitter } from "events";
+
+export const ScreenerEmitter = new EventEmitter();
 
 enum screenerSocketEvents {
   LOGIN = "loginScreener",
   LOGOUT = "logoutScreener",
+}
+
+export enum screenerEmitterEvents {
+  UPDATE_SCREENER = "screenerUpdate",
+  STUDENT_LOGIN = "studentLogin",
 }
 
 enum screenerSocketActions {
@@ -19,9 +27,9 @@ interface ScreenerInfo {
 }
 
 const allScreener: Map<string, string> = new Map([]);
-let onlineScreenerList: ScreenerInfo[] = [];
+export let onlineScreenerList: ScreenerInfo[] = [];
 
-const startScreenerSocket = (): void => {
+const startScreenerSocket = () => {
   const subcriber = studentQueue.getClient().duplicate();
   subcriber.subscribe("queue");
 
@@ -29,6 +37,11 @@ const startScreenerSocket = (): void => {
     if (!onlineScreenerList.some((s) => s.email === screener.email)) {
       onlineScreenerList.push(screener);
     }
+
+    ScreenerEmitter.emit(
+      screenerEmitterEvents.UPDATE_SCREENER,
+      onlineScreenerList.length
+    );
     io.sockets
       .in(SCREENER_CHANNEL)
       .emit(screenerSocketActions.UPDATE_SCREENER, onlineScreenerList);
@@ -41,7 +54,10 @@ const startScreenerSocket = (): void => {
         newList.push(screener);
       }
     }
+
     onlineScreenerList = newList;
+
+    ScreenerEmitter.emit(screenerEmitterEvents.UPDATE_SCREENER, newList.length);
     io.sockets
       .in(SCREENER_CHANNEL)
       .emit(screenerSocketActions.UPDATE_SCREENER, newList);
@@ -57,6 +73,7 @@ const startScreenerSocket = (): void => {
 
       const jobList = await studentQueue.listInfo();
       socket.join(SCREENER_CHANNEL);
+      // send current status of Jobs to Screener
       socket.emit(screenerSocketActions.UPDATE_QUEUE, jobList);
       addScreener(data);
 
@@ -68,15 +85,17 @@ const startScreenerSocket = (): void => {
         const email = allScreener.get(socket.id);
         allScreener.delete(socket.id);
         removeScreener(email);
+        console.log(`Screener ${email} logged out!`);
       }
     });
 
-    socket.on(screenerSocketEvents.LOGOUT, async (data) => {
+    socket.on(screenerSocketEvents.LOGOUT, async (data: ScreenerInfo) => {
       allScreener.delete(socket.id);
       removeScreener(data.email);
       console.log(`Screener ${data.email} logged out!`);
     });
   });
+
   subcriber.on("message", async () => {
     // screener is notified in everytime when the queue changes (we dont need to check what changed)
     const jobList = await studentQueue.listInfo();

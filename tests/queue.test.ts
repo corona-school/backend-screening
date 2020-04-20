@@ -1,7 +1,8 @@
 import redis from "redis";
 import RedisMock from "redis-mock";
 jest.spyOn(redis, "createClient").mockImplementation(RedisMock.createClient);
-import Queue, { Job, ScreenerInfo } from "../src/queue";
+import Queue from "../src/queue";
+import { Job, ScreenerInfo } from "../src/models/Queue";
 
 describe("Testing queue functionality", () => {
   const myQueue = new Queue("StudentQueue");

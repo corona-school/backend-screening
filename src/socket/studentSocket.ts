@@ -1,10 +1,25 @@
 import ScreeningService from "../service/screeningService";
 import { studentSubscriber } from "../subscriber/studentSubscriber";
 import { io, studentQueue } from "../server";
+import { EventEmitter } from "events";
+import { onlineScreenerList } from "./screenerSocket";
+
+export const StudentEmitter = new EventEmitter();
 
 enum StudentSocketEvents {
   LOGIN = "login",
   LOGOUT = "logout",
+}
+
+export enum StudentEmitterEvents {
+  STUDENT_LOGIN = "loginStudent",
+}
+
+export enum StudentSocketActions {
+  LOGIN = "login",
+  UPDATE_JOB = "updateJob",
+  REMOVED_JOB = "removedJob",
+  UPDATE_SCREENER = "updateScreener",
 }
 
 const screeningService = new ScreeningService();
@@ -48,14 +63,24 @@ const loginStudent = (socket: SocketIO.Socket, data: any): void => {
   screeningService
     .login(data.email)
     .then((jobInfo) => {
-      io.sockets.in(data.email).emit("login", { success: true, jobInfo });
+      io.sockets
+        .in(data.email)
+        .emit(StudentSocketActions.LOGIN, { success: true, jobInfo });
+
+      console.log(onlineScreenerList.length);
+
+      io.sockets.in(data.email).emit(StudentSocketActions.UPDATE_SCREENER, {
+        screenerCount: onlineScreenerList.length,
+      });
     })
     .catch(() => {
-      io.sockets.in(data.email).emit("login", { success: false });
+      io.sockets
+        .in(data.email)
+        .emit(StudentSocketActions.LOGIN, { success: false });
     });
 };
 
-export const startStudentSocket = (): void => {
+export const startStudentSocket = () => {
   studentSubscriber.init(screeningService).listen();
 
   io.on("connection", (socket: SocketIO.Socket) => {

@@ -18,9 +18,8 @@ import {
   queueRouter,
   statisticsRouter,
 } from "./controller";
-import { startStudentSocket } from "./controller/studentSocket";
-import startScreenerSocket from "./controller/screenerSocket";
 import Queue from "./queue";
+import SocketController from "./socket/socketController";
 
 const app = new Koa();
 app.use(koaBody());
@@ -91,8 +90,7 @@ app
 const server = http.createServer(app.callback());
 export const io: SocketIO.Server = socket(server);
 
-startStudentSocket();
-startScreenerSocket();
+SocketController();
 
 sequelize
   .sync()
