@@ -6,6 +6,7 @@ import { Screener } from "../models/Screener";
 import { createStudentScreeningResult } from "../utils/studentScreenResult";
 import { studentQueue } from "../server";
 import { JobInfo } from "../models/Queue";
+import { saveJobInQueueLog } from "../database/models/QueueLog";
 import LoggerService from "../utils/Logger";
 const Logger = LoggerService("studentController.ts");
 
@@ -97,6 +98,7 @@ studentRouter.post("/student/changeJob", requireAuth, async (ctx: any) => {
 
   if (job.status === "completed" || job.status === "rejected") {
     try {
+      saveJobInQueueLog(job);
       await apiService.updateStudent(
         createStudentScreeningResult(job),
         job.email
