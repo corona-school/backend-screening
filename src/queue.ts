@@ -1,6 +1,7 @@
 import redis, { RedisClient } from "redis";
 import { Operation, Message, Job, JobInfo, ScreenerInfo } from "./models/Queue";
 import LoggerService from "./utils/Logger";
+import chalk from "chalk";
 const Logger = LoggerService("queue.ts");
 
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
@@ -48,7 +49,9 @@ export default class Queue {
         } else {
           this.getJobWithPosition(job.email)
             .then((jobInfo) => {
-              Logger.info("Added new Job: " + jobInfo.email);
+              Logger.info(
+                `Added new Job: ${chalk.yellowBright(jobInfo.email)}`
+              );
               this.publish("addedJob", jobInfo.email);
               resolve(jobInfo);
             })
@@ -65,7 +68,11 @@ export default class Queue {
 
     return new Promise((resolve, reject) => {
       if (!job) {
-        Logger.warn("Could not remove Job because Job is not in Queue:", email);
+        Logger.warn(
+          `Could not remove Job because Job is not in Queue: ${chalk.yellowBright(
+            email
+          )}`
+        );
         reject("No job found.");
       }
 
@@ -75,7 +82,7 @@ export default class Queue {
           return reject(err);
         }
 
-        Logger.info("Removed Job: ", email);
+        Logger.info(`Removed Job: ${chalk.yellowBright(email)}`);
         this.publish("removedJob", email);
         return resolve(true);
       });
@@ -102,7 +109,11 @@ export default class Queue {
     const index = list.findIndex((j) => j.email === oldJob.email);
 
     if (index === -1) {
-      Logger.warn("Could not change Job because Job is not in Queue:", email);
+      Logger.warn(
+        `Could not change Job because Job is not in Queue: ${chalk.yellowBright(
+          email
+        )}`
+      );
       return null;
     }
 
@@ -116,7 +127,15 @@ export default class Queue {
 
     client.lset(this.key, index, jobString);
 
-    Logger.info("Changed Job:", oldJob, newJob);
+    Logger.info(
+      `Job changed from ${chalk.bgGreenBright(oldJob.status)} -> ${chalk.bgBlue(
+        newJob.status
+      )} of Student ${chalk.yellowBright(newJob.email)}:`,
+      {
+        oldJob,
+        newJob,
+      }
+    );
     this.publish("changedStatus", job.email, screener.email);
     return {
       ...oldJob,
