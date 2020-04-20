@@ -1,5 +1,7 @@
 import Queue from "../queue";
 import QueueLog from "../database/models/QueueLog";
+import LoggerService from "../utils/Logger";
+const Logger = LoggerService("statisticService.ts");
 
 export default class StatisticService {
   myQueue: Queue;
@@ -13,7 +15,7 @@ export default class StatisticService {
       const logs = await QueueLog.findAll({});
       return logs;
     } catch (e) {
-      console.log(e);
+      Logger.info(e);
 
       return null;
     }

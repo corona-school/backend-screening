@@ -20,6 +20,10 @@ import {
 } from "./controller";
 import Queue from "./queue";
 import SocketController from "./socket/socketController";
+import LoggerService from "./utils/Logger";
+import chalk from "chalk";
+
+const Logger = LoggerService("server.ts");
 
 const app = new Koa();
 app.use(koaBody());
@@ -95,8 +99,10 @@ SocketController();
 sequelize
   .sync()
   .then(() => {
-    server.listen(PORT, () => console.log(`Server listening on ${PORT}`));
+    server.listen(PORT, () =>
+      Logger.info(`Server listening on ${chalk.bgGreenBright(PORT)}`)
+    );
   })
   .catch((err) => {
-    console.error(err);
+    Logger.error(err);
   });

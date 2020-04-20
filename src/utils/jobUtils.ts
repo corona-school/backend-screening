@@ -13,7 +13,7 @@ export const createJob = (student: Student): Job => {
       }
       return [1, 13];
     } catch (err) {
-      console.error(err);
+      Logger.error(err);
       return [1, 13];
     }
   };
@@ -22,7 +22,7 @@ export const createJob = (student: Student): Job => {
   try {
     subjects = JSON.parse(student.subjects);
   } catch (err) {
-    console.log("could not parse subjects");
+    Logger.info("could not parse subjects");
   }
 
   return {

@@ -1,5 +1,7 @@
 import { io, studentQueue } from "../server";
 import { EventEmitter } from "events";
+import LoggerService from "../utils/Logger";
+const Logger = LoggerService("screenerSocket.ts");
 
 export const ScreenerEmitter = new EventEmitter();
 
@@ -77,7 +79,7 @@ const startScreenerSocket = () => {
       socket.emit(screenerSocketActions.UPDATE_QUEUE, jobList);
       addScreener(data);
 
-      console.log(`New Screener Login from ${data.email}`);
+      Logger.info(`New Screener Login from ${data.email}`);
     });
 
     socket.on("disconnect", async () => {
@@ -85,14 +87,14 @@ const startScreenerSocket = () => {
         const email = allScreener.get(socket.id);
         allScreener.delete(socket.id);
         removeScreener(email);
-        console.log(`Screener ${email} logged out!`);
+        Logger.info(`Screener ${email} logged out!`);
       }
     });
 
     socket.on(screenerSocketEvents.LOGOUT, async (data: ScreenerInfo) => {
       allScreener.delete(socket.id);
       removeScreener(data.email);
-      console.log(`Screener ${data.email} logged out!`);
+      Logger.info(`Screener ${data.email} logged out!`);
     });
   });
 

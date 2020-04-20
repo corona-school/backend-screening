@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import { apiService } from "../api/backendApiService";
 import { ScreenerRequest } from "../models/Screener";
 import { requireAuth } from "../auth";
+import LoggerService from "../utils/Logger";
+const Logger = LoggerService("screenerController.ts");
 
 const screenerRouter = new Router();
 
@@ -20,7 +22,7 @@ screenerRouter.post("/screener/create", requireAuth, async (ctx) => {
     await apiService.createScreener(screener);
     ctx.body = screener;
   } catch (err) {
-    console.error(err);
+    Logger.error(err);
     ctx.body = "Could not create Screener: " + err.toString();
     ctx.status = 400;
   }

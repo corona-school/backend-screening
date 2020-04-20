@@ -1,5 +1,7 @@
 import redis, { RedisClient } from "redis";
 import { Operation, Message, Job, JobInfo, ScreenerInfo } from "./models/Queue";
+import LoggerService from "./utils/Logger";
+const Logger = LoggerService("queue.ts");
 
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
@@ -36,14 +38,17 @@ export default class Queue {
 
     return new Promise((resolve, reject) => {
       if (list.some((j) => j.email === job.email)) {
+        Logger.warn("Found Duplicate Job: " + job.email);
         reject("Duplicate Job");
       }
       client.rpush(this.key, JSON.stringify(job), (err) => {
         if (err) {
+          Logger.error("Could not add Job to Queue", err);
           return reject(err);
         } else {
           this.getJobWithPosition(job.email)
             .then((jobInfo) => {
+              Logger.info("Added new Job: " + jobInfo.email);
               this.publish("addedJob", jobInfo.email);
               resolve(jobInfo);
             })
@@ -60,14 +65,17 @@ export default class Queue {
 
     return new Promise((resolve, reject) => {
       if (!job) {
+        Logger.warn("Could not remove Job because Job is not in Queue:", email);
         reject("No job found.");
       }
 
       client.lrem(this.key, 0, JSON.stringify(job), (err) => {
         if (err) {
+          Logger.error("Could not remove Job:", err);
           return reject(err);
         }
 
+        Logger.info("Removed Job: ", email);
         this.publish("removedJob", email);
         return resolve(true);
       });
@@ -94,6 +102,7 @@ export default class Queue {
     const index = list.findIndex((j) => j.email === oldJob.email);
 
     if (index === -1) {
+      Logger.warn("Could not change Job because Job is not in Queue:", email);
       return null;
     }
 
@@ -107,6 +116,7 @@ export default class Queue {
 
     client.lset(this.key, index, jobString);
 
+    Logger.info("Changed Job:", oldJob, newJob);
     this.publish("changedStatus", job.email, screener.email);
     return {
       ...oldJob,
@@ -119,8 +129,10 @@ export default class Queue {
     return new Promise((resolve, reject) => {
       client.del(this.key, (err) => {
         if (err) {
+          Logger.error("Could not reset Queue.");
           reject("Could not delete list.");
         }
+        Logger.info("Queue was resetted.");
         resolve([]);
       });
     });

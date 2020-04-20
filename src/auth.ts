@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import { apiService } from "./api/backendApiService";
 import { Screener } from "./models/Screener";
 import { Context, Next } from "koa";
+import LoggerService from "./utils/Logger";
+const Logger = LoggerService("auth.ts");
 
 const LocalStrategy = PassportLocal.Strategy;
 
@@ -30,7 +32,7 @@ const comparePassword = (
 
     bcrypt.compare(password, hash, (err, ok) => {
       if (err) {
-        console.error(err);
+        Logger.error(err);
         reject(err);
       }
       if (!ok) {

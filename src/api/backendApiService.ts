@@ -2,6 +2,8 @@ import axios from "axios";
 import { Screener, ScreenerRequest, IRawScreener } from "../models/Screener";
 import { Student, IRawStudent } from "../models/Student";
 import { IStudentScreeningResult } from "../models/StudentScreeningResult";
+import LoggerService from "../utils/Logger";
+const Logger = LoggerService("backendApiService.ts");
 
 const apiUriStudent = process.env.CORONA_BACKEND_API_URL + "student/";
 const apiUriScreener = process.env.CORONA_BACKEND_API_URL + "screener/";
@@ -39,7 +41,7 @@ export const apiService = {
           }
         })
         .catch((err) => {
-          console.error("Get student data failed: ", err);
+          Logger.error("Get student data failed: ", err);
           reject(err);
         });
     });
@@ -79,7 +81,7 @@ export const apiService = {
           }
         })
         .catch((err) => {
-          console.error("Update student data failed: ", err);
+          Logger.error("Update student data failed: ", err);
           reject(err);
         });
     });
@@ -112,7 +114,7 @@ export const apiService = {
           }
         })
         .catch((err) => {
-          console.error("Get screener data failed: ", err);
+          Logger.error("Get screener data failed: ", err);
           reject(err);
         });
     });
@@ -151,7 +153,7 @@ export const apiService = {
           }
         })
         .catch((err) => {
-          console.error(
+          Logger.error(
             "Create screener failed: {} (status {})",
             err.response.data,
             err.response.status

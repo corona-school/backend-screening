@@ -1,12 +1,14 @@
 import ScreeningService from "../service/screeningService";
 import { io, studentQueue } from "../server";
 import { RedisClient } from "redis";
-import { Message, JobInfo, QueueChanges, ScreenerInfo } from "../models/Queue";
+import { Message, JobInfo, QueueChanges } from "../models/Queue";
 import {
   ScreenerEmitter,
   screenerEmitterEvents,
 } from "../socket/screenerSocket";
 import { StudentSocketActions } from "../socket/studentSocket";
+import LoggerService from "../utils/Logger";
+const Logger = LoggerService("studentSubscriber.ts");
 
 const updateStudent = (
   message: Message,
@@ -21,7 +23,7 @@ const changeStatus = async (message: Message): Promise<void> => {
 
   for (const jobInfo of jobList) {
     if (jobInfo.email === message.email) {
-      console.log(jobInfo.status, jobInfo.email);
+      Logger.info(jobInfo.status, jobInfo.email);
 
       updateStudent(message, jobInfo, io);
     } else if (jobInfo.status === "waiting") {
@@ -33,7 +35,7 @@ const changeStatus = async (message: Message): Promise<void> => {
 };
 
 const removeJob = async (message: Message): Promise<void> => {
-  console.log("removedJob");
+  Logger.info("removedJob");
 
   const jobList = await studentQueue.listInfo();
 
@@ -42,7 +44,7 @@ const removeJob = async (message: Message): Promise<void> => {
     .emit(StudentSocketActions.REMOVED_JOB, message.email);
   for (const jobInfo of jobList) {
     if (jobInfo.status === "waiting") {
-      console.log("updated", jobInfo.email);
+      Logger.info("updated", jobInfo.email);
 
       io.sockets
         .in(jobInfo.email)
@@ -67,7 +69,7 @@ export const studentSubscriber: StudentSubscriber = {
 
   listen: (): void => {
     if (!subcriber) {
-      console.error("Could not start StudentSubscriber");
+      Logger.error("Could not start StudentSubscriber");
       return;
     }
 
@@ -91,16 +93,16 @@ export const studentSubscriber: StudentSubscriber = {
 
       switch (message.operation) {
         case QueueChanges.ADDED_JOB: {
-          console.log("Student Subscriber: added Job");
+          Logger.info("Student Subscriber: added Job");
           break;
         }
         case QueueChanges.CHANGED_STATUS: {
-          console.log("Student Subscriber: changed Status");
+          Logger.info("Student Subscriber: changed Status");
           changeStatus(message);
           break;
         }
         case QueueChanges.REMOVED_JOB: {
-          console.log("Student Subscriber: removed Job");
+          Logger.info("Student Subscriber: removed Job");
           removeJob(message);
           break;
         }

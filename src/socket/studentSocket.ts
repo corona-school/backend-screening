@@ -3,6 +3,8 @@ import { studentSubscriber } from "../subscriber/studentSubscriber";
 import { io, studentQueue } from "../server";
 import { EventEmitter } from "events";
 import { onlineScreenerList } from "./screenerSocket";
+import LoggerService from "../utils/Logger";
+const Logger = LoggerService("studentSocket.ts");
 
 export const StudentEmitter = new EventEmitter();
 
@@ -40,7 +42,7 @@ export const logoutStudent = async (
   id: string,
   forced = false
 ): Promise<void> => {
-  console.log("Try loggin out", email, id, forced);
+  Logger.info("Try loggin out", email, id, forced);
 
   const job = await studentQueue.getJobWithPosition(email);
 
@@ -67,7 +69,7 @@ const loginStudent = (socket: SocketIO.Socket, data: any): void => {
         .in(data.email)
         .emit(StudentSocketActions.LOGIN, { success: true, jobInfo });
 
-      console.log(onlineScreenerList.length);
+      Logger.info(onlineScreenerList.length.toString());
 
       io.sockets.in(data.email).emit(StudentSocketActions.UPDATE_SCREENER, {
         screenerCount: onlineScreenerList.length,
@@ -93,7 +95,7 @@ export const startStudentSocket = () => {
 
     socket.on(StudentSocketEvents.LOGIN, async (data: any) => {
       allStudents.set(socket.id, data.email);
-      console.log(`New Student Login from ${data.email}`);
+      Logger.info(`New Student Login from ${data.email}`);
       loginStudent(socket, data);
     });
 

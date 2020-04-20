@@ -6,6 +6,8 @@ import { Screener } from "../models/Screener";
 import { createStudentScreeningResult } from "../utils/studentScreenResult";
 import { studentQueue } from "../server";
 import { JobInfo } from "../models/Queue";
+import LoggerService from "../utils/Logger";
+const Logger = LoggerService("studentController.ts");
 
 const studentRouter = new Router();
 
@@ -47,7 +49,7 @@ studentRouter.post("/student/remove", requireAuth, async (ctx) => {
     await studentQueue.remove(email);
     ctx.body = "Student Job successfully removed out.";
   } catch (err) {
-    console.error(err);
+    Logger.error(err);
     ctx.body = "Could not remove student.";
     ctx.status = 400;
   }
@@ -100,8 +102,8 @@ studentRouter.post("/student/changeJob", requireAuth, async (ctx: any) => {
         job.email
       );
     } catch (err) {
-      console.error(err);
-      console.log("Student data could not be updated!");
+      Logger.error(err);
+      Logger.info("Student data could not be updated!");
     }
   }
 
@@ -110,7 +112,7 @@ studentRouter.post("/student/changeJob", requireAuth, async (ctx: any) => {
   } catch (err) {
     ctx.status = 400;
     ctx.body = "Something went wrong! ";
-    console.error(err);
+    Logger.error(err);
   }
 });
 
