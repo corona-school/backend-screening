@@ -45,7 +45,7 @@ screenerRouter.post("/screener/login", async (ctx: any, next) => {
       ctx.body = { success: false };
       ctx.throw(401);
     }
-
+    Logger.info(`Screener ${email} logged in!`);
     ctx.body = await apiService.getScreener(email, false);
     return ctx.login(email);
   })(ctx, next);
@@ -53,6 +53,8 @@ screenerRouter.post("/screener/login", async (ctx: any, next) => {
 
 screenerRouter.get("/screener/logout", (ctx: any) => {
   if (ctx.isAuthenticated()) {
+    const from = ctx.session.passport.user;
+    Logger.info(`Screener ${from} logged out!`);
     ctx.logout();
     ctx.redirect("/");
   } else {

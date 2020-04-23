@@ -59,6 +59,7 @@ const startScreenerSocket = () => {
 
     onlineScreenerList = newList;
 
+    // notify Students in Queue
     ScreenerEmitter.emit(screenerEmitterEvents.UPDATE_SCREENER, newList.length);
     io.sockets
       .in(SCREENER_CHANNEL)
@@ -87,7 +88,7 @@ const startScreenerSocket = () => {
         const email = allScreener.get(socket.id);
         allScreener.delete(socket.id);
         removeScreener(email);
-        Logger.info(`Screener ${email} logged out!`);
+        Logger.info(`Screener ${email} disconnected.`);
       }
     });
 

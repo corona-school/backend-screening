@@ -36,6 +36,7 @@ const comparePassword = (
         reject(err);
       }
       if (!ok) {
+        Logger.warn(`Screener ${screener.email} used the wrong password.`);
         reject("Password not correct.");
       }
       resolve(screener);
