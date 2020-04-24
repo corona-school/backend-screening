@@ -11,6 +11,7 @@ export const StudentEmitter = new EventEmitter();
 enum StudentSocketEvents {
   LOGIN = "login",
   LOGOUT = "logout",
+  RECONNECT = "student-reconnect",
 }
 
 export enum StudentEmitterEvents {
@@ -42,7 +43,9 @@ export const logoutStudent = async (
   id: string,
   forced = false
 ): Promise<void> => {
-  Logger.info("Try loggin out", email, id, forced);
+  Logger.info(
+    `${forced ? "Logging" : "Maybe logging"} out ${email} (id:${id})`
+  );
 
   const job = await studentQueue.getJobWithPosition(email);
 
@@ -51,11 +54,17 @@ export const logoutStudent = async (
     if (forced) {
       await studentQueue.remove(email);
     } else {
+      // remove Job of Queue if email is not in map after 1 minute
       setTimeout(() => {
         if (!findInMap(allStudents, email)) {
+          Logger.warn(`Removing student ${email} from queue after 1 Minute`);
           studentQueue.remove(email);
+        } else {
+          Logger.info(
+            `Student ${email} successfully reconnected and will not be removed`
+          );
         }
-      }, 1000);
+      }, 60 * 1000);
     }
   }
 };
@@ -87,10 +96,19 @@ export const startStudentSocket = () => {
 
   io.on("connection", (socket: SocketIO.Socket) => {
     socket.on("disconnect", async () => {
+      Logger.warn(`Student ${allStudents.get(socket.id)} disconnected.`);
       if (allStudents.get(socket.id)) {
         const email = allStudents.get(socket.id);
         logoutStudent(email, socket.id);
       }
+    });
+
+    socket.on(StudentSocketEvents.RECONNECT, async (data) => {
+      allStudents.set(socket.id, data.email);
+      const job = await studentQueue.getJobWithPosition(data.email);
+      Logger.info(`Student ${data.email} reconnected.`);
+      socket.join(data.email);
+      io.sockets.in(data.email).emit(StudentSocketActions.UPDATE_JOB, job);
     });
 
     socket.on(StudentSocketEvents.LOGIN, async (data: any) => {
