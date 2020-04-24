@@ -91,6 +91,21 @@ const startScreenerSocket = () => {
         Logger.info(`Screener ${email} disconnected.`);
       }
     });
+    socket.on("screener-reconnect", async (data) => {
+      if (!data) {
+        return;
+      }
+
+      allScreener.set(socket.id, data.email);
+
+      const jobList = await studentQueue.listInfo();
+      socket.join(SCREENER_CHANNEL);
+      // send current status of Jobs to Screener
+      socket.emit(screenerSocketActions.UPDATE_QUEUE, jobList);
+      addScreener(data);
+
+      Logger.info(`Screener ${data.email} reconnected.`);
+    });
 
     socket.on(screenerSocketEvents.LOGOUT, async (data: ScreenerInfo) => {
       allScreener.delete(socket.id);

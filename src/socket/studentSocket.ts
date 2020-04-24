@@ -96,9 +96,9 @@ export const startStudentSocket = () => {
 
   io.on("connection", (socket: SocketIO.Socket) => {
     socket.on("disconnect", async () => {
-      Logger.warn(`Student ${allStudents.get(socket.id)} disconnected.`);
       if (allStudents.get(socket.id)) {
         const email = allStudents.get(socket.id);
+        Logger.warn(`Student ${email} disconnected.`);
         logoutStudent(email, socket.id);
       }
     });
