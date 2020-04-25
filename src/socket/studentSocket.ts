@@ -107,6 +107,13 @@ export const startStudentSocket = () => {
       if (data.email) {
         allStudents.set(socket.id, data.email);
         const job = await studentQueue.getJobWithPosition(data.email);
+        if (!job) {
+          Logger.warn(
+            `Student ${data.email} tried reconnecting but Job is already deleted.`
+          );
+          loginStudent(socket, data.email);
+          return;
+        }
         Logger.info(`Student ${data.email} reconnected.`);
         socket.join(data.email);
         io.sockets.in(data.email).emit(StudentSocketActions.UPDATE_JOB, job);
