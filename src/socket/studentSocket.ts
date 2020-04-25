@@ -104,11 +104,15 @@ export const startStudentSocket = () => {
     });
 
     socket.on(StudentSocketEvents.RECONNECT, async (data) => {
-      allStudents.set(socket.id, data.email);
-      const job = await studentQueue.getJobWithPosition(data.email);
-      Logger.info(`Student ${data.email} reconnected.`);
-      socket.join(data.email);
-      io.sockets.in(data.email).emit(StudentSocketActions.UPDATE_JOB, job);
+      if (data.email) {
+        allStudents.set(socket.id, data.email);
+        const job = await studentQueue.getJobWithPosition(data.email);
+        Logger.info(`Student ${data.email} reconnected.`);
+        socket.join(data.email);
+        io.sockets.in(data.email).emit(StudentSocketActions.UPDATE_JOB, job);
+      } else {
+        Logger.warn("Student tried reconnecting without an email.");
+      }
     });
 
     socket.on(StudentSocketEvents.LOGIN, async (data: any) => {
