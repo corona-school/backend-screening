@@ -23,6 +23,7 @@ export enum StudentSocketActions {
   UPDATE_JOB = "updateJob",
   REMOVED_JOB = "removedJob",
   UPDATE_SCREENER = "updateScreener",
+  FAILED_RECONNECT = "failedReconnect",
 }
 
 const screeningService = new ScreeningService();
@@ -118,7 +119,10 @@ export const startStudentSocket = () => {
         socket.join(data.email);
         io.sockets.in(data.email).emit(StudentSocketActions.UPDATE_JOB, job);
       } else {
-        Logger.warn("Student tried reconnecting without an email.");
+        Logger.error(
+          "Student tried reconnecting without an email. Forcing Logout."
+        );
+        socket.emit(StudentSocketActions.FAILED_RECONNECT);
       }
     });
 
