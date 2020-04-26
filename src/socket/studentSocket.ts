@@ -122,6 +122,7 @@ export const startStudentSocket = () => {
         Logger.error(
           "Student tried reconnecting without an email. Forcing Logout."
         );
+        Logger.info("Student reconnect data:", data);
         socket.emit(StudentSocketActions.FAILED_RECONNECT);
       }
     });
