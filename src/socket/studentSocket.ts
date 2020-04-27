@@ -120,9 +120,8 @@ export const startStudentSocket = () => {
         io.sockets.in(data.email).emit(StudentSocketActions.UPDATE_JOB, job);
       } else {
         Logger.error(
-          "Student tried reconnecting without an email. Forcing Logout."
+          `Student tried reconnecting without an email (${socket.id}). Forcing Logout.`
         );
-        Logger.info("Student reconnect data:", data);
         socket.emit(StudentSocketActions.FAILED_RECONNECT);
       }
     });
