@@ -1,4 +1,4 @@
-import Koa from "koa";
+import Koa, { Context } from "koa";
 import Router from "koa-router";
 import koaBody from "koa-body";
 import session from "koa-session";
@@ -28,13 +28,40 @@ const Logger = LoggerService("server.ts");
 const app = new Koa();
 app.use(koaBody());
 
+const validOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3002",
+  "https://corona-school-admin-dev.herokuapp.com",
+  "https://corona-school-admin.herokuapp.com",
+  "https://authentication.corona-school.de",
+  "https://screeners.corona-school.de",
+  "https://corona-student-dev.herokuapp.com",
+  "https://corona-student-app.herokuapp.com",
+];
+function originIsValid(origin: string): boolean {
+  return validOrigins.indexOf(origin) != -1;
+}
+
+function verifyOrigin(ctx: Context): any {
+  const origin = ctx.headers.origin;
+  if (!originIsValid(origin)) return false;
+  return origin;
+}
+
 app.use(
   cors({
     credentials: true,
-    allowMethods: ["*"],
+    origin: verifyOrigin,
+    allowMethods: ["GET", "HEAD", "PUT", "POST", "DELETE", "PATCH"],
     allowHeaders: [
-      "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept",
+      "X-Requested-With",
+      "X-HTTP-Method-Override",
+      "Content-Type",
+      "Accept",
+      "Set-Cookie",
+      "Cookie",
     ],
+    exposeHeaders: ["Cookie", "Set-Cookie"],
     keepHeadersOnError: true,
   })
 );
@@ -89,6 +116,10 @@ app
   .use(studentRouter.routes())
   .use(queueRouter.routes())
   .use(statisticsRouter.routes())
+  .use(screenerRouter.allowedMethods())
+  .use(studentRouter.allowedMethods())
+  .use(queueRouter.allowedMethods())
+  .use(statisticsRouter.allowedMethods())
   .use(router.allowedMethods());
 
 const server = http.createServer(app.callback());
