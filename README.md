@@ -10,6 +10,8 @@ To start the local environment you need 3 things:
 - a locally or remore running postgres database
 - a .env file with the connection urls
 
+#### Instructions for MAC OS
+
 To install and start a local redis store:
 
 ```
@@ -37,6 +39,38 @@ CORONA_BACKEND_API_URL=http://localhost:5000/api/screening/ (example for locally
 CORONA_BACKEND_API_TOKEN=[security token for screening api as provided in backend]
 
 ```
+
+#### Installation on debian based systems
+
+To install and start a local redis store:
+
+```
+sudo apt-get update
+sudo apt-get install redis-server
+sudo systemctl restart redis-server
+```
+
+To install the postgress sql drivers and create the database:
+
+```
+sudo apt-get install postgresql postgresql-client
+# create psql user(s) and
+psql
+createdb dev_corona_school
+```
+
+Additionally create an ".env" file in the root of the project with the following variables:
+
+```
+DATABASE_URL=postgresql://localhost:5432/dev_corona_school
+REDIS_URL=redis://127.0.0.1:6379
+COOKIE_SESSION_SECRET=oYz2bYa2MBDqiqQE7T80bmoFikIpamkHvxEVnYPpAxlFTV5F5JWHbckS04Xd
+CORONA_BACKEND_API_URL=http://localhost:5000/api/screening/ (example for locally running backend app)
+CORONA_BACKEND_API_TOKEN=[security token for screening api as provided in backend]
+```
+
+#### Installation on debian based systems
+
 
 ### Local Development
 
