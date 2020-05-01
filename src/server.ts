@@ -6,12 +6,14 @@ import passport from "koa-passport";
 import cors from "@koa/cors";
 import redisStore from "koa-redis";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 import socket from "socket.io";
 import http from "http";
 
 import { sequelize } from "./database";
+import cleanup from "./jobs/cleanup";
 import {
   screenerRouter,
   studentRouter,
@@ -130,10 +132,12 @@ SocketController();
 sequelize
   .sync()
   .then(() => {
-    server.listen(PORT, () =>
-      Logger.info(`Server listening on ${chalk.bgGreenBright(PORT)}`)
-    );
+    server.listen(PORT, () => {
+      Logger.info(`Server listening on ${chalk.bgGreenBright(PORT)}`);
+      cleanup.invoke();
+    });
   })
   .catch((err) => {
+    cleanup.cancel();
     Logger.error(err);
   });
