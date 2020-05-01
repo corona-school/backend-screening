@@ -26,7 +26,12 @@ const cleanup = schedule.scheduleJob("*/15 * * * 0-6", async () => {
         );
         continue;
       }
-      Logger.info(`Job ${job.email} is older than 1 hour.`);
+      const duration = moment
+        .duration(moment(job.time).diff(new Date()))
+        .asHours();
+      Logger.info(
+        `Job ${job.email} is ${duration} hours old and will be removed.`
+      );
       const success = await studentQueue.remove(job.email);
       if (success) {
         Logger.info(`Removed ${job.email} via cleanup script.`);
