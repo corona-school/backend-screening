@@ -27,7 +27,7 @@ const cleanup = schedule.scheduleJob("*/15 * * * 0-6", async () => {
         continue;
       }
       const duration = moment
-        .duration(moment(job.time).diff(new Date()))
+        .duration(moment(new Date()).diff(moment(job.time)))
         .asHours();
       Logger.info(
         `Job ${job.email} is ${duration} hours old and will be removed.`
