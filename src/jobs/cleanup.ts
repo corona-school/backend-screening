@@ -18,13 +18,13 @@ const cleanup = schedule.scheduleJob("*/15 * * * 0-6", async () => {
 
     for (const job of jobs) {
       if (job.status !== "completed" && job.status !== "rejected") {
-        return;
+        continue;
       }
       if (moment(job.time).isAfter(moment().subtract(1, "hours"))) {
         Logger.info(
           `Job ${job.email} is newer than 1 hour and will not be deleted.`
         );
-        return;
+        continue;
       }
       Logger.info(`Job ${job.email} is older than 1 hour.`);
       const success = await studentQueue.remove(job.email);
