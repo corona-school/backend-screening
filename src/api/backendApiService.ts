@@ -30,6 +30,8 @@ export const apiService = {
                 msg: data.msg,
               };
 
+              console.log(data);
+
               resolve(student);
             } else {
               reject(

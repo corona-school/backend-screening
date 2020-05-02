@@ -56,6 +56,11 @@ studentRouter.post("/student/remove", requireAuth, async (ctx) => {
   }
 });
 
+studentRouter.get("/student", async (ctx) => {
+  const { email } = ctx.request.query;
+  ctx.body = await apiService.getStudent(email);
+});
+
 studentRouter.get("/student/jobInfo", async (ctx) => {
   const { email } = ctx.request.query;
   ctx.body = await studentQueue.getJobWithPosition(email);

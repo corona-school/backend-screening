@@ -26,6 +26,7 @@ interface ScreenerInfo {
   firstname: string;
   lastname: string;
   email: string;
+  active: boolean;
 }
 
 const allScreener: Map<string, string> = new Map([]);
@@ -42,7 +43,7 @@ const startScreenerSocket = () => {
 
     ScreenerEmitter.emit(
       screenerEmitterEvents.UPDATE_SCREENER,
-      onlineScreenerList.length
+      onlineScreenerList.filter((s) => s.active).length
     );
     io.sockets
       .in(SCREENER_CHANNEL)
@@ -60,14 +61,17 @@ const startScreenerSocket = () => {
     onlineScreenerList = newList;
 
     // notify Students in Queue
-    ScreenerEmitter.emit(screenerEmitterEvents.UPDATE_SCREENER, newList.length);
+    ScreenerEmitter.emit(
+      screenerEmitterEvents.UPDATE_SCREENER,
+      newList.filter((s) => s.active).length
+    );
     io.sockets
       .in(SCREENER_CHANNEL)
       .emit(screenerSocketActions.UPDATE_SCREENER, newList);
   };
 
   io.on("connection", (socket) => {
-    socket.on(screenerSocketEvents.LOGIN, async (data) => {
+    socket.on(screenerSocketEvents.LOGIN, async (data: ScreenerInfo) => {
       if (!data) {
         return;
       }
@@ -90,6 +94,25 @@ const startScreenerSocket = () => {
         removeScreener(email);
         Logger.info(`Screener ${email} disconnected.`);
       }
+    });
+    socket.on("screenerStatus", async (data: ScreenerInfo) => {
+      onlineScreenerList = onlineScreenerList.map((s) => {
+        if (s.email === data.email) {
+          Logger.info(
+            `Changing Status of Screener ${data.email} from ${s.active} to ${data.active}`
+          );
+          return data;
+        }
+        return s;
+      });
+      // notify Students in Queue
+      ScreenerEmitter.emit(
+        screenerEmitterEvents.UPDATE_SCREENER,
+        onlineScreenerList.filter((s) => s.active).length
+      );
+      io.sockets
+        .in(SCREENER_CHANNEL)
+        .emit(screenerSocketActions.UPDATE_SCREENER, onlineScreenerList);
     });
     socket.on("screener-reconnect", async (data) => {
       if (!data) {

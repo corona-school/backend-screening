@@ -77,7 +77,9 @@ export const studentSubscriber: StudentSubscriber = {
       screenerEmitterEvents.UPDATE_SCREENER,
       async (screenerCount: number) => {
         const jobList = await studentQueue.listInfo();
-
+        Logger.info(
+          `Screener List updated to ${screenerCount} active Screener.`
+        );
         jobList
           .filter((j) => j.status === "waiting")
           .map((j) =>
