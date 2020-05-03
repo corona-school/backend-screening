@@ -24,6 +24,7 @@ import Queue from "./queue";
 import SocketController from "./socket/socketController";
 import LoggerService from "./utils/Logger";
 import chalk from "chalk";
+import { openHoursController } from "./controller";
 
 const Logger = LoggerService("server.ts");
 
@@ -118,9 +119,11 @@ app
   .use(studentRouter.routes())
   .use(queueRouter.routes())
   .use(statisticsRouter.routes())
+  .use(openHoursController.routes())
   .use(screenerRouter.allowedMethods())
   .use(studentRouter.allowedMethods())
   .use(queueRouter.allowedMethods())
+  .use(openHoursController.allowedMethods())
   .use(statisticsRouter.allowedMethods())
   .use(router.allowedMethods());
 
