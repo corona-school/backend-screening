@@ -1,7 +1,7 @@
 import Router from "koa-router";
 import redis from "redis";
+import crypto from "crypto";
 import LoggerService from "../utils/Logger";
-import { reject } from "bluebird";
 const Logger = LoggerService("openHoursController.ts");
 
 const openHoursController = new Router();
@@ -37,33 +37,15 @@ const set = (key: string, data: string) => {
   });
 };
 
+// week: 1 = Monday, 2 = Tuesday ...
 interface ITime {
+  week: number;
   from: string;
   to: string;
 }
 
-interface IOpeningHours {
-  Monday: {
-    times: ITime[];
-  };
-  Tuesday: {
-    times: ITime[];
-  };
-  Wednesday: {
-    times: ITime[];
-  };
-  Thursday: {
-    times: ITime[];
-  };
-  Friday: {
-    times: ITime[];
-  };
-  Saturday: {
-    times: ITime[];
-  };
-  Sunday: {
-    times: ITime[];
-  };
+interface IDatabaseTime extends ITime {
+  id: string;
 }
 
 openHoursController.get("/openingHours", async (ctx) => {
@@ -76,8 +58,12 @@ openHoursController.get("/openingHours", async (ctx) => {
 
 openHoursController.post("/openingHours", async (ctx) => {
   try {
-    const data: IOpeningHours = ctx.request.body;
-    await set(KEY, JSON.stringify(data));
+    const data: ITime[] = ctx.request.body;
+    const save: IDatabaseTime[] = data.map((t) => {
+      const id = `${t.week}-${t.from}-${t.to}`;
+      return { ...t, id: crypto.createHash("md5").update(id).digest("hex") };
+    });
+    await set(KEY, JSON.stringify(save));
     ctx.body = await get(KEY);
   } catch (err) {
     ctx.body = err;
