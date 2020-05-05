@@ -8,6 +8,7 @@ import { studentQueue } from "../server";
 import { JobInfo } from "../models/Queue";
 import { saveJobInQueueLog } from "../database/models/QueueLog";
 import LoggerService from "../utils/Logger";
+import { isValidStatusChange } from "../utils/jobUtils";
 const Logger = LoggerService("studentController.ts");
 
 const studentRouter = new Router();
@@ -90,6 +91,22 @@ studentRouter.post("/student/changeJob", requireAuth, async (ctx: any) => {
     email: screener.email,
     time: Date.now(),
   };
+
+  const oldJob = await studentQueue.getJobWithPosition(job.email);
+  if (!oldJob) {
+    ctx.body = "Could not change status of student.";
+    ctx.status = 400;
+    return;
+  }
+
+  if (!isValidStatusChange(oldJob.status, job.status)) {
+    Logger.warn(
+      `Invalid Status change of Job ${job.email} from ${oldJob.status} to ${job.status}! Old Screener: ${oldJob.screener.email} New Screener: ${job.screener.email}`
+    );
+    ctx.body = "Invalid Status change of Job!";
+    ctx.status = 400;
+    return;
+  }
 
   if (
     job.status === "active" &&

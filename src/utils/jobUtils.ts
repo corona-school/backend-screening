@@ -1,6 +1,7 @@
-import { Job } from "../models/Queue";
+import { Job, Status } from "../models/Queue";
 import { Student } from "../models/Student";
 import LoggerService from "../utils/Logger";
+
 const Logger = LoggerService("jobUtils.ts");
 
 export const createJob = (student: Student): Job => {
@@ -48,4 +49,30 @@ export const createJob = (student: Student): Job => {
     }_${Date.now()}`,
     status: "waiting",
   };
+};
+
+export const isValidStatusChange = (
+  oldStatus: Status,
+  newStatus: Status
+): boolean => {
+  if (oldStatus === "active" && newStatus === "waiting") {
+    return false;
+  }
+  if (oldStatus === "completed" && newStatus === "active") {
+    return false;
+  }
+  if (oldStatus === "rejected" && newStatus === "active") {
+    return false;
+  }
+  if (oldStatus === "completed" && newStatus === "waiting") {
+    return false;
+  }
+  if (oldStatus === "rejected" && newStatus === "waiting") {
+    return false;
+  }
+  if (oldStatus === "waiting" && newStatus === "completed") {
+    return false;
+  }
+
+  return true;
 };

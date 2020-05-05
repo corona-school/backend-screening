@@ -1,4 +1,4 @@
-type Status = "waiting" | "active" | "completed" | "rejected";
+export type Status = "waiting" | "active" | "completed" | "rejected";
 
 export type Operation = "addedJob" | "changedStatus" | "removedJob";
 
