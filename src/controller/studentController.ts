@@ -8,7 +8,7 @@ import { studentQueue } from "../server";
 import { JobInfo } from "../models/Queue";
 import { saveJobInQueueLog } from "../database/models/QueueLog";
 import LoggerService from "../utils/Logger";
-import { isValidStatusChange } from "../utils/jobUtils";
+import { isValidStatusChange, isValidScreenerChange } from "../utils/jobUtils";
 const Logger = LoggerService("studentController.ts");
 
 const studentRouter = new Router();
@@ -94,7 +94,7 @@ studentRouter.post("/student/changeJob", requireAuth, async (ctx: any) => {
 
   const oldJob = await studentQueue.getJobWithPosition(job.email);
   if (!oldJob) {
-    ctx.body = "Could not change status of student.";
+    ctx.body = "Could not change status of student because no oldJob found.";
     ctx.status = 400;
     return;
   }
@@ -104,6 +104,15 @@ studentRouter.post("/student/changeJob", requireAuth, async (ctx: any) => {
       `Invalid Status change of Job ${job.email} from ${oldJob.status} to ${job.status}! Old Screener: ${oldJob.screener.email} New Screener: ${job.screener.email}`
     );
     ctx.body = "Invalid Status change of Job!";
+    ctx.status = 400;
+    return;
+  }
+
+  if (!isValidScreenerChange(oldJob, job)) {
+    Logger.warn(
+      `Invalid Screener change of Job ${job.email} from ${oldJob.screener.email} to ${job.screener.email} (${oldJob.status} -> ${job.status})`
+    );
+    ctx.body = "Invalid Screener change of Job!";
     ctx.status = 400;
     return;
   }

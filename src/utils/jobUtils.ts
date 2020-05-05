@@ -76,3 +76,20 @@ export const isValidStatusChange = (
 
   return true;
 };
+
+export const isValidScreenerChange = (oldJob: Job, newJob: Job) => {
+  if (!oldJob.screener) {
+    return true;
+  }
+  if (!newJob.screener) {
+    return false;
+  }
+  if (oldJob.screener.email === newJob.screener.email) {
+    return true;
+  }
+  if (oldJob.status !== "waiting" || newJob.status !== "waiting") {
+    return false;
+  }
+
+  return true;
+};
