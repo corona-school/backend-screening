@@ -2,6 +2,7 @@ import redis, { RedisClient } from "redis";
 import { Operation, Message, Job, JobInfo, ScreenerInfo } from "./models/Queue";
 import LoggerService from "./utils/Logger";
 import chalk from "chalk";
+import { isValidScreenerChange } from "./utils/jobUtils";
 const Logger = LoggerService("queue.ts");
 
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
@@ -122,6 +123,13 @@ export default class Queue {
       ...job,
       screener,
     };
+
+    if (!isValidScreenerChange(job, newJob)) {
+      Logger.warn(
+        `Invalid Screener change of Job ${newJob.email} from ${job.screener?.email} to ${newJob.screener?.email} (${job.status} -> ${newJob.status})`
+      );
+      return null;
+    }
 
     const jobString: string = JSON.stringify(newJob);
 

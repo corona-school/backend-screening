@@ -77,7 +77,7 @@ export const isValidStatusChange = (
   return true;
 };
 
-export const isValidScreenerChange = (oldJob: Job, newJob: Job) => {
+export const isValidScreenerChange = (oldJob: Partial<Job>, newJob: Job) => {
   if (!oldJob.screener) {
     return true;
   }

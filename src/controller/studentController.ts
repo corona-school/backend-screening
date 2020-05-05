@@ -101,18 +101,9 @@ studentRouter.post("/student/changeJob", requireAuth, async (ctx: any) => {
 
   if (!isValidStatusChange(oldJob.status, job.status)) {
     Logger.warn(
-      `Invalid Status change of Job ${job.email} from ${oldJob.status} to ${job.status}! Old Screener: ${oldJob.screener.email} New Screener: ${job.screener.email}`
+      `Invalid Status change of Job ${job.email} from ${oldJob.status} to ${job.status}! Old Screener: ${oldJob.screener?.email} New Screener: ${screenerInfo?.email}`
     );
     ctx.body = "Invalid Status change of Job!";
-    ctx.status = 400;
-    return;
-  }
-
-  if (!isValidScreenerChange(oldJob, job)) {
-    Logger.warn(
-      `Invalid Screener change of Job ${job.email} from ${oldJob.screener.email} to ${job.screener.email} (${oldJob.status} -> ${job.status})`
-    );
-    ctx.body = "Invalid Screener change of Job!";
     ctx.status = 400;
     return;
   }
