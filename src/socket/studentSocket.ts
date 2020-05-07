@@ -56,10 +56,13 @@ export const logoutStudent = async (
       await studentQueue.remove(email);
     } else {
       // remove Job of Queue if email is not in map after 1 minute
-      setTimeout(() => {
+      setTimeout(async () => {
         if (!findInMap(allStudents, email)) {
           Logger.warn(`Removing student ${email} from queue after 1 Minute`);
-          studentQueue.remove(email);
+          const newJob = await studentQueue.getJobWithPosition(email);
+          if (newJob && newJob.status === "waiting") {
+            studentQueue.remove(email);
+          }
         } else {
           Logger.info(
             `Student ${email} successfully reconnected and will not be removed`
