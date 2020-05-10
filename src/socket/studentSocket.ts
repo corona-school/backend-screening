@@ -1,9 +1,10 @@
 import ScreeningService from "../service/screeningService";
 import { studentSubscriber } from "../subscriber/studentSubscriber";
-import { io, studentQueue } from "../server";
+import { io, newStudentQueue } from "../server";
 import { EventEmitter } from "events";
 import { onlineScreenerList } from "./screenerSocket";
 import LoggerService from "../utils/Logger";
+import { getId } from "../utils/jobUtils";
 const Logger = LoggerService("studentSocket.ts");
 
 export const StudentEmitter = new EventEmitter();
@@ -47,21 +48,21 @@ export const logoutStudent = async (
   Logger.info(
     `${forced ? "Logging" : "Maybe logging"} out ${email} (id:${id})`
   );
-
-  const job = await studentQueue.getJobWithPosition(email);
+  const jobId = getId(email);
+  const job = await newStudentQueue.getJobWithPosition(jobId);
 
   if (job && job.status === "waiting") {
     allStudents.delete(id);
     if (forced) {
-      await studentQueue.remove(email);
+      await newStudentQueue.remove(jobId);
     } else {
       // remove Job of Queue if email is not in map after 1 minute
       setTimeout(async () => {
         if (!findInMap(allStudents, email)) {
-          Logger.warn(`Removing student ${email} from queue after 1 Minute`);
-          const newJob = await studentQueue.getJobWithPosition(email);
+          Logger.warn(`Removing student ${jobId} from queue after 1 Minute`);
+          const newJob = await newStudentQueue.getJobWithPosition(jobId);
           if (newJob && newJob.status === "waiting") {
-            studentQueue.remove(email);
+            newStudentQueue.remove(newJob.id);
           }
         } else {
           Logger.info(
@@ -96,7 +97,7 @@ const loginStudent = (socket: SocketIO.Socket, data: any): void => {
 };
 
 export const startStudentSocket = () => {
-  studentSubscriber.init(screeningService).listen();
+  studentSubscriber.listen();
 
   io.on("connection", (socket: SocketIO.Socket) => {
     socket.on("disconnect", async () => {
@@ -110,7 +111,7 @@ export const startStudentSocket = () => {
     socket.on(StudentSocketEvents.RECONNECT, async (data) => {
       if (data.email) {
         allStudents.set(socket.id, data.email);
-        const job = await studentQueue.getJobWithPosition(data.email);
+        const job = await newStudentQueue.getJobWithPosition(getId(data.email));
         if (!job) {
           Logger.warn(
             `Student ${data.email} tried reconnecting but Job is already deleted.`

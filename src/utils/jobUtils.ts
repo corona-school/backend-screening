@@ -1,10 +1,14 @@
-import { Job, Status } from "../models/Queue";
+import crypto from "crypto";
+import { StudentData, Status } from "../models/Queue";
 import { Student } from "../models/Student";
 import LoggerService from "../utils/Logger";
 
 const Logger = LoggerService("jobUtils.ts");
 
-export const createJob = (student: Student): Job => {
+export const getId = (email: string) =>
+  crypto.createHash("md5").update(email).digest("hex");
+
+export const createJob = (id: string, student: Student): StudentData => {
   const getSubject = (subject: string): string | null => {
     try {
       return subject.replace(/[0-9]+|:/g, "");
@@ -48,21 +52,17 @@ export const createJob = (student: Student): Job => {
   }
 
   return {
+    id,
     firstname: student.firstname,
     lastname: student.lastname,
     email: student.email,
     subjects: subjects,
     phone: student.phone,
     knowcsfrom: "",
-    birthday: student.birthday,
     msg: student.msg,
     feedback: student.feedback,
     commentScreener: "",
-    time: Date.now(),
-    jitsi: `https://meet.jit.si/${student.firstname}_${
-      student.lastname
-    }_${Date.now()}`,
-    status: "waiting",
+    jitsi: `https://meet.jit.si/${id}`,
   };
 };
 
@@ -92,19 +92,22 @@ export const isValidStatusChange = (
   return true;
 };
 
-export const isValidScreenerChange = (oldJob: Partial<Job>, newJob: Job) => {
-  if (!oldJob.screener) {
-    return true;
-  }
-  if (!newJob.screener) {
-    return false;
-  }
-  if (oldJob.screener.email === newJob.screener.email) {
-    return true;
-  }
-  if (oldJob.status !== "waiting" || newJob.status !== "waiting") {
-    return false;
-  }
+export const isValidScreenerChange = (
+  oldJob: Partial<StudentData>,
+  newJob: StudentData
+) => {
+  // if (!oldJob.screener) {
+  // 	return true;
+  // }
+  // if (!newJob.screener) {
+  // 	return false;
+  // }
+  // if (oldJob.screener.email === newJob.screener.email) {
+  // 	return true;
+  // }
+  // if (oldJob.status !== "waiting" || newJob.status !== "waiting") {
+  // 	return false;
+  // }
 
   return true;
 };

@@ -1,4 +1,4 @@
-import { io, studentQueue } from "../server";
+import { io, newStudentQueue } from "../server";
 import { EventEmitter } from "events";
 import LoggerService from "../utils/Logger";
 const Logger = LoggerService("screenerSocket.ts");
@@ -33,9 +33,6 @@ const allScreener: Map<string, string> = new Map([]);
 export let onlineScreenerList: ScreenerInfo[] = [];
 
 const startScreenerSocket = () => {
-  const subcriber = studentQueue.getClient().duplicate();
-  subcriber.subscribe("queue");
-
   const addScreener = (screener: ScreenerInfo): void => {
     if (!onlineScreenerList.some((s) => s.email === screener.email)) {
       onlineScreenerList.push(screener);
@@ -78,7 +75,7 @@ const startScreenerSocket = () => {
 
       allScreener.set(socket.id, data.email);
 
-      const jobList = await studentQueue.listInfo();
+      const jobList = await newStudentQueue.listInfo();
       socket.join(SCREENER_CHANNEL);
       // send current status of Jobs to Screener
       socket.emit(screenerSocketActions.UPDATE_QUEUE, jobList);
@@ -121,7 +118,7 @@ const startScreenerSocket = () => {
 
       allScreener.set(socket.id, data.email);
 
-      const jobList = await studentQueue.listInfo();
+      const jobList = await newStudentQueue.listInfo();
       socket.join(SCREENER_CHANNEL);
       // send current status of Jobs to Screener
       socket.emit(screenerSocketActions.UPDATE_QUEUE, jobList);
@@ -137,9 +134,9 @@ const startScreenerSocket = () => {
     });
   });
 
-  subcriber.on("message", async () => {
+  newStudentQueue.on("message", async () => {
     // screener is notified in everytime when the queue changes (we dont need to check what changed)
-    const jobList = await studentQueue.listInfo();
+    const jobList = await newStudentQueue.listInfo();
     io.sockets
       .in(SCREENER_CHANNEL)
       .emit(screenerSocketActions.UPDATE_QUEUE, jobList);

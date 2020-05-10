@@ -1,34 +1,39 @@
 import ScreeningService from "../service/screeningService";
-import { io, studentQueue } from "../server";
-import { RedisClient } from "redis";
-import { Message, JobInfo, QueueChanges } from "../models/Queue";
+import { io, newStudentQueue } from "../server";
+import {
+  Message,
+  QueueChanges,
+  StudentData,
+  ScreenerInfo,
+} from "../models/Queue";
 import {
   ScreenerEmitter,
   screenerEmitterEvents,
 } from "../socket/screenerSocket";
+import { JobInfo } from "../GenericQueue";
 import { StudentSocketActions } from "../socket/studentSocket";
 import LoggerService from "../utils/Logger";
 const Logger = LoggerService("studentSubscriber.ts");
 
 const updateStudent = (
   message: Message,
-  jobInfo: JobInfo,
+  jobInfo: JobInfo<StudentData, ScreenerInfo>,
   io: SocketIO.Server
 ): void => {
   io.sockets.in(message.email).emit(StudentSocketActions.UPDATE_JOB, jobInfo);
 };
 
 const changeStatus = async (message: Message): Promise<void> => {
-  const jobList = await studentQueue.listInfo();
+  const jobList = await newStudentQueue.listInfo();
 
   for (const jobInfo of jobList) {
-    if (jobInfo.email === message.email) {
-      Logger.info(jobInfo.status, jobInfo.email);
+    if (jobInfo.data.email === message.email) {
+      Logger.info(jobInfo.status, jobInfo.data.email);
 
       updateStudent(message, jobInfo, io);
     } else if (jobInfo.status === "waiting") {
       io.sockets
-        .in(jobInfo.email)
+        .in(jobInfo.data.email)
         .emit(StudentSocketActions.UPDATE_JOB, jobInfo);
     }
   }
@@ -37,60 +42,49 @@ const changeStatus = async (message: Message): Promise<void> => {
 const removeJob = async (message: Message): Promise<void> => {
   Logger.info("removedJob");
 
-  const jobList = await studentQueue.listInfo();
+  const jobList = await newStudentQueue.listInfo();
 
   io.sockets
     .in(message.email)
     .emit(StudentSocketActions.REMOVED_JOB, message.email);
   for (const jobInfo of jobList) {
     if (jobInfo.status === "waiting") {
-      Logger.info("updated", jobInfo.email);
+      Logger.info("updated", jobInfo.data.email);
 
       io.sockets
-        .in(jobInfo.email)
+        .in(jobInfo.data.email)
         .emit(StudentSocketActions.UPDATE_JOB, jobInfo);
     }
   }
 };
-
-let subcriber: null | RedisClient = null;
 
 interface StudentSubscriber {
   init: (screeningService: ScreeningService) => StudentSubscriber;
   listen: () => void;
 }
 
-export const studentSubscriber: StudentSubscriber = {
-  init: (): StudentSubscriber => {
-    subcriber = studentQueue.getClient().duplicate();
-    subcriber.subscribe("queue");
-    return studentSubscriber;
-  },
-
+export const studentSubscriber = {
   listen: (): void => {
-    if (!subcriber) {
-      Logger.error("Could not start StudentSubscriber");
-      return;
-    }
-
     ScreenerEmitter.on(
       screenerEmitterEvents.UPDATE_SCREENER,
       async (screenerCount: number) => {
-        const jobList = await studentQueue.listInfo();
+        const jobList = await newStudentQueue.listInfo();
         Logger.info(
           `Screener List updated to ${screenerCount} active Screener.`
         );
         jobList
           .filter((j) => j.status === "waiting")
           .map((j) =>
-            io.sockets.in(j.email).emit(StudentSocketActions.UPDATE_SCREENER, {
-              screenerCount,
-            })
+            io.sockets
+              .in(j.data.email)
+              .emit(StudentSocketActions.UPDATE_SCREENER, {
+                screenerCount,
+              })
           );
       }
     );
 
-    subcriber.on("message", async (_, data) => {
+    newStudentQueue.on("message", async (_, data) => {
       const message: Message = JSON.parse(data);
 
       switch (message.operation) {

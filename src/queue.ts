@@ -1,5 +1,11 @@
 import redis, { RedisClient } from "redis";
-import { Operation, Message, Job, JobInfo, ScreenerInfo } from "./models/Queue";
+import {
+  Operation,
+  Message,
+  StudentData,
+  JobInfo,
+  ScreenerInfo,
+} from "./models/Queue";
 import LoggerService from "./utils/Logger";
 import chalk from "chalk";
 import { isValidScreenerChange } from "./utils/jobUtils";
@@ -35,7 +41,7 @@ export default class Queue {
     publisher.publish("queue", JSON.stringify(message));
   };
 
-  add = async (job: Job): Promise<JobInfo> => {
+  add = async (job: StudentData): Promise<JobInfo> => {
     const list = await this.list();
 
     return new Promise((resolve, reject) => {
@@ -102,7 +108,7 @@ export default class Queue {
 
   changeJob = async (
     email: string,
-    job: Partial<Job>,
+    job: Partial<StudentData>,
     screener: ScreenerInfo
   ): Promise<JobInfo | null> => {
     const oldJob = await this.getJobWithPosition(email);
@@ -165,13 +171,13 @@ export default class Queue {
     });
   };
 
-  list = (): Promise<Job[]> => {
+  list = (): Promise<StudentData[]> => {
     return new Promise((resolve, reject) => {
       client.lrange(this.key, 0, -1, (err, res) => {
         if (err) {
           reject(err);
         } else {
-          const list: Job[] = res.map((job) => JSON.parse(job));
+          const list: StudentData[] = res.map((job) => JSON.parse(job));
           resolve(list.sort((a, b) => a.time - b.time));
         }
       });

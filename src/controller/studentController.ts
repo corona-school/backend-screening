@@ -3,12 +3,12 @@ import { requireAuth } from "../auth";
 import ScreeningService from "../service/screeningService";
 import { apiService } from "../api/backendApiService";
 import { Screener } from "../models/Screener";
-import { createStudentScreeningResult } from "../utils/studentScreenResult";
-import { studentQueue } from "../server";
-import { JobInfo } from "../models/Queue";
-import { saveJobInQueueLog } from "../database/models/QueueLog";
+import { newStudentQueue } from "../server";
+import { IStudentScreeningResult } from "../models/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
-import { isValidStatusChange, isValidScreenerChange } from "../utils/jobUtils";
+import { isValidStatusChange, getId } from "../utils/jobUtils";
+import { StudentData, ScreenerInfo } from "../models/Queue";
+
 const Logger = LoggerService("studentController.ts");
 
 const studentRouter = new Router();
@@ -18,7 +18,7 @@ const screeningService = new ScreeningService();
 studentRouter.post("/student/login", async (ctx) => {
   const { email } = ctx.request.body;
 
-  let jobInfo: JobInfo;
+  let jobInfo;
   try {
     jobInfo = await screeningService.login(email);
   } catch (e) {
@@ -48,7 +48,7 @@ studentRouter.post("/student/logout", async (ctx) => {
 studentRouter.post("/student/remove", requireAuth, async (ctx) => {
   const { email } = ctx.request.body;
   try {
-    await studentQueue.remove(email);
+    await newStudentQueue.remove(getId(email));
     ctx.body = "Student Job successfully removed out.";
   } catch (err) {
     Logger.error(err);
@@ -57,18 +57,42 @@ studentRouter.post("/student/remove", requireAuth, async (ctx) => {
   }
 });
 
-studentRouter.get("/student", async (ctx) => {
+studentRouter.get("/student", requireAuth, async (ctx) => {
   const { email } = ctx.request.query;
   ctx.body = await apiService.getStudent(email);
 });
 
 studentRouter.get("/student/jobInfo", async (ctx) => {
   const { email } = ctx.request.query;
-  ctx.body = await studentQueue.getJobWithPosition(email);
+  ctx.body = await newStudentQueue.getJobWithPosition(getId(email));
+});
+
+studentRouter.post("/student/verify", async (ctx) => {
+  const screeningResult: IStudentScreeningResult | null =
+    ctx.request.body.screeningResult;
+  const studentEmail: string | null = ctx.request.body.studentEmail;
+
+  if (!screeningResult || !studentEmail) {
+    ctx.body = "Not the correct data.";
+    ctx.status = 400;
+    return;
+  }
+
+  try {
+    await apiService.updateStudent(screeningResult, studentEmail);
+    ctx.body = "Screening Result saved.";
+    ctx.status = 200;
+    return;
+  } catch (err) {
+    ctx.body = "Could not verify student.";
+    ctx.status = 400;
+    return;
+  }
 });
 
 studentRouter.post("/student/changeJob", requireAuth, async (ctx: any) => {
-  const job: JobInfo = ctx.request.body;
+  const job: StudentData = ctx.request.body.data;
+  const action: string = ctx.request.body.action;
 
   if (!job) {
     ctx.body = "Could not change status of student.";
@@ -84,55 +108,58 @@ studentRouter.post("/student/changeJob", requireAuth, async (ctx: any) => {
     return;
   }
 
-  const screenerInfo = {
-    id: screener.id,
+  const screenerInfo: ScreenerInfo = {
     firstname: screener.firstname,
     lastname: screener.lastname,
     email: screener.email,
-    time: Date.now(),
   };
 
-  const oldJob = await studentQueue.getJobWithPosition(job.email);
-  if (!oldJob) {
-    ctx.body = "Could not change status of student because no oldJob found.";
-    ctx.status = 400;
-    return;
-  }
+  // const oldJob = await newStudentQueue.getJobWithPosition(job.id);
+  // if (!oldJob) {
+  // 	ctx.body = "Could not change status of student because no oldJob found.";
+  // 	ctx.status = 400;
+  // 	return;
+  // }
 
-  if (!isValidStatusChange(oldJob.status, job.status)) {
-    Logger.warn(
-      `Invalid Status change of Job ${job.email} from ${oldJob.status} to ${job.status}! Old Screener: ${oldJob.screener?.email} New Screener: ${screenerInfo?.email}`
-    );
-    ctx.body = "Invalid Status change of Job!";
-    ctx.status = 400;
-    return;
-  }
+  // if (!isValidStatusChange(oldJob.status, job.status)) {
+  // 	Logger.warn(
+  // 		`Invalid Status change of Job ${job.data.email} from ${oldJob.status} to ${job.status}! Old Screener: ${oldJob.assignedTo?.email} New Screener: ${screenerInfo?.email}`
+  // 	);
+  // 	ctx.body = "Invalid Status change of Job!";
+  // 	ctx.status = 400;
+  // 	return;
+  // }
 
-  if (
-    job.status === "active" &&
-    job.screener &&
-    job.screener.email !== screener.email
-  ) {
-    ctx.status = 400;
-    ctx.body = "Ein Screener verifiziert diesen Studenten schon.";
-    return;
-  }
+  // if (
+  // 	job.status === "active" &&
+  // 	job.assignedTo &&
+  // 	job.assignedTo.email !== screener.email
+  // ) {
+  // 	ctx.status = 400;
+  // 	ctx.body = "Ein Screener verifiziert diesen Studenten schon.";
+  // 	return;
+  // }
 
-  if (job.status === "completed" || job.status === "rejected") {
-    try {
-      saveJobInQueueLog(job);
-      await apiService.updateStudent(
-        createStudentScreeningResult(job),
-        job.email
-      );
-    } catch (err) {
-      Logger.error(err);
-      Logger.info("Student data could not be updated!");
-    }
-  }
+  // if (job.status === "completed" || job.status === "rejected") {
+  // 	try {
+  // 		saveJobInQueueLog(job);
+  // 		await apiService.updateStudent(
+  // 			createStudentScreeningResult(job),
+  // 			job.email
+  // 		);
+  // 	} catch (err) {
+  // 		Logger.error(err);
+  // 		Logger.info("Student data could not be updated!");
+  // 	}
+  // }
 
   try {
-    ctx.body = await studentQueue.changeJob(job.email, job, screenerInfo);
+    ctx.body = await newStudentQueue.changeJob(
+      job.id,
+      job,
+      screenerInfo,
+      action
+    );
   } catch (err) {
     ctx.status = 400;
     ctx.body = "Something went wrong! ";

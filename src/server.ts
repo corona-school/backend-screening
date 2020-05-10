@@ -25,6 +25,8 @@ import SocketController from "./socket/socketController";
 import LoggerService from "./utils/Logger";
 import chalk from "chalk";
 import { openHoursController } from "./controller";
+import GenericQueue from "./GenericQueue";
+import { StudentData, ScreenerInfo } from "./models/Queue";
 
 const Logger = LoggerService("server.ts");
 
@@ -112,6 +114,9 @@ router.get("/", async (ctx) => {
 });
 
 export const studentQueue = new Queue("StudentQueue");
+export const newStudentQueue = new GenericQueue<StudentData, ScreenerInfo>(
+  "StudentQueue"
+);
 
 app
   .use(router.routes())

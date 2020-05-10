@@ -1,6 +1,6 @@
 import schedule from "node-schedule";
 import LoggerService from "../utils/Logger";
-import { studentQueue } from "../server";
+import { newStudentQueue } from "../server";
 import moment from "moment";
 
 const Logger = LoggerService("cleanup.ts");
@@ -10,7 +10,7 @@ const Logger = LoggerService("cleanup.ts");
 const cleanup = schedule.scheduleJob("*/15 * * * 0-6", async () => {
   try {
     Logger.info("Starting cleanup job..");
-    const jobs = await studentQueue.list();
+    const jobs = await newStudentQueue.list();
     if (!jobs || jobs.length === 0) {
       Logger.info("No jobs found to cleanup.");
       return;
@@ -20,23 +20,26 @@ const cleanup = schedule.scheduleJob("*/15 * * * 0-6", async () => {
       if (job.status !== "completed" && job.status !== "rejected") {
         continue;
       }
-      if (moment(job.time).isAfter(moment().subtract(1, "hours"))) {
+      if (!job.timeDone) {
+        continue;
+      }
+      if (moment(job.timeDone).isAfter(moment().subtract(1, "hours"))) {
         Logger.info(
-          `Job ${job.email} is newer than 1 hour and will not be deleted.`
+          `Job ${job.data.email} is newer than 1 hour and will not be deleted.`
         );
         continue;
       }
       const duration = moment
-        .duration(moment(new Date()).diff(moment(job.time)))
+        .duration(moment(new Date()).diff(moment(job.timeDone)))
         .asHours();
       Logger.info(
-        `Job ${job.email} is ${duration} hours old and will be removed.`
+        `Job ${job.data.email} is ${duration} hours old and will be removed.`
       );
-      const success = await studentQueue.remove(job.email);
+      const success = await newStudentQueue.remove(job.id);
       if (success) {
-        Logger.info(`Removed ${job.email} via cleanup script.`);
+        Logger.info(`Removed ${job.data.email} via cleanup script.`);
       } else {
-        Logger.info(`Could not remove ${job.email} via cleanup script.`);
+        Logger.info(`Could not remove ${job.data.email} via cleanup script.`);
       }
     }
   } catch (err) {

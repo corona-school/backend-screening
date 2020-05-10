@@ -1,22 +1,30 @@
-import { createJob } from "../utils/jobUtils";
+import crypto from "crypto";
+import { createJob, getId } from "../utils/jobUtils";
 import { apiService } from "../api/backendApiService";
 import { Student } from "../models/Student";
-import { studentQueue } from "../server";
-import { JobInfo } from "../models/Queue";
+import { newStudentQueue } from "../server";
+import { JobInfo } from "../GenericQueue";
+import { ScreenerInfo, StudentData } from "../models/Queue";
 
 export default class ScreeningService {
-  login = async (email: string): Promise<JobInfo> => {
-    const list = await studentQueue.listInfo();
+  login = async (id: string): Promise<JobInfo<StudentData, ScreenerInfo>> => {
+    const list = await newStudentQueue.listInfo();
 
-    if (list.some((job) => job.email === email)) {
-      return list.find((job) => job.email === email);
+    if (list.some((job) => job.id === id)) {
+      return list.find((job) => job.id === id);
     }
 
     return new Promise((resolve, reject) => {
       apiService
-        .getUnverifiedStudent(email)
-        .then((student: Student | null) => studentQueue.add(createJob(student)))
-        .then((jobInfo: JobInfo) => {
+        .getUnverifiedStudent(id)
+        .then((student: Student | null) => {
+          const id = crypto
+            .createHash("md5")
+            .update(student.email)
+            .digest("hex");
+          return newStudentQueue.add(id, createJob(id, student));
+        })
+        .then((jobInfo: JobInfo<StudentData, ScreenerInfo>) => {
           resolve(jobInfo);
         })
         .catch((err) => {
@@ -26,6 +34,6 @@ export default class ScreeningService {
   };
 
   logout = async (email: string): Promise<boolean> => {
-    return studentQueue.remove(email);
+    return newStudentQueue.remove(getId(email));
   };
 }
