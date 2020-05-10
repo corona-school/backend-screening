@@ -5,8 +5,13 @@ import LoggerService from "../utils/Logger";
 const Logger = LoggerService("jobUtils.ts");
 
 export const createJob = (student: Student): Job => {
-  const getSubject = (subject: string): string =>
-    subject.replace(/[0-9]+|:/g, "");
+  const getSubject = (subject: string): string | null => {
+    try {
+      return subject.replace(/[0-9]+|:/g, "");
+    } catch (err) {
+      return null;
+    }
+  };
 
   const getValues = (subject: string | null): number[] => {
     try {
@@ -23,20 +28,30 @@ export const createJob = (student: Student): Job => {
 
   let subjects = [];
   try {
-    subjects = JSON.parse(student.subjects);
+    subjects = JSON.parse(student.subjects).map((s: any) => {
+      if (getSubject(s)) {
+        return {
+          subject: getSubject(s),
+          min: getValues(s)[0],
+          max: getValues(s)[1],
+        };
+      } else {
+        return {
+          subject: s.name,
+          min: s.minGrade,
+          max: s.maxGrade,
+        };
+      }
+    });
   } catch (err) {
-    Logger.info("could not parse subjects");
+    Logger.info("Cannot parse");
   }
 
   return {
     firstname: student.firstname,
     lastname: student.lastname,
     email: student.email,
-    subjects: subjects.map((s: string) => ({
-      subject: getSubject(s),
-      min: getValues(s)[0],
-      max: getValues(s)[1],
-    })),
+    subjects: subjects,
     phone: student.phone,
     knowcsfrom: "",
     birthday: student.birthday,
