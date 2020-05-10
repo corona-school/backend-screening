@@ -2,6 +2,7 @@ import Router from "koa-router";
 import redis from "redis";
 import crypto from "crypto";
 import LoggerService from "../utils/Logger";
+import { requireAuth } from "../auth";
 const Logger = LoggerService("openHoursController.ts");
 
 const openHoursController = new Router();
@@ -48,6 +49,14 @@ interface IDatabaseTime extends ITime {
   id: string;
 }
 
+const admins = [
+  "gero@corona-school.de",
+  "mascha.matveeva@gmail.com",
+  "reinerschristopher@gmail.com",
+  "leon-erath@hotmail.de",
+  "paul.renger@magd.ox.ac.uk",
+];
+
 openHoursController.get("/openingHours", async (ctx) => {
   try {
     ctx.body = await get(KEY);
@@ -56,7 +65,21 @@ openHoursController.get("/openingHours", async (ctx) => {
   }
 });
 
-openHoursController.post("/openingHours", async (ctx) => {
+openHoursController.post("/openingHours", requireAuth, async (ctx: any) => {
+  const email = ctx.session.passport.user;
+
+  if (!email) {
+    ctx.body = "Anscheinend ist etwas schief gelaufen.";
+    ctx.status = 500;
+    return;
+  }
+
+  if (!admins.includes(email)) {
+    ctx.body = "Du hast keine Rechte die Öffnungszeiten zu bearbeiten.";
+    ctx.status = 403;
+    return;
+  }
+
   try {
     const data: ITime[] = ctx.request.body;
     const save: IDatabaseTime[] = data.map((t) => {
