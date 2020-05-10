@@ -7,8 +7,9 @@ import { createStudentScreeningResult } from "../utils/studentScreenResult";
 import { studentQueue } from "../server";
 import { JobInfo } from "../models/Queue";
 import { saveJobInQueueLog } from "../database/models/QueueLog";
+import { IStudentScreeningResult } from "../models/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
-import { isValidStatusChange, isValidScreenerChange } from "../utils/jobUtils";
+import { isValidStatusChange } from "../utils/jobUtils";
 const Logger = LoggerService("studentController.ts");
 
 const studentRouter = new Router();
@@ -57,7 +58,7 @@ studentRouter.post("/student/remove", requireAuth, async (ctx) => {
   }
 });
 
-studentRouter.get("/student", async (ctx) => {
+studentRouter.get("/student", requireAuth, async (ctx) => {
   const { email } = ctx.request.query;
   ctx.body = await apiService.getStudent(email);
 });
@@ -65,6 +66,29 @@ studentRouter.get("/student", async (ctx) => {
 studentRouter.get("/student/jobInfo", async (ctx) => {
   const { email } = ctx.request.query;
   ctx.body = await studentQueue.getJobWithPosition(email);
+});
+
+studentRouter.post("/student/verify", async (ctx) => {
+  const screeningResult: IStudentScreeningResult | null =
+    ctx.request.body.screeningResult;
+  const studentEmail: string | null = ctx.request.body.studentEmail;
+
+  if (!screeningResult || !studentEmail) {
+    ctx.body = "Not the correct data.";
+    ctx.status = 400;
+    return;
+  }
+
+  try {
+    await apiService.updateStudent(screeningResult, studentEmail);
+    ctx.body = "Screening Result saved.";
+    ctx.status = 200;
+    return;
+  } catch (err) {
+    ctx.body = "Could not verify student.";
+    ctx.status = 400;
+    return;
+  }
 });
 
 studentRouter.post("/student/changeJob", requireAuth, async (ctx: any) => {
