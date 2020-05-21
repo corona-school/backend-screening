@@ -13,6 +13,7 @@ export default class ScreeningService {
     if (list.some((job) => job.id === id)) {
       return list.find((job) => job.id === id);
     }
+    console.log("here");
 
     return new Promise((resolve, reject) => {
       apiService
@@ -22,6 +23,7 @@ export default class ScreeningService {
             .createHash("md5")
             .update(student.email)
             .digest("hex");
+          console.log("here2");
           return newStudentQueue.add(id, createJob(id, student));
         })
         .then((jobInfo: JobInfo<StudentData, ScreenerInfo>) => {

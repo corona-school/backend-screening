@@ -84,7 +84,8 @@ export const studentSubscriber = {
       }
     );
 
-    newStudentQueue.on("message", async (_, data) => {
+    newStudentQueue.on("StudentQueue", async (_, data) => {
+      console.log("Heyo event emitter at student");
       const message: Message = JSON.parse(data);
 
       switch (message.operation) {

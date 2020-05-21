@@ -134,7 +134,9 @@ const startScreenerSocket = () => {
     });
   });
 
-  newStudentQueue.on("message", async () => {
+  newStudentQueue.on("StudentQueue", async () => {
+    console.log("Heyo event emitter at screener");
+
     // screener is notified in everytime when the queue changes (we dont need to check what changed)
     const jobList = await newStudentQueue.listInfo();
     io.sockets

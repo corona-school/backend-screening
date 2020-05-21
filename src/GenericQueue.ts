@@ -33,14 +33,15 @@ export default class GenericQueue<D, S> extends EventEmitter {
 
   publish = (
     operation: Operation,
-    email: string,
+    id: string,
     screenerEmail?: string
   ): void => {
     const message: Message = {
       operation,
-      email,
+      id,
       screenerEmail,
     };
+    console.log("publish", this.key, message);
 
     this.emit(this.key, JSON.stringify(message));
   };
@@ -61,10 +62,10 @@ export default class GenericQueue<D, S> extends EventEmitter {
     };
 
     const number = await this.client.rpush(this.key, JSON.stringify(newJob));
-
+    this.publish("addedJob", newJob.id);
     return {
       ...newJob,
-      position: number,
+      position: number - 1,
     };
   };
 

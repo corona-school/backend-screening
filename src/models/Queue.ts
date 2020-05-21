@@ -10,7 +10,7 @@ export enum QueueChanges {
 
 export interface Message {
   operation: Operation;
-  email: string;
+  id: string;
   screenerEmail?: string;
 }
 
