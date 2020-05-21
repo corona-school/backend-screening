@@ -3,6 +3,7 @@ import { requireAuth } from "../auth";
 import ScreeningService from "../service/screeningService";
 import { apiService } from "../api/backendApiService";
 import { Screener } from "../models/Screener";
+
 import { newStudentQueue } from "../server";
 import { IStudentScreeningResult } from "../models/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
@@ -65,6 +66,29 @@ studentRouter.get("/student", requireAuth, async (ctx) => {
 studentRouter.get("/student/jobInfo", async (ctx) => {
   const { email } = ctx.request.query;
   ctx.body = await newStudentQueue.getJobWithPosition(getId(email));
+});
+
+studentRouter.post("/student/verify", async (ctx) => {
+  const screeningResult: IStudentScreeningResult | null =
+    ctx.request.body.screeningResult;
+  const studentEmail: string | null = ctx.request.body.studentEmail;
+
+  if (!screeningResult || !studentEmail) {
+    ctx.body = "Not the correct data.";
+    ctx.status = 400;
+    return;
+  }
+
+  try {
+    await apiService.updateStudent(screeningResult, studentEmail);
+    ctx.body = "Screening Result saved.";
+    ctx.status = 200;
+    return;
+  } catch (err) {
+    ctx.body = "Could not verify student.";
+    ctx.status = 400;
+    return;
+  }
 });
 
 studentRouter.post("/student/verify", async (ctx) => {
