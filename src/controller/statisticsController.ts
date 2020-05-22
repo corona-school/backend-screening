@@ -1,13 +1,10 @@
-import Router from "koa-router";
-import { requireAuth } from "../auth";
 import { newStudentQueue } from "../server";
-import StatisticService from "../service/statisticService";
-
-const statisticsRouter = new Router();
+import StatisticService from "../services/statisticService";
+import { Context } from "koa";
 
 const statisticService = new StatisticService();
 
-statisticsRouter.get("/statistics/logs", requireAuth, async (ctx) => {
+const getLogs = async (ctx: any) => {
   const logs = await statisticService.getDatabaseQueueLogs();
 
   if (!logs) {
@@ -16,9 +13,9 @@ statisticsRouter.get("/statistics/logs", requireAuth, async (ctx) => {
     return;
   }
   ctx.body = logs;
-});
+};
 
-statisticsRouter.get("/queue/statistics", async (ctx) => {
+const getStatistics = async (ctx: any) => {
   const list = await newStudentQueue.listInfo();
   let countCompleted = 0;
   let countRejected = 0;
@@ -35,6 +32,6 @@ statisticsRouter.get("/queue/statistics", async (ctx) => {
     countRejected,
     total: countCompleted + countRejected,
   };
-});
+};
 
-export { statisticsRouter };
+export default { getLogs, getStatistics };

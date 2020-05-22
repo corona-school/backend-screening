@@ -1,22 +1,18 @@
-import Router from "koa-router";
-import { requireAuth } from "../auth";
-import ScreeningService from "../service/screeningService";
-import { apiService } from "../api/backendApiService";
-import { Screener } from "../models/Screener";
-
+import ScreeningService from "../services/screeningService";
+import { apiService } from "../services/backendApiService";
+import { Screener } from "../types/Screener";
 import { newStudentQueue } from "../server";
-import { IStudentScreeningResult } from "../models/StudentScreeningResult";
+import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
 import { isValidStatusChange, getId } from "../utils/jobUtils";
-import { StudentData, ScreenerInfo } from "../models/Queue";
+import { StudentData, ScreenerInfo } from "../types/Queue";
+import { Context } from "koa";
 
 const Logger = LoggerService("studentController.ts");
 
-const studentRouter = new Router();
-
 const screeningService = new ScreeningService();
 
-studentRouter.post("/student/login", async (ctx) => {
+const login = async (ctx: any) => {
   const { email } = ctx.request.body;
 
   let jobInfo;
@@ -33,9 +29,9 @@ studentRouter.post("/student/login", async (ctx) => {
     return;
   }
   ctx.body = jobInfo;
-});
+};
 
-studentRouter.post("/student/logout", async (ctx) => {
+const logout = async (ctx: any) => {
   const { email } = ctx.request.body;
   try {
     await screeningService.logout(email);
@@ -44,9 +40,9 @@ studentRouter.post("/student/logout", async (ctx) => {
     ctx.body = "Could not logout student.";
     ctx.status = 400;
   }
-});
+};
 
-studentRouter.post("/student/remove", requireAuth, async (ctx) => {
+const remove = async (ctx: any) => {
   const { email } = ctx.request.body;
   try {
     await newStudentQueue.remove(getId(email));
@@ -56,19 +52,19 @@ studentRouter.post("/student/remove", requireAuth, async (ctx) => {
     ctx.body = "Could not remove student.";
     ctx.status = 400;
   }
-});
+};
 
-studentRouter.get("/student", requireAuth, async (ctx) => {
+const get = async (ctx: any) => {
   const { email } = ctx.request.query;
   ctx.body = await apiService.getStudent(email);
-});
+};
 
-studentRouter.get("/student/jobInfo", async (ctx) => {
+const getInfo = async (ctx: any) => {
   const { email } = ctx.request.query;
   ctx.body = await newStudentQueue.getJobWithPosition(getId(email));
-});
+};
 
-studentRouter.post("/student/verify", async (ctx) => {
+const verify = async (ctx: any) => {
   const screeningResult: IStudentScreeningResult | null =
     ctx.request.body.screeningResult;
   const studentEmail: string | null = ctx.request.body.studentEmail;
@@ -89,32 +85,9 @@ studentRouter.post("/student/verify", async (ctx) => {
     ctx.status = 400;
     return;
   }
-});
+};
 
-studentRouter.post("/student/verify", async (ctx) => {
-  const screeningResult: IStudentScreeningResult | null =
-    ctx.request.body.screeningResult;
-  const studentEmail: string | null = ctx.request.body.studentEmail;
-
-  if (!screeningResult || !studentEmail) {
-    ctx.body = "Not the correct data.";
-    ctx.status = 400;
-    return;
-  }
-
-  try {
-    await apiService.updateStudent(screeningResult, studentEmail);
-    ctx.body = "Screening Result saved.";
-    ctx.status = 200;
-    return;
-  } catch (err) {
-    ctx.body = "Could not verify student.";
-    ctx.status = 400;
-    return;
-  }
-});
-
-studentRouter.post("/student/changeJob", requireAuth, async (ctx: any) => {
+const changeJob = async (ctx: any) => {
   const job: StudentData = ctx.request.body.data;
   const action: string = ctx.request.body.action;
 
@@ -189,6 +162,6 @@ studentRouter.post("/student/changeJob", requireAuth, async (ctx: any) => {
     ctx.body = "Something went wrong! ";
     Logger.error(err);
   }
-});
+};
 
-export { studentRouter };
+export default { login, logout, remove, get, getInfo, verify, changeJob };

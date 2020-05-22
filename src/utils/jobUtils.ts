@@ -1,6 +1,6 @@
 import crypto from "crypto";
-import { StudentData, Status } from "../models/Queue";
-import { Student } from "../models/Student";
+import { StudentData, Status } from "../types/Queue";
+import { Student } from "../types/Student";
 import LoggerService from "../utils/Logger";
 
 const Logger = LoggerService("jobUtils.ts");

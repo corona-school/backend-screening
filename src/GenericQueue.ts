@@ -1,11 +1,9 @@
-import { Operation, Message, Status } from "./models/Queue";
+import { Operation, Message, Status } from "./types/Queue";
 import LoggerService from "./utils/Logger";
 import chalk from "chalk";
 import { EventEmitter } from "events";
 import Redis from "ioredis";
 const Logger = LoggerService("GenericQueue.ts");
-
-const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
 export interface Job<D, S> {
   id: string;
@@ -25,10 +23,10 @@ export default class GenericQueue<D, S> extends EventEmitter {
   private key: string;
   private client: Redis.Redis;
 
-  constructor(key: string, options?: Redis.RedisOptions) {
+  constructor(key: string, redisUrl: string, options?: Redis.RedisOptions) {
     super();
     this.key = key;
-    this.client = new Redis(REDIS_URL, options);
+    this.client = new Redis(redisUrl, options);
   }
 
   publish = (

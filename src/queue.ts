@@ -5,7 +5,7 @@ import {
   StudentData,
   JobInfo,
   ScreenerInfo,
-} from "./models/Queue";
+} from "./types/Queue";
 import LoggerService from "./utils/Logger";
 import chalk from "chalk";
 import { isValidScreenerChange } from "./utils/jobUtils";

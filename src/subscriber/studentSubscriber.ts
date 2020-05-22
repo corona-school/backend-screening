@@ -1,11 +1,11 @@
-import ScreeningService from "../service/screeningService";
+import ScreeningService from "../services/screeningService";
 import { io, newStudentQueue } from "../server";
 import {
   Message,
   QueueChanges,
   StudentData,
   ScreenerInfo,
-} from "../models/Queue";
+} from "../types/Queue";
 import {
   ScreenerEmitter,
   screenerEmitterEvents,

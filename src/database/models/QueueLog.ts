@@ -1,6 +1,6 @@
 import { Model, Table, Column } from "sequelize-typescript";
 import LoggerService from "../../utils/Logger";
-import { JobInfo } from "../../models/Queue";
+import { JobInfo } from "../../types/Queue";
 const Logger = LoggerService("QueueLog.ts");
 
 @Table({

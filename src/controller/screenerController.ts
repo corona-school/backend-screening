@@ -1,15 +1,12 @@
-import Router from "koa-router";
 import passport from "koa-passport";
 import bcrypt from "bcrypt";
-import { apiService } from "../api/backendApiService";
-import { ScreenerRequest } from "../models/Screener";
-import { requireAuth } from "../auth";
+import { apiService } from "../services/backendApiService";
+import { ScreenerRequest } from "../types/Screener";
 import LoggerService from "../utils/Logger";
+import { Context, Next } from "koa";
 const Logger = LoggerService("screenerController.ts");
 
-const screenerRouter = new Router();
-
-screenerRouter.post("/screener/create", requireAuth, async (ctx) => {
+const create = async (ctx: any) => {
   const { firstname, lastname, email, password } = ctx.request.body;
 
   try {
@@ -26,9 +23,9 @@ screenerRouter.post("/screener/create", requireAuth, async (ctx) => {
     ctx.body = "Could not create Screener: " + err.toString();
     ctx.status = 400;
   }
-});
+};
 
-screenerRouter.get("/screener/status", async (ctx: any) => {
+const getStatus = async (ctx: any) => {
   if (ctx.isAuthenticated()) {
     const from = ctx.session.passport.user;
 
@@ -37,21 +34,21 @@ screenerRouter.get("/screener/status", async (ctx: any) => {
     ctx.body = { success: false };
     ctx.throw(401);
   }
-});
+};
 
-screenerRouter.post("/screener/login", async (ctx: any, next) => {
+const login = async (ctx: any, next: any) => {
   return passport.authenticate("local", async (err, email) => {
     if (!email || err) {
       ctx.body = { success: false };
       ctx.throw(401);
     }
     Logger.info(`Screener ${email} logged in!`);
+    await ctx.login(email);
     ctx.body = await apiService.getScreener(email, false);
-    return ctx.login(email);
   })(ctx, next);
-});
+};
 
-screenerRouter.get("/screener/logout", (ctx: any) => {
+const logout = (ctx: any) => {
   if (ctx.isAuthenticated()) {
     const from = ctx.session.passport.user;
     Logger.info(`Screener ${from} logged out!`);
@@ -61,9 +58,9 @@ screenerRouter.get("/screener/logout", (ctx: any) => {
     ctx.body = { success: false };
     ctx.throw(401);
   }
-});
+};
 
-screenerRouter.get("/screener/info", requireAuth, async (ctx) => {
+const getInfo = async (ctx: any) => {
   const { email } = ctx.request.query;
   const screener = await apiService.getScreener(email);
   if (!screener) {
@@ -72,6 +69,6 @@ screenerRouter.get("/screener/info", requireAuth, async (ctx) => {
     return;
   }
   ctx.body = screener;
-});
+};
 
-export { screenerRouter };
+export default { create, getStatus, login, logout, getInfo };

@@ -1,4 +1,4 @@
-import ScreeningService from "../service/screeningService";
+import ScreeningService from "../services/screeningService";
 import { studentSubscriber } from "../subscriber/studentSubscriber";
 import { io, newStudentQueue } from "../server";
 import { EventEmitter } from "events";

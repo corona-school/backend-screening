@@ -1,10 +1,10 @@
 import crypto from "crypto";
 import { createJob, getId } from "../utils/jobUtils";
-import { apiService } from "../api/backendApiService";
-import { Student } from "../models/Student";
+import { apiService } from "./backendApiService";
+import { Student } from "../types/Student";
 import { newStudentQueue } from "../server";
 import { JobInfo } from "../GenericQueue";
-import { ScreenerInfo, StudentData } from "../models/Queue";
+import { ScreenerInfo, StudentData } from "../types/Queue";
 
 export default class ScreeningService {
   login = async (id: string): Promise<JobInfo<StudentData, ScreenerInfo>> => {
@@ -13,7 +13,6 @@ export default class ScreeningService {
     if (list.some((job) => job.id === id)) {
       return list.find((job) => job.id === id);
     }
-    console.log("here");
 
     return new Promise((resolve, reject) => {
       apiService
