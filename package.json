@@ -8,7 +8,7 @@
   "dependencies": {
     "@koa/cors": "2",
     "@types/bcrypt": "^3.0.0",
-    "@types/bluebird": "^3.5.30",
+    "@types/bluebird": "^3.5.32",
     "@types/ioredis": "^4.16.2",
     "@types/koa": "^2.11.2",
     "@types/koa-passport": "^4.0.2",
@@ -58,6 +58,7 @@
     "lint": "eslint 'src/**/*.{ts,tsx}'"
   },
   "devDependencies": {
+    "@types/jest": "^25.2.3",
     "@typescript-eslint/eslint-plugin": "^2.25.0",
     "@typescript-eslint/parser": "^2.25.0",
     "eslint": "^6.8.0",

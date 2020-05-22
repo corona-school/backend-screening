@@ -12,10 +12,11 @@
 		"sourceMap": true,
 		"outDir": "dist",
 		"baseUrl": ".",
+		"types": ["node", "jest"],
 		"paths": {
 			"*": ["node_modules/*"]
 		},
 		"lib": ["es2015"]
 	},
-	"include": ["src/**/*"]
+	"include": ["src/**/*", "tests/**/*", "types/**/*"]
 }

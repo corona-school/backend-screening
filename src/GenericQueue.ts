@@ -23,11 +23,15 @@ export default class GenericQueue<D, S> extends EventEmitter {
   private key: string;
   private client: Redis.Redis;
 
-  constructor(key: string, redisUrl: string, options?: Redis.RedisOptions) {
+  constructor(key: string, redisUrl?: string, options?: Redis.RedisOptions) {
     super();
     this.key = key;
     this.client = new Redis(redisUrl, options);
   }
+
+  disconnect = () => {
+    this.client.disconnect();
+  };
 
   publish = (
     operation: Operation,
@@ -39,7 +43,6 @@ export default class GenericQueue<D, S> extends EventEmitter {
       id,
       screenerEmail,
     };
-    console.log("publish", this.key, message);
 
     this.emit(this.key, JSON.stringify(message));
   };
@@ -61,6 +64,7 @@ export default class GenericQueue<D, S> extends EventEmitter {
 
     const number = await this.client.rpush(this.key, JSON.stringify(newJob));
     this.publish("addedJob", newJob.id);
+
     return {
       ...newJob,
       position: number - 1,
@@ -121,6 +125,7 @@ export default class GenericQueue<D, S> extends EventEmitter {
       return;
     }
     let newJob: Job<D, S> | null = null;
+
     switch (action) {
       case "SET_ACTIVE": {
         newJob = {
@@ -196,7 +201,6 @@ export default class GenericQueue<D, S> extends EventEmitter {
         .sort((a, b) => a.timeWaiting - b.timeWaiting);
       return list;
     } catch (err) {
-      Logger.error(err.message);
       return [];
     }
   };
