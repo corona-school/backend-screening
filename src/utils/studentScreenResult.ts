@@ -1,16 +1,16 @@
 import { IStudentScreeningResult } from "../types/StudentScreeningResult";
-import { JobInfo, Subject } from "../types/Queue";
+import { JobInfo } from "../GenericQueue";
+import { Subject, StudentData, ScreenerInfo } from "../types/Queue";
 
 export const createStudentScreeningResult = (
-  job: JobInfo
+  job: JobInfo<StudentData, ScreenerInfo>
 ): IStudentScreeningResult => ({
   verified: job.status === "completed",
-  birthday: job.birthday,
-  commentScreener: job.commentScreener,
-  knowscsfrom: job.knowcsfrom,
+  commentScreener: job.data.commentScreener,
+  knowscsfrom: job.data.knowcsfrom,
   subjects: JSON.stringify(
-    job.subjects.map((s: Subject) => `${s.subject}${s.min}:${s.max}`)
+    job.data.subjects.map((s: Subject) => `${s.subject}${s.min}:${s.max}`)
   ),
-  feedback: job.feedback,
-  screenerEmail: job.screener.email,
+  feedback: job.data.feedback,
+  screenerEmail: job.assignedTo.email,
 });

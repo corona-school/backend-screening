@@ -20,14 +20,14 @@ const updateStudent = (
   jobInfo: JobInfo<StudentData, ScreenerInfo>,
   io: SocketIO.Server
 ): void => {
-  io.sockets.in(message.email).emit(StudentSocketActions.UPDATE_JOB, jobInfo);
+  io.sockets.in(message.id).emit(StudentSocketActions.UPDATE_JOB, jobInfo);
 };
 
 const changeStatus = async (message: Message): Promise<void> => {
   const jobList = await newStudentQueue.listInfo();
 
   for (const jobInfo of jobList) {
-    if (jobInfo.data.email === message.email) {
+    if (jobInfo.data.email === message.id) {
       Logger.info(jobInfo.status, jobInfo.data.email);
 
       updateStudent(message, jobInfo, io);
@@ -44,15 +44,13 @@ const removeJob = async (message: Message): Promise<void> => {
 
   const jobList = await newStudentQueue.listInfo();
 
-  io.sockets
-    .in(message.email)
-    .emit(StudentSocketActions.REMOVED_JOB, message.email);
+  io.sockets.in(message.id).emit(StudentSocketActions.REMOVED_JOB, message.id);
   for (const jobInfo of jobList) {
     if (jobInfo.status === "waiting") {
       Logger.info("updated", jobInfo.data.email);
 
       io.sockets
-        .in(jobInfo.data.email)
+        .in(jobInfo.data.id)
         .emit(StudentSocketActions.UPDATE_JOB, jobInfo);
     }
   }

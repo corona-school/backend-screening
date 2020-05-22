@@ -1,6 +1,8 @@
 import { Model, Table, Column } from "sequelize-typescript";
 import LoggerService from "../../utils/Logger";
-import { JobInfo } from "../../types/Queue";
+import { JobInfo } from "../../GenericQueue";
+import { StudentData, ScreenerInfo } from "../../types/Queue";
+
 const Logger = LoggerService("QueueLog.ts");
 
 @Table({
@@ -18,7 +20,9 @@ export default class QueueLog extends Model<QueueLog> {
   studentEmail: string;
 }
 
-export const saveJobInQueueLog = async (job: JobInfo) => {
+export const saveJobInQueueLog = async (
+  job: JobInfo<StudentData, ScreenerInfo>
+) => {
   if (job.status !== "completed" && job.status !== "rejected") {
     return;
   }
@@ -26,26 +30,26 @@ export const saveJobInQueueLog = async (job: JobInfo) => {
   try {
     const log = await QueueLog.findOne({
       where: {
-        screenerEmail: job.screener.email,
-        studentEmail: job.email,
+        screenerEmail: job.assignedTo.email,
+        studentEmail: job.data.email,
       },
     });
     if (log) {
-      Logger.warn(`Duplicate QueueLog for ${job.email}`);
+      Logger.warn(`Duplicate QueueLog for ${job.data.email}`);
       return;
     }
     const queue = new QueueLog({
-      createdAt: new Date(job.time).toISOString(),
-      finnishedAt: new Date(job.screener.time).toISOString(),
+      createdAt: new Date(job.timeWaiting).toISOString(),
+      finnishedAt: new Date(job.timeDone).toISOString(),
       completed: job.status === "completed",
-      screenerEmail: job.screener.email,
-      studentEmail: job.email,
+      screenerEmail: job.assignedTo.email,
+      studentEmail: job.data.email,
     });
     await queue.save();
-    Logger.info(`Saved QueueLog for ${job.email}`);
+    Logger.info(`Saved QueueLog for ${job.data.email}`);
   } catch (e) {
     Logger.error(
-      `Could not save QueueLog for ${job.email}: ${e.name}-${e.original.messageDetail}`
+      `Could not save QueueLog for ${job.data.email}: ${e.name}-${e.original.messageDetail}`
     );
   }
 };
