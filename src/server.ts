@@ -7,10 +7,11 @@ import GenericQueue from "./GenericQueue";
 import { StudentData, ScreenerInfo } from "./types/Queue";
 import { sequelize } from "./database";
 import cleanup from "./jobs/cleanup";
+import { Context } from "koa";
 
 const app = new App(config);
 
-function handleError(err: any, ctx: any) {
+function handleError(err: any, ctx: Context) {
   console.error(err, ctx);
 }
 

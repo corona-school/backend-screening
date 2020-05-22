@@ -4,7 +4,7 @@ import { Context } from "koa";
 
 const statisticService = new StatisticService();
 
-const getLogs = async (ctx: any) => {
+const getLogs = async (ctx: Context) => {
   const logs = await statisticService.getDatabaseQueueLogs();
 
   if (!logs) {
@@ -15,7 +15,7 @@ const getLogs = async (ctx: any) => {
   ctx.body = logs;
 };
 
-const getStatistics = async (ctx: any) => {
+const getStatistics = async (ctx: Context) => {
   const list = await newStudentQueue.listInfo();
   let countCompleted = 0;
   let countRejected = 0;

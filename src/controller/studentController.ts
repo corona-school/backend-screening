@@ -12,7 +12,7 @@ const Logger = LoggerService("studentController.ts");
 
 const screeningService = new ScreeningService();
 
-const login = async (ctx: any) => {
+const login = async (ctx: Context) => {
   const { email } = ctx.request.body;
 
   let jobInfo;
@@ -31,7 +31,7 @@ const login = async (ctx: any) => {
   ctx.body = jobInfo;
 };
 
-const logout = async (ctx: any) => {
+const logout = async (ctx: Context) => {
   const { email } = ctx.request.body;
   try {
     await screeningService.logout(email);
@@ -42,7 +42,7 @@ const logout = async (ctx: any) => {
   }
 };
 
-const remove = async (ctx: any) => {
+const remove = async (ctx: Context) => {
   const { email } = ctx.request.body;
   try {
     await newStudentQueue.remove(getId(email));
@@ -54,17 +54,17 @@ const remove = async (ctx: any) => {
   }
 };
 
-const get = async (ctx: any) => {
+const get = async (ctx: Context) => {
   const { email } = ctx.request.query;
   ctx.body = await apiService.getStudent(email);
 };
 
-const getInfo = async (ctx: any) => {
+const getInfo = async (ctx: Context) => {
   const { email } = ctx.request.query;
   ctx.body = await newStudentQueue.getJobWithPosition(getId(email));
 };
 
-const verify = async (ctx: any) => {
+const verify = async (ctx: Context) => {
   const screeningResult: IStudentScreeningResult | null =
     ctx.request.body.screeningResult;
   const studentEmail: string | null = ctx.request.body.studentEmail;
@@ -87,7 +87,7 @@ const verify = async (ctx: any) => {
   }
 };
 
-const changeJob = async (ctx: any) => {
+const changeJob = async (ctx: Context) => {
   const job: StudentData = ctx.request.body.data;
   const action: string = ctx.request.body.action;
 

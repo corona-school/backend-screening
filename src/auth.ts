@@ -6,6 +6,7 @@ import { Screener } from "./types/Screener";
 import LoggerService from "./utils/Logger";
 import Response from "./utils/response";
 import { AUTH_REQUIRED } from "./constants/error";
+import { Context, Next } from "koa";
 const Logger = LoggerService("auth.ts");
 
 const LocalStrategy = PassportLocal.Strategy;
@@ -58,7 +59,7 @@ passport.use(
   )
 );
 
-export const requireAuth = async (ctx: any, next: any) => {
+export const requireAuth = async (ctx: Context, next: Next) => {
   if (ctx.isAuthenticated()) {
     return await next();
   } else {

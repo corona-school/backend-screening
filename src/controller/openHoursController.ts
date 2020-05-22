@@ -1,13 +1,13 @@
-import redis from "redis";
+import Redis from "ioredis";
 import crypto from "crypto";
 import LoggerService from "../utils/Logger";
-import { Context, ParameterizedContext } from "koa";
 import Response from "../utils/response";
 import {
   AUTH_REQUIRED,
   INVALID_REQUEST,
   UNKNOWN_ERROR,
 } from "../constants/error";
+import { Context } from "koa";
 
 const Logger = LoggerService("openHoursController.ts");
 
@@ -15,7 +15,7 @@ const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
 const KEY = "OPENING_HOURS";
 
-const client = redis.createClient({ url: REDIS_URL });
+const client = new Redis(REDIS_URL);
 
 const get = (key: string) => {
   return new Promise((resolve, reject) => {
@@ -61,7 +61,7 @@ const admins = [
   "paul.renger@magd.ox.ac.uk",
 ];
 
-const getOpeningHours = async (ctx: any) => {
+const getOpeningHours = async (ctx: Context) => {
   try {
     ctx.body = await get(KEY);
   } catch (err) {
@@ -70,7 +70,7 @@ const getOpeningHours = async (ctx: any) => {
   }
 };
 
-const changeOpeningHours = async (ctx: any) => {
+const changeOpeningHours = async (ctx: Context) => {
   const email = ctx.session.passport.user;
 
   if (!email) {

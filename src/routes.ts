@@ -7,8 +7,9 @@ import {
   StatisticsController,
 } from "./controller";
 import { requireAuth } from "./auth";
+import { DefaultState, Context } from "koa";
 
-const router = new Router();
+const router = new Router<DefaultState, Context>();
 router.get("/", async (ctx) => {
   ctx.body = "Hello World";
   ctx.status = 200;

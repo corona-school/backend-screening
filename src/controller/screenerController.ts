@@ -6,7 +6,7 @@ import LoggerService from "../utils/Logger";
 import { Context, Next } from "koa";
 const Logger = LoggerService("screenerController.ts");
 
-const create = async (ctx: any) => {
+const create = async (ctx: Context) => {
   const { firstname, lastname, email, password } = ctx.request.body;
 
   try {
@@ -25,7 +25,7 @@ const create = async (ctx: any) => {
   }
 };
 
-const getStatus = async (ctx: any) => {
+const getStatus = async (ctx: Context) => {
   if (ctx.isAuthenticated()) {
     const from = ctx.session.passport.user;
 
@@ -36,7 +36,7 @@ const getStatus = async (ctx: any) => {
   }
 };
 
-const login = async (ctx: any, next: any) => {
+const login = async (ctx: Context, next: Next) => {
   return passport.authenticate("local", async (err, email) => {
     if (!email || err) {
       ctx.body = { success: false };
@@ -48,7 +48,7 @@ const login = async (ctx: any, next: any) => {
   })(ctx, next);
 };
 
-const logout = (ctx: any) => {
+const logout = (ctx: Context) => {
   if (ctx.isAuthenticated()) {
     const from = ctx.session.passport.user;
     Logger.info(`Screener ${from} logged out!`);
@@ -60,7 +60,7 @@ const logout = (ctx: any) => {
   }
 };
 
-const getInfo = async (ctx: any) => {
+const getInfo = async (ctx: Context) => {
   const { email } = ctx.request.query;
   const screener = await apiService.getScreener(email);
   if (!screener) {
