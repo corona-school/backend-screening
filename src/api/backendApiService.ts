@@ -48,6 +48,45 @@ export const apiService = {
         });
     });
   },
+  getAllStudents: async (): Promise<Student[]> => {
+    return new Promise((resolve, reject) => {
+      axios
+        .get(apiUriStudent)
+        .then(({ status, data }: { status: number; data: IRawStudent[] }) => {
+          if (status == 200) {
+            if (data) {
+              const students: Student[] = data.map((s) => {
+                return {
+                  firstname: s.firstName,
+                  lastname: s.lastName,
+                  email: s.email,
+                  verified:
+                    s.alreadyScreened === false ? undefined : s.verified,
+                  subjects: s.subjects,
+                  phone: s.phone,
+                  birthday: s.birthday,
+                  msg: s.msg,
+                };
+              });
+
+              resolve(students);
+            } else {
+              reject(
+                "Get all students response with missing or invalid student data"
+              );
+            }
+          } else {
+            reject(
+              "Get all students response with non-200 return code: " + status
+            );
+          }
+        })
+        .catch((err) => {
+          Logger.error("Get all students data failed: ", err);
+          reject(err);
+        });
+    });
+  },
 
   getUnverifiedStudent: async (email: string): Promise<Student> => {
     return new Promise((resolve, reject) => {

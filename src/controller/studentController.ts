@@ -60,7 +60,12 @@ studentRouter.post("/student/remove", requireAuth, async (ctx) => {
 
 studentRouter.get("/student", requireAuth, async (ctx) => {
   const { email } = ctx.request.query;
+
   ctx.body = await apiService.getStudent(email);
+});
+
+studentRouter.get("/students", requireAuth, async (ctx) => {
+  ctx.body = await apiService.getAllStudents();
 });
 
 studentRouter.get("/student/jobInfo", async (ctx) => {
