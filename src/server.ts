@@ -5,9 +5,8 @@ import config from "./config";
 import App from "./app";
 import GenericQueue from "./GenericQueue";
 import { StudentData, ScreenerInfo } from "./types/Queue";
-import { sequelize } from "./database";
-import cleanup from "./jobs/cleanup";
 import { Context } from "koa";
+import cleanup from "./jobs/cleanup";
 
 const app = new App(config);
 
@@ -36,19 +35,12 @@ const server = http.createServer(app.callback());
 export const io: SocketIO.Server = socket(server);
 
 // Start server
-
-sequelize
-  .sync()
-  .then(() => {
-    server.listen(config.port, () => {
-      console.info(
-        `API server listening on http://localhost:${config.port}/ in ${config.env}`
-      );
-    });
-  })
-  .catch((err) => {
-    cleanup.cancel();
-  });
+server.listen(config.port, () => {
+  console.info(
+    `API server listening on http://localhost:${config.port}/ in ${config.env}`
+  );
+  cleanup.invoke();
+});
 
 server.on("error", handleError);
 

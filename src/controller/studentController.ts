@@ -4,7 +4,7 @@ import { Screener } from "../types/Screener";
 import { newStudentQueue } from "../server";
 import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
-import { isValidStatusChange, getId } from "../utils/jobUtils";
+import { getId } from "../utils/jobUtils";
 import { StudentData, ScreenerInfo } from "../types/Queue";
 import { Context } from "koa";
 
@@ -135,19 +135,6 @@ const changeJob = async (ctx: Context) => {
   // 	ctx.status = 400;
   // 	ctx.body = "Ein Screener verifiziert diesen Studenten schon.";
   // 	return;
-  // }
-
-  // if (job.status === "completed" || job.status === "rejected") {
-  // 	try {
-  // 		saveJobInQueueLog(job);
-  // 		await apiService.updateStudent(
-  // 			createStudentScreeningResult(job),
-  // 			job.email
-  // 		);
-  // 	} catch (err) {
-  // 		Logger.error(err);
-  // 		Logger.info("Student data could not be updated!");
-  // 	}
   // }
 
   try {
