@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import { apiService } from "./services/backendApiService";
 import { Screener } from "./types/Screener";
 import LoggerService from "./utils/Logger";
-import Response from "./utils/response";
+import Response from "./utils/Response";
 import { AUTH_REQUIRED } from "./constants/error";
 import { Context, Next } from "koa";
 const Logger = LoggerService("auth.ts");
