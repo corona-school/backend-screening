@@ -1,7 +1,7 @@
 import axios from "axios";
-import { Screener, ScreenerRequest, IRawScreener } from "../models/Screener";
-import { Student, IRawStudent } from "../models/Student";
-import { IStudentScreeningResult } from "../models/StudentScreeningResult";
+import { Screener, ScreenerRequest, IRawScreener } from "../types/Screener";
+import { Student, IRawStudent } from "../types/Student";
+import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
 const Logger = LoggerService("backendApiService.ts");
 

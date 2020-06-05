@@ -1,5 +1,13 @@
-export * from "./screenerController";
-export * from "./studentController";
-export * from "./statisticsController";
-export * from "./queueController";
-export * from "./openHoursController";
+import OpenHoursController from "./OpenHoursController";
+import QueueController from "./QueueController";
+import StudentController from "./StudentController";
+import ScreenerController from "./ScreenerController";
+import StatisticsController from "./StatisticsController";
+
+export {
+  OpenHoursController,
+  QueueController,
+  StudentController,
+  ScreenerController,
+  StatisticsController,
+};

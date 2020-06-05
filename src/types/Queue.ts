@@ -10,7 +10,7 @@ export enum QueueChanges {
 
 export interface Message {
   operation: Operation;
-  email: string;
+  id: string;
   screenerEmail?: string;
 }
 
@@ -18,7 +18,6 @@ export interface ScreenerInfo {
   firstname: string;
   lastname: string;
   email: string;
-  time: number;
 }
 
 export interface Subject {
@@ -27,23 +26,20 @@ export interface Subject {
   max: number;
 }
 
-export interface Job {
+export interface StudentData {
+  id: string;
   firstname: string;
   lastname: string;
   email: string;
   subjects: Subject[];
   phone?: string;
-  birthday?: Date;
   msg?: string;
-  screener?: ScreenerInfo;
   feedback?: string;
   knowcsfrom?: string;
   commentScreener?: string;
-  time: number;
   jitsi: string;
-  status: Status;
 }
 
-export interface JobInfo extends Job {
+export interface JobInfo extends StudentData {
   position?: number;
 }

@@ -1,146 +1,55 @@
-import Koa, { Context } from "koa";
-import Router from "koa-router";
-import koaBody from "koa-body";
-import session from "koa-session";
-import passport from "koa-passport";
-import cors from "@koa/cors";
-import redisStore from "koa-redis";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-import socket from "socket.io";
 import http from "http";
+import socket from "socket.io";
 
-import { sequelize } from "./database";
+import config from "./config";
+import App from "./app";
+import GenericQueue from "./GenericQueue";
+import { StudentData, ScreenerInfo } from "./types/Queue";
+import { Context } from "koa";
 import cleanup from "./jobs/cleanup";
-import {
-  screenerRouter,
-  studentRouter,
-  queueRouter,
-  statisticsRouter,
-} from "./controller";
-import Queue from "./queue";
-import SocketController from "./socket/socketController";
-import LoggerService from "./utils/Logger";
-import chalk from "chalk";
-import { openHoursController } from "./controller";
 
-const Logger = LoggerService("server.ts");
+const app = new App(config);
 
-const app = new Koa();
-app.use(koaBody());
-
-const validOrigins = [
-  "http://localhost:3000",
-  "http://localhost:3002",
-  "https://corona-school-admin-dev.herokuapp.com",
-  "https://corona-school-admin.herokuapp.com",
-  "https://authentication.corona-school.de",
-  "https://screeners.corona-school.de",
-  "https://corona-student-dev.herokuapp.com",
-  "https://corona-student-app.herokuapp.com",
-];
-function originIsValid(origin: string): boolean {
-  return validOrigins.indexOf(origin) != -1;
+function handleError(err: any, ctx: Context) {
+  console.error(err, ctx);
 }
 
-function verifyOrigin(ctx: Context): any {
-  const origin = ctx.headers.origin;
-  if (!originIsValid(origin)) return false;
-  return origin;
+async function terminate(signal: string) {
+  try {
+    await app.terminate();
+  } finally {
+    console.info({ signal, event: "terminate" }, "App is terminated");
+    process.kill(process.pid, signal);
+  }
 }
 
-app.use(
-  cors({
-    credentials: true,
-    origin: verifyOrigin,
-    allowMethods: ["GET", "HEAD", "PUT", "POST", "DELETE", "PATCH"],
-    allowHeaders: [
-      "X-Requested-With",
-      "X-HTTP-Method-Override",
-      "Content-Type",
-      "Accept",
-      "Set-Cookie",
-      "Cookie",
-    ],
-    exposeHeaders: ["Cookie", "Set-Cookie"],
-    keepHeadersOnError: true,
-  })
+// Handle uncaught errors
+app.on("error", handleError);
+
+export const newStudentQueue = new GenericQueue<StudentData, ScreenerInfo>(
+  "StudentQueue",
+  config.redisUrl
 );
-
-let sessionConfig = {};
-
-if (process.env.NODE_ENV === "production") {
-  sessionConfig = {
-    secure: true,
-    sameSite: "none",
-  };
-}
-
-// sessions
-const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
-app.keys = [process.env.COOKIE_SESSION_SECRET];
-app.use(
-  session(
-    {
-      ...sessionConfig,
-      rolling: true,
-      renew: true,
-      store: redisStore({
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        enable_offline_queue: false,
-        url: REDIS_URL,
-      }),
-    },
-    app
-  )
-);
-
-app.proxy = true;
-
-// authentication
-require("./auth");
-app.use(passport.initialize());
-app.use(passport.session());
-
-const router = new Router();
-const PORT = process.env.PORT || 3001;
-
-router.get("/", async (ctx) => {
-  ctx.body = "Hello World";
-});
-
-export const studentQueue = new Queue("StudentQueue");
-
-app
-  .use(router.routes())
-  .use(screenerRouter.routes())
-  .use(studentRouter.routes())
-  .use(queueRouter.routes())
-  .use(statisticsRouter.routes())
-  .use(openHoursController.routes())
-  .use(screenerRouter.allowedMethods())
-  .use(studentRouter.allowedMethods())
-  .use(queueRouter.allowedMethods())
-  .use(openHoursController.allowedMethods())
-  .use(statisticsRouter.allowedMethods())
-  .use(router.allowedMethods());
 
 const server = http.createServer(app.callback());
 export const io: SocketIO.Server = socket(server);
 
-SocketController();
+// Start server
+server.listen(config.port, () => {
+  console.info(
+    `API server listening on http://localhost:${config.port}/ in ${config.env}`
+  );
+  cleanup.invoke();
+});
 
-sequelize
-  .sync()
-  .then(() => {
-    server.listen(PORT, () => {
-      Logger.info(`Server listening on ${chalk.bgGreenBright(PORT)}`);
-      cleanup.invoke();
-    });
-  })
-  .catch((err) => {
-    cleanup.cancel();
-    Logger.error(err);
-  });
+server.on("error", handleError);
+
+const errors: any[] = ["unhandledRejection", "uncaughtException"];
+errors.map((error) => {
+  process.on(error, handleError);
+});
+
+const signals: any[] = ["SIGTERM", "SIGINT", "SIGUSR2"];
+signals.map((signal) => {
+  process.once(signal, () => terminate(signal));
+});

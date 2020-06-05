@@ -1,17 +1,21 @@
-import Router from "koa-router";
-import redis from "redis";
+import Redis from "ioredis";
 import crypto from "crypto";
 import LoggerService from "../utils/Logger";
-import { requireAuth } from "../auth";
-const Logger = LoggerService("openHoursController.ts");
+import Response from "../utils/response";
+import {
+  AUTH_REQUIRED,
+  INVALID_REQUEST,
+  UNKNOWN_ERROR,
+} from "../constants/error";
+import { Context } from "koa";
 
-const openHoursController = new Router();
+const Logger = LoggerService("openHoursController.ts");
 
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
 const KEY = "OPENING_HOURS";
 
-const client = redis.createClient({ url: REDIS_URL });
+const client = new Redis(REDIS_URL);
 
 const get = (key: string) => {
   return new Promise((resolve, reject) => {
@@ -57,27 +61,24 @@ const admins = [
   "paul.renger@magd.ox.ac.uk",
 ];
 
-openHoursController.get("/openingHours", async (ctx) => {
+const getOpeningHours = async (ctx: Context) => {
   try {
     ctx.body = await get(KEY);
   } catch (err) {
-    ctx.body = err;
+    Logger.error(err);
+    Response.internalServerError(ctx, UNKNOWN_ERROR);
   }
-});
+};
 
-openHoursController.post("/openingHours", requireAuth, async (ctx: any) => {
+const changeOpeningHours = async (ctx: Context) => {
   const email = ctx.session.passport.user;
 
   if (!email) {
-    ctx.body = "Anscheinend ist etwas schief gelaufen.";
-    ctx.status = 500;
-    return;
+    return Response.badRequest(ctx, INVALID_REQUEST);
   }
 
   if (!admins.includes(email)) {
-    ctx.body = "Du hast keine Rechte die Öffnungszeiten zu bearbeiten.";
-    ctx.status = 403;
-    return;
+    return Response.unauthorized(ctx, AUTH_REQUIRED);
   }
 
   try {
@@ -91,6 +92,6 @@ openHoursController.post("/openingHours", requireAuth, async (ctx: any) => {
   } catch (err) {
     ctx.body = err;
   }
-});
+};
 
-export { openHoursController };
+export default { getOpeningHours, changeOpeningHours };

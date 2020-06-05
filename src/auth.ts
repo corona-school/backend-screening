@@ -1,10 +1,12 @@
 import passport from "koa-passport";
 import PassportLocal from "passport-local";
 import bcrypt from "bcrypt";
-import { apiService } from "./api/backendApiService";
-import { Screener } from "./models/Screener";
-import { Context, Next } from "koa";
+import { apiService } from "./services/backendApiService";
+import { Screener } from "./types/Screener";
 import LoggerService from "./utils/Logger";
+import Response from "./utils/response";
+import { AUTH_REQUIRED } from "./constants/error";
+import { Context, Next } from "koa";
 const Logger = LoggerService("auth.ts");
 
 const LocalStrategy = PassportLocal.Strategy;
@@ -59,9 +61,8 @@ passport.use(
 
 export const requireAuth = async (ctx: Context, next: Next) => {
   if (ctx.isAuthenticated()) {
-    return next();
+    return await next();
   } else {
-    ctx.body = { success: false };
-    ctx.throw(401);
+    Response.unauthorized(ctx, AUTH_REQUIRED);
   }
 };

@@ -1,16 +1,13 @@
-import Router from "koa-router";
-import { studentQueue } from "../server";
-import { requireAuth } from "../auth";
+import { newStudentQueue } from "../server";
+import { Context } from "koa";
 
-const queueRouter = new Router();
+const resetQueue = async (ctx: Context) => {
+  await newStudentQueue.reset(true);
+  ctx.body = await newStudentQueue.list();
+};
 
-queueRouter.post("/queue/reset", requireAuth, async (ctx) => {
-  await studentQueue.reset();
-  ctx.body = await studentQueue.list();
-});
+const listJobs = async (ctx: Context) => {
+  ctx.body = await newStudentQueue.listInfo();
+};
 
-queueRouter.get("/queue/jobs", requireAuth, async (ctx) => {
-  ctx.body = await studentQueue.listInfo();
-});
-
-export { queueRouter };
+export default { resetQueue, listJobs };
