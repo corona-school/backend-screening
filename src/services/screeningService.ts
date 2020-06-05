@@ -22,7 +22,6 @@ export default class ScreeningService {
             .createHash("md5")
             .update(student.email)
             .digest("hex");
-          console.log("here2");
           return newStudentQueue.add(id, createJob(id, student));
         })
         .then((jobInfo: JobInfo<StudentData, ScreenerInfo>) => {
@@ -35,6 +34,11 @@ export default class ScreeningService {
   };
 
   logout = async (email: string): Promise<boolean> => {
-    return newStudentQueue.remove(getId(email));
+    try {
+      await newStudentQueue.remove(getId(email));
+      return true;
+    } catch (err) {
+      return false;
+    }
   };
 }
