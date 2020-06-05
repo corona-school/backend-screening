@@ -28,7 +28,7 @@ const baseConfig: Config = {
   env,
   redisUrl,
   name: "corona-queue-backend",
-  port: 3001,
+  port: parseInt(process.env.PORT) || 3001,
   sessionKeys: [process.env.COOKIE_SESSION_SECRET] || [],
 };
 
