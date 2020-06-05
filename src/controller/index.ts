@@ -1,8 +1,8 @@
-import OpenHoursController from "./OpenHoursController";
-import QueueController from "./QueueController";
-import StudentController from "./StudentController";
-import ScreenerController from "./ScreenerController";
-import StatisticsController from "./StatisticsController";
+import OpenHoursController from "./OpenHoursController2";
+import QueueController from "./QueueController2";
+import StudentController from "./StudentController2";
+import ScreenerController from "./ScreenerController2";
+import StatisticsController from "./StatisticsController2";
 
 export {
   OpenHoursController,

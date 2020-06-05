@@ -9,7 +9,7 @@ import {
 } from "../constants/error";
 import { Context } from "koa";
 
-const Logger = LoggerService("openHoursController.ts");
+const Logger = LoggerService("OpenHoursController.ts");
 
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
