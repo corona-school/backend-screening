@@ -1,3 +1,5 @@
+import { JobInfo as GenericJobInfo } from "../GenericQueue";
+
 export type Status = "waiting" | "active" | "completed" | "rejected";
 
 export type Operation = "addedJob" | "changedStatus" | "removedJob";
@@ -8,10 +10,9 @@ export enum QueueChanges {
   CHANGED_STATUS = "changedStatus",
 }
 
-export interface Message {
+export interface Message<D, S> {
   operation: Operation;
-  id: string;
-  screenerEmail?: string;
+  jobInfo: GenericJobInfo<D, S>;
 }
 
 export interface ScreenerInfo {

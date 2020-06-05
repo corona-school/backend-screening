@@ -33,26 +33,22 @@ export default class GenericQueue<D, S> extends EventEmitter {
     this.client.disconnect();
   };
 
-  publish = (
-    operation: Operation,
-    id: string,
-    screenerEmail?: string
-  ): void => {
-    const message: Message = {
+  publish = (operation: Operation, jobInfo: JobInfo<D, S>): void => {
+    const message: Message<D, S> = {
       operation,
-      id,
-      screenerEmail,
+      jobInfo,
     };
 
     this.emit(this.key, JSON.stringify(message));
   };
 
   add = async (id: string, data: D): Promise<JobInfo<D, S>> => {
-    const list = await this.list();
+    const list = await this.listInfo();
 
-    if (list.some((j) => j.id === id)) {
+    const duplicateJob = list.find((j) => j.id === id);
+    if (duplicateJob) {
       Logger.warn("Found Duplicate Job: " + id);
-      throw new Error("Duplicate Job.");
+      return duplicateJob;
     }
 
     const newJob: Job<D, S> = {
@@ -63,17 +59,18 @@ export default class GenericQueue<D, S> extends EventEmitter {
     };
 
     const number = await this.client.rpush(this.key, JSON.stringify(newJob));
-    this.publish("addedJob", newJob.id);
 
-    return {
+    const jobInfo: JobInfo<D, S> = {
       ...newJob,
       position: number - 1,
     };
+    this.publish("addedJob", jobInfo);
+
+    return jobInfo;
   };
 
-  remove = async (id: string): Promise<boolean> => {
+  remove = async (id: string): Promise<void> => {
     const currentList = await this.list();
-
     const job = currentList.find((job) => job.id === id);
 
     if (!job) {
@@ -85,9 +82,16 @@ export default class GenericQueue<D, S> extends EventEmitter {
       throw new Error("Could not remove Job because Job is not in Queue");
     }
 
-    await this.client.lrem(this.key, 0, JSON.stringify(job));
-    this.publish("removedJob", id);
-    return true;
+    const removedItemsCount = await this.client.lrem(
+      this.key,
+      0,
+      JSON.stringify(job)
+    );
+
+    this.publish("removedJob", { ...job, position: -1 });
+    if (removedItemsCount === 0) {
+      throw new Error("Could not delete Item");
+    }
   };
 
   getJobWithPosition = async (id: string): Promise<JobInfo<D, S> | null> => {
@@ -164,7 +168,7 @@ export default class GenericQueue<D, S> extends EventEmitter {
       }
     }
     if (!newJob || index === -1) {
-      return;
+      throw new Error("Job is not in queue");
     }
     const jobString: string = JSON.stringify(newJob);
 
@@ -179,10 +183,7 @@ export default class GenericQueue<D, S> extends EventEmitter {
         newJob,
       }
     );
-    this.publish(
-      "changedStatus",
-      JSON.stringify({ ...newJob, position: index })
-    );
+    this.publish("changedStatus", { ...newJob, position: index });
     return { ...newJob, position: index };
   };
 

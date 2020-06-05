@@ -7,6 +7,8 @@ import GenericQueue from "./GenericQueue";
 import { StudentData, ScreenerInfo } from "./types/Queue";
 import { Context } from "koa";
 import cleanup from "./jobs/cleanup";
+import { startStudentSocket } from "./socket/studentSocket";
+import startScreenerSocket from "./socket/screenerSocket";
 
 const app = new App(config);
 
@@ -33,6 +35,9 @@ export const newStudentQueue = new GenericQueue<StudentData, ScreenerInfo>(
 
 const server = http.createServer(app.callback());
 export const io: SocketIO.Server = socket(server);
+
+startStudentSocket();
+startScreenerSocket();
 
 // Start server
 server.listen(config.port, () => {

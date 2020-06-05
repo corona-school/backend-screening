@@ -5,6 +5,7 @@ import { newStudentQueue } from "../server";
 import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
 import { getId } from "../utils/jobUtils";
+import { createStudentScreeningResult } from "../utils/studentScreenResult";
 import { StudentData, ScreenerInfo } from "../types/Queue";
 import { Context } from "koa";
 
@@ -89,62 +90,76 @@ const verify = async (ctx: Context) => {
 };
 
 const changeJob = async (ctx: Context) => {
-  const job: StudentData = ctx.request.body.data;
-  const action: string = ctx.request.body.action;
-
-  if (!job) {
-    ctx.body = "Could not change status of student.";
-    ctx.status = 400;
-    return;
-  }
-  const from = ctx.session.passport.user;
-  const screener: Screener = await apiService.getScreener(from);
-
-  if (!screener) {
-    ctx.body = "Could not change status of student.";
-    ctx.status = 400;
-    return;
-  }
-
-  const screenerInfo: ScreenerInfo = {
-    firstname: screener.firstname,
-    lastname: screener.lastname,
-    email: screener.email,
-  };
-
-  // const oldJob = await newStudentQueue.getJobWithPosition(job.id);
-  // if (!oldJob) {
-  // 	ctx.body = "Could not change status of student because no oldJob found.";
-  // 	ctx.status = 400;
-  // 	return;
-  // }
-
-  // if (!isValidStatusChange(oldJob.status, job.status)) {
-  // 	Logger.warn(
-  // 		`Invalid Status change of Job ${job.data.email} from ${oldJob.status} to ${job.status}! Old Screener: ${oldJob.assignedTo?.email} New Screener: ${screenerInfo?.email}`
-  // 	);
-  // 	ctx.body = "Invalid Status change of Job!";
-  // 	ctx.status = 400;
-  // 	return;
-  // }
-
-  // if (
-  // 	job.status === "active" &&
-  // 	job.assignedTo &&
-  // 	job.assignedTo.email !== screener.email
-  // ) {
-  // 	ctx.status = 400;
-  // 	ctx.body = "Ein Screener verifiziert diesen Studenten schon.";
-  // 	return;
-  // }
-
   try {
-    ctx.body = await newStudentQueue.changeJob(
-      job.id,
-      job,
+    const jobData: StudentData = ctx.request.body.data;
+    const action: string = ctx.request.body.action;
+
+    if (!jobData) {
+      ctx.body = "Could not change status of student.";
+      ctx.status = 400;
+      return;
+    }
+    const from = ctx.session.passport.user;
+    const screener: Screener = await apiService.getScreener(from);
+
+    if (!screener) {
+      ctx.body = "Could not change status of student.";
+      ctx.status = 400;
+      return;
+    }
+
+    const screenerInfo: ScreenerInfo = {
+      firstname: screener.firstname,
+      lastname: screener.lastname,
+      email: screener.email,
+    };
+
+    // const oldJob = await newStudentQueue.getJobWithPosition(job.id);
+    // if (!oldJob) {
+    // 	ctx.body = "Could not change status of student because no oldJob found.";
+    // 	ctx.status = 400;
+    // 	return;
+    // }
+
+    // if (!isValidStatusChange(oldJob.status, job.status)) {
+    // 	Logger.warn(
+    // 		`Invalid Status change of Job ${job.data.email} from ${oldJob.status} to ${job.status}! Old Screener: ${oldJob.assignedTo?.email} New Screener: ${screenerInfo?.email}`
+    // 	);
+    // 	ctx.body = "Invalid Status change of Job!";
+    // 	ctx.status = 400;
+    // 	return;
+    // }
+
+    // if (
+    // 	job.status === "active" &&
+    // 	job.assignedTo &&
+    // 	job.assignedTo.email !== screener.email
+    // ) {
+    // 	ctx.status = 400;
+    // 	ctx.body = "Ein Screener verifiziert diesen Studenten schon.";
+    // 	return;
+    // }
+
+    const changedJob = await newStudentQueue.changeJob(
+      jobData.id,
+      jobData,
       screenerInfo,
       action
     );
+
+    if (changedJob.status === "completed" || changedJob.status === "rejected") {
+      try {
+        await apiService.updateStudent(
+          createStudentScreeningResult(changedJob),
+          jobData.email
+        );
+      } catch (err) {
+        Logger.error(err);
+        Logger.info("Student data could not be updated!");
+      }
+    }
+
+    ctx.body = changedJob;
   } catch (err) {
     ctx.status = 400;
     ctx.body = "Something went wrong! ";

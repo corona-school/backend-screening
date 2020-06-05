@@ -10,27 +10,22 @@ import {
   ScreenerEmitter,
   screenerEmitterEvents,
 } from "../socket/screenerSocket";
-import { JobInfo } from "../GenericQueue";
 import { StudentSocketActions } from "../socket/studentSocket";
 import LoggerService from "../utils/Logger";
 const Logger = LoggerService("studentSubscriber.ts");
 
-const updateStudent = (
-  message: Message,
-  jobInfo: JobInfo<StudentData, ScreenerInfo>,
-  io: SocketIO.Server
-): void => {
-  io.sockets.in(message.id).emit(StudentSocketActions.UPDATE_JOB, jobInfo);
-};
-
-const changeStatus = async (message: Message): Promise<void> => {
+const changeStatus = async (
+  message: Message<StudentData, ScreenerInfo>
+): Promise<void> => {
   const jobList = await newStudentQueue.listInfo();
 
   for (const jobInfo of jobList) {
-    if (jobInfo.data.email === message.id) {
+    if (jobInfo.data.email === message.jobInfo.data.email) {
       Logger.info(jobInfo.status, jobInfo.data.email);
 
-      updateStudent(message, jobInfo, io);
+      io.sockets
+        .in(jobInfo.data.email)
+        .emit(StudentSocketActions.UPDATE_JOB, jobInfo);
     } else if (jobInfo.status === "waiting") {
       io.sockets
         .in(jobInfo.data.email)
@@ -39,12 +34,16 @@ const changeStatus = async (message: Message): Promise<void> => {
   }
 };
 
-const removeJob = async (message: Message): Promise<void> => {
+const removeJob = async (
+  message: Message<StudentData, ScreenerInfo>
+): Promise<void> => {
   Logger.info("removedJob");
 
   const jobList = await newStudentQueue.listInfo();
 
-  io.sockets.in(message.id).emit(StudentSocketActions.REMOVED_JOB, message.id);
+  io.sockets
+    .in(message.jobInfo.data.email)
+    .emit(StudentSocketActions.REMOVED_JOB, message.jobInfo.data.email);
   for (const jobInfo of jobList) {
     if (jobInfo.status === "waiting") {
       Logger.info("updated", jobInfo.data.email);
@@ -82,9 +81,13 @@ export const studentSubscriber = {
       }
     );
 
-    newStudentQueue.on("StudentQueue", async (_, data) => {
-      console.log("Heyo event emitter at student");
-      const message: Message = JSON.parse(data);
+    newStudentQueue.on("StudentQueue", async (data) => {
+      if (!data) {
+        Logger.warn("Message without data recieved");
+        return;
+      }
+
+      const message: Message<StudentData, ScreenerInfo> = JSON.parse(data);
 
       switch (message.operation) {
         case QueueChanges.ADDED_JOB: {

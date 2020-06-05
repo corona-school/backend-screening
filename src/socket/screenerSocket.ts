@@ -69,6 +69,8 @@ const startScreenerSocket = () => {
 
   io.on("connection", (socket) => {
     socket.on(screenerSocketEvents.LOGIN, async (data: ScreenerInfo) => {
+      console.log("screener login");
+
       if (!data) {
         return;
       }
@@ -78,6 +80,8 @@ const startScreenerSocket = () => {
       const jobList = await newStudentQueue.listInfo();
       socket.join(SCREENER_CHANNEL);
       // send current status of Jobs to Screener
+      console.log(jobList, "screener here");
+
       socket.emit(screenerSocketActions.UPDATE_QUEUE, jobList);
       addScreener(data);
 
@@ -135,8 +139,6 @@ const startScreenerSocket = () => {
   });
 
   newStudentQueue.on("StudentQueue", async () => {
-    console.log("Heyo event emitter at screener");
-
     // screener is notified in everytime when the queue changes (we dont need to check what changed)
     const jobList = await newStudentQueue.listInfo();
     io.sockets
