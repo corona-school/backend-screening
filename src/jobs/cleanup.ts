@@ -35,12 +35,10 @@ const cleanup = schedule.scheduleJob("*/15 * * * 0-6", async () => {
       Logger.info(
         `Job ${job.data.email} is ${duration} hours old and will be removed.`
       );
-      const success = await newStudentQueue.remove(job.id);
-      if (success) {
-        Logger.info(`Removed ${job.data.email} via cleanup script.`);
-      } else {
-        Logger.info(`Could not remove ${job.data.email} via cleanup script.`);
-      }
+
+      await newStudentQueue.remove(job.id);
+
+      Logger.info(`Removed ${job.data.email} via cleanup script.`);
     }
   } catch (err) {
     Logger.error(`An errour occurred in the cleanup script: ${err.message}`);
