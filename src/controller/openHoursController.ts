@@ -1,7 +1,7 @@
 import Redis from "ioredis";
 import crypto from "crypto";
 import LoggerService from "../utils/Logger";
-import Response from "../utils/response";
+import Response from "../utils/Response";
 import {
   AUTH_REQUIRED,
   INVALID_REQUEST,

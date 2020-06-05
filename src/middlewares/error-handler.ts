@@ -1,6 +1,6 @@
 "use strict";
 
-import Response from "../utils/response";
+import Response from "../utils/Response";
 import { InvalidRequestBodyFormat } from "../errors";
 import {
   UNKNOWN_ENDPOINT,
