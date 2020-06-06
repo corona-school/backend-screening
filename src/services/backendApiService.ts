@@ -1,6 +1,11 @@
 import axios from "axios";
 import { Screener, ScreenerRequest, IRawScreener } from "../types/Screener";
-import { Student, IRawStudent } from "../types/Student";
+import {
+  Student,
+  IRawStudent,
+  IRawStudent2,
+  SearchStudent,
+} from "../types/Student";
 import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
 const Logger = LoggerService("backendApiService.ts");
@@ -48,24 +53,18 @@ export const apiService = {
         });
     });
   },
-  getAllStudents: async (): Promise<Student[]> => {
+  getAllStudents: async (): Promise<SearchStudent[]> => {
     return new Promise((resolve, reject) => {
       axios
         .get(apiUriStudent)
-        .then(({ status, data }: { status: number; data: IRawStudent[] }) => {
+        .then(({ status, data }: { status: number; data: IRawStudent2[] }) => {
           if (status == 200) {
             if (data) {
-              const students: Student[] = data.map((s) => {
+              const students: SearchStudent[] = data.map((s) => {
                 return {
-                  firstname: s.firstName,
-                  lastname: s.lastName,
+                  firstname: s.firstname,
+                  lastname: s.lastname,
                   email: s.email,
-                  verified:
-                    s.alreadyScreened === false ? undefined : s.verified,
-                  subjects: s.subjects,
-                  phone: s.phone,
-                  birthday: s.birthday,
-                  msg: s.msg,
                 };
               });
 

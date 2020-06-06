@@ -9,7 +9,6 @@ import { createStudentScreeningResult } from "../utils/studentScreenResult";
 import { StudentData, ScreenerInfo } from "../types/Queue";
 import { Context } from "koa";
 import Response from "../utils/Response";
-import { BAD_REQUEST } from "../constants/error";
 
 const Logger = LoggerService("studentController.ts");
 
@@ -64,6 +63,10 @@ const get = async (ctx: Context) => {
   const { email } = ctx.request.query;
 
   ctx.body = await apiService.getStudent(email);
+};
+
+const getAll = async (ctx: Context) => {
+  ctx.body = await apiService.getAllStudents();
 };
 
 const getInfo = async (ctx: Context) => {
@@ -150,4 +153,13 @@ const changeJob = async (ctx: Context) => {
   }
 };
 
-export default { login, logout, remove, get, getInfo, verify, changeJob };
+export default {
+  login,
+  logout,
+  remove,
+  get,
+  getAll,
+  getInfo,
+  verify,
+  changeJob,
+};

@@ -1,7 +1,7 @@
 {
   "name": "corona-screening",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/server.ts",
   "repository": "https://github.com/LeonErath/corona-screening.git",
   "author": "Leon Erath <leon-erath@hotmail.de>",
   "license": "MIT",

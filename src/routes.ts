@@ -37,6 +37,7 @@ router.post("/student/login", StudentController.login);
 router.post("/student/logout", StudentController.logout);
 router.post("/student/remove", requireAuth, StudentController.remove);
 router.get("/student", requireAuth, StudentController.get);
+router.get("/student/all", requireAuth, StudentController.getAll);
 router.get("/student/jobInfo", StudentController.getInfo);
 router.post("/student/verify", StudentController.verify);
 router.post("/student/changeJob", requireAuth, StudentController.changeJob);

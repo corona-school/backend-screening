@@ -2,12 +2,28 @@ export interface Student {
   firstname: string;
   lastname: string;
   email: string;
-  verified: boolean;
+  verified?: boolean;
   subjects: string;
-  phone: string;
-  birthday: Date;
+  phone?: string;
+  birthday?: Date;
   msg: string;
   feedback?: string;
+}
+
+export interface SearchStudent {
+  firstname: string;
+  lastname: string;
+  email: string;
+}
+
+export interface IRawStudent2 {
+  firstname: string;
+  lastname: string;
+  email: string;
+  subjects: string;
+  msg?: string;
+  verified: boolean;
+  alreadyScreened: boolean;
 }
 
 export interface IRawStudent {
