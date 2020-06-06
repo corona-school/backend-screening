@@ -1,13 +1,18 @@
 import crypto from "crypto";
+import QueueService from "../services/QueueService";
 import { createJob, getId } from "../utils/jobUtils";
 import { apiService } from "./backendApiService";
 import { Student } from "../types/Student";
-import { newStudentQueue } from "../server";
+
 import { JobInfo } from "../GenericQueue";
 import { ScreenerInfo, StudentData } from "../types/Queue";
 
 export default class ScreeningService {
-  login = async (id: string): Promise<JobInfo<StudentData, ScreenerInfo>> => {
+  login = async (
+    id: string,
+    key: string
+  ): Promise<JobInfo<StudentData, ScreenerInfo>> => {
+    const newStudentQueue = await QueueService.getQueue(key);
     const list = await newStudentQueue.listInfo();
 
     if (list.some((job) => job.id === id)) {
@@ -33,9 +38,9 @@ export default class ScreeningService {
     });
   };
 
-  logout = async (email: string): Promise<boolean> => {
+  logout = async (email: string, key: string): Promise<boolean> => {
     try {
-      await newStudentQueue.remove(getId(email));
+      await QueueService.getQueue(key).remove(getId(email));
       return true;
     } catch (err) {
       return false;

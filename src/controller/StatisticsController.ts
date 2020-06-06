@@ -1,5 +1,5 @@
-import { newStudentQueue } from "../server";
 import StatisticService from "../services/statisticService";
+import QueueService from "../services/QueueService";
 import { Context } from "koa";
 
 const statisticService = new StatisticService();
@@ -16,7 +16,8 @@ const getLogs = async (ctx: Context) => {
 };
 
 const getStatistics = async (ctx: Context) => {
-  const list = await newStudentQueue.listInfo();
+  const { key } = ctx.request.query;
+  const list = await QueueService.getQueue(key).listInfo();
   let countCompleted = 0;
   let countRejected = 0;
   list.forEach((j) => {

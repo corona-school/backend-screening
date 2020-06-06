@@ -20,7 +20,7 @@ export interface JobInfo<D, S> extends Job<D, S> {
 }
 
 export default class GenericQueue<D, S> extends EventEmitter {
-  private key: string;
+  key: string;
   private client: Redis.Redis;
 
   constructor(key: string, redisUrl?: string, options?: Redis.RedisOptions) {

@@ -1,7 +1,7 @@
 import ScreeningService from "../services/screeningService";
 import { apiService } from "../services/backendApiService";
 import { Screener } from "../types/Screener";
-import { newStudentQueue } from "../server";
+import QueueService from "../services/QueueService";
 import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
 import { getId } from "../utils/jobUtils";
@@ -14,11 +14,12 @@ const Logger = LoggerService("studentController.ts");
 const screeningService = new ScreeningService();
 
 const login = async (ctx: Context) => {
+  const { key } = ctx.request.query;
   const { email } = ctx.request.body;
 
   let jobInfo;
   try {
-    jobInfo = await screeningService.login(email);
+    jobInfo = await screeningService.login(email, key);
   } catch (e) {
     ctx.body = "Could not login the student: " + e;
     ctx.status = 400;
@@ -33,9 +34,10 @@ const login = async (ctx: Context) => {
 };
 
 const logout = async (ctx: Context) => {
+  const { key } = ctx.request.query;
   const { email } = ctx.request.body;
   try {
-    await screeningService.logout(email);
+    await screeningService.logout(email, key);
     ctx.body = "Student successfully logged out.";
   } catch (err) {
     ctx.body = "Could not logout student.";
@@ -44,9 +46,10 @@ const logout = async (ctx: Context) => {
 };
 
 const remove = async (ctx: Context) => {
+  const { key } = ctx.request.query;
   const { email } = ctx.request.body;
   try {
-    await newStudentQueue.remove(getId(email));
+    await QueueService.getQueue(key).remove(getId(email));
     ctx.body = "Student Job successfully removed out.";
   } catch (err) {
     Logger.error(err);
@@ -62,8 +65,16 @@ const get = async (ctx: Context) => {
 };
 
 const getInfo = async (ctx: Context) => {
-  const { email } = ctx.request.query;
-  ctx.body = await newStudentQueue.getJobWithPosition(getId(email));
+  try {
+    const { email, key } = ctx.request.query;
+    ctx.body = await QueueService.getQueue(key).getJobWithPosition(
+      getId(email)
+    );
+  } catch (err) {
+    ctx.body = "Not the correct data.";
+    ctx.status = 400;
+    return;
+  }
 };
 
 const verify = async (ctx: Context) => {
@@ -91,6 +102,7 @@ const verify = async (ctx: Context) => {
 
 const changeJob = async (ctx: Context) => {
   try {
+    const { key } = ctx.request.query;
     const jobData: StudentData = ctx.request.body.data;
     const action: string = ctx.request.body.action;
 
@@ -140,7 +152,7 @@ const changeJob = async (ctx: Context) => {
     // 	return;
     // }
 
-    const changedJob = await newStudentQueue.changeJob(
+    const changedJob = await QueueService.getQueue(key).changeJob(
       jobData.id,
       jobData,
       screenerInfo,

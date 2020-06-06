@@ -1,60 +1,40 @@
-import http from "http";
-import socket from "socket.io";
-
 import config from "./config";
 import App from "./app";
-import GenericQueue from "./GenericQueue";
-import { StudentData, ScreenerInfo } from "./types/Queue";
 import { Context } from "koa";
-import cleanup from "./jobs/cleanup";
-import { startStudentSocket } from "./socket/studentSocket";
-import startScreenerSocket from "./socket/screenerSocket";
+import LoggerService from "./utils/Logger";
+import chalk from "chalk";
+
+const Logger = LoggerService("server.ts");
 
 const app = new App(config);
 
-function handleError(err: any, ctx: Context) {
-  console.error(err, ctx);
-}
+const handleError = (err: any, ctx: Context) => {
+  Logger.error(err, ctx);
+};
 
-async function terminate(signal: string) {
+const terminate = async (signal: string) => {
   try {
     await app.terminate();
   } finally {
-    console.info({ signal, event: "terminate" }, "App is terminated");
+    Logger.info("App is terminated");
     process.kill(process.pid, signal);
   }
-}
+};
+
+app.listen(config.port, () => {
+  Logger.info(
+    `backend-screening api listening on ${chalk.yellowBright(
+      "http://localhost:" + config.port + "/"
+    )} in ${chalk.yellowBright(config.env)}`
+  );
+});
 
 // Handle uncaught errors
 app.on("error", handleError);
 
-export const newStudentQueue = new GenericQueue<StudentData, ScreenerInfo>(
-  "StudentQueue",
-  config.redisUrl
-);
+process.on("unhandledRejection" as any, handleError);
+process.on("uncaughtException" as any, handleError);
 
-const server = http.createServer(app.callback());
-export const io: SocketIO.Server = socket(server);
-
-startStudentSocket();
-startScreenerSocket();
-
-// Start server
-server.listen(config.port, () => {
-  console.info(
-    `API server listening on http://localhost:${config.port}/ in ${config.env}`
-  );
-  cleanup.invoke();
-});
-
-server.on("error", handleError);
-
-const errors: any[] = ["unhandledRejection", "uncaughtException"];
-errors.map((error) => {
-  process.on(error, handleError);
-});
-
-const signals: any[] = ["SIGTERM", "SIGINT", "SIGUSR2"];
-signals.map((signal) => {
-  process.once(signal, () => terminate(signal));
-});
+process.once("SIGTERM", () => terminate("SIGTERM"));
+process.once("SIGINT", () => terminate("SIGINT"));
+process.once("SIGUSR2", () => terminate("SIGUSR2"));

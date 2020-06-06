@@ -1,5 +1,5 @@
 "use strict";
-
+import socket from "socket.io";
 import Koa from "koa";
 import { Server } from "http";
 import bodyParser from "./middlewares/body-parser";
@@ -10,10 +10,14 @@ import router from "./routes";
 import sessionMiddleware from "./middlewares/session";
 import { Config } from "./config";
 import koaPassport from "koa-passport";
+import SocketController from "./socket/socketController";
+import QueueService from "./services/QueueService";
+import { StudentData, ScreenerInfo } from "./types/Queue";
 
 class App extends Koa {
-  servers: Server[];
+  server: Server;
   config: Config;
+  io: SocketIO.Server;
 
   constructor(config: Config) {
     super();
@@ -23,8 +27,6 @@ class App extends Koa {
     this.proxy = true;
     // Disable `console.errors` except development env
     this.silent = this.env !== "development";
-
-    this.servers = [];
 
     this._configureMiddlewares();
     this._configureRoutes();
@@ -58,13 +60,24 @@ class App extends Koa {
 
   listen(...args: any) {
     const server = super.listen(...args);
-    this.servers.push(server);
+    this.server = server;
+    this.io = socket(this.server);
+    this.initialize();
     return server;
   }
 
+  initialize() {
+    QueueService.initialize(this.config.redisUrl).addQueue<
+      StudentData,
+      ScreenerInfo
+    >("StudentQueue");
+
+    SocketController(this.io, "StudentQueue");
+  }
+
   async terminate() {
-    for (const server of this.servers) {
-      server.close();
+    if (this.server) {
+      this.server.close();
     }
   }
 }

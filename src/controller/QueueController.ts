@@ -1,13 +1,16 @@
-import { newStudentQueue } from "../server";
 import { Context } from "koa";
+import QueueService from "../services/QueueService";
 
 const resetQueue = async (ctx: Context) => {
-  await newStudentQueue.reset(true);
-  ctx.body = await newStudentQueue.list();
+  const { key } = ctx.request.query;
+  const queue = await QueueService.getQueue(key);
+  await queue.reset(true);
+  ctx.body = await queue.list();
 };
 
 const listJobs = async (ctx: Context) => {
-  ctx.body = await newStudentQueue.listInfo();
+  const { key } = ctx.request.query;
+  ctx.body = await await QueueService.getQueue(key).listInfo();
 };
 
 export default { resetQueue, listJobs };
