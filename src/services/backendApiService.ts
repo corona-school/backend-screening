@@ -112,13 +112,14 @@ export const apiService = {
     return new Promise((resolve, reject) => {
       axios
         .put(apiUriStudent + studentEmail, studentScreeningResult)
-        .then(({ status, data }) => {
+        .then(({ status }) => {
           if (status == 200) {
             resolve(true);
           } else {
-            reject(
+            Logger.error(
               "Update student response with non-200 return code: " + status
             );
+            reject("Student data could not be saved in our database.");
           }
         })
         .catch((err) => {

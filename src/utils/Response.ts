@@ -36,8 +36,8 @@ interface Params {
   statusCode?: number;
 }
 
-const toResponse = (statusCode: number, params: Params = {}) => {
-  const { code = null, data = null, message = null } = params;
+const toResponse = (statusCode: number, params: Params) => {
+  const { code, data, message } = params;
 
   if (statusCode < 400) {
     return {
@@ -47,7 +47,7 @@ const toResponse = (statusCode: number, params: Params = {}) => {
     };
   } else {
     return {
-      status: statusCode < 500 ? "fail" : "error",
+      status: statusCode,
       code,
       data,
       message,

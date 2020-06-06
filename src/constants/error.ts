@@ -3,6 +3,12 @@
 /**
  * Client Failures
  */
+export const BAD_REQUEST = (message: string) => ({
+  statusCode: 400,
+  code: "BAD_REQUEST",
+  message,
+});
+
 export const AUTH_REQUIRED = {
   statusCode: 401,
   code: "AUTH_REQUIRED",

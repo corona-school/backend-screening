@@ -8,6 +8,8 @@ import { getId } from "../utils/jobUtils";
 import { createStudentScreeningResult } from "../utils/studentScreenResult";
 import { StudentData, ScreenerInfo } from "../types/Queue";
 import { Context } from "koa";
+import Response from "../utils/Response";
+import { BAD_REQUEST } from "../constants/error";
 
 const Logger = LoggerService("studentController.ts");
 
@@ -107,17 +109,16 @@ const changeJob = async (ctx: Context) => {
     const action: string = ctx.request.body.action;
 
     if (!jobData) {
-      ctx.body = "Could not change status of student.";
-      ctx.status = 400;
-      return;
+      return Response.badRequest(ctx, {
+        code: "BAD_REQUEST",
+        message: "Please, specify the job data in the body.",
+      });
     }
     const from = ctx.session.passport.user;
     const screener: Screener = await apiService.getScreener(from);
 
     if (!screener) {
-      ctx.body = "Could not change status of student.";
-      ctx.status = 400;
-      return;
+      throw new Error("We could not find your account data.");
     }
 
     const screenerInfo: ScreenerInfo = {
@@ -134,22 +135,18 @@ const changeJob = async (ctx: Context) => {
     );
 
     if (changedJob.status === "completed" || changedJob.status === "rejected") {
-      try {
-        await apiService.updateStudent(
-          createStudentScreeningResult(changedJob),
-          jobData.email
-        );
-      } catch (err) {
-        Logger.error(err);
-        Logger.info("Student data could not be updated!");
-      }
+      await apiService.updateStudent(
+        createStudentScreeningResult(changedJob),
+        jobData.email
+      );
     }
 
     ctx.body = changedJob;
   } catch (err) {
-    ctx.status = 400;
-    ctx.body = "Something went wrong! ";
-    Logger.error(err);
+    Response.internalServerError(ctx, {
+      code: "INTERNAL_SERVER_ERROR",
+      message: err.message,
+    });
   }
 };
 
