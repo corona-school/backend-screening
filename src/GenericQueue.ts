@@ -126,7 +126,25 @@ export default class GenericQueue<D, S> extends EventEmitter {
           id
         )}`
       );
-      return;
+      throw new Error("Job not found.");
+    }
+    // check correct actions
+    if (action === "SET_ACTIVE" && oldJob.status !== "waiting") {
+      throw new Error("Action is incorrect. Job is not waiting.");
+    }
+    if (action === "SET_DONE" && oldJob.status !== "active") {
+      throw new Error("Action is incorrect. Job is not active.");
+    }
+    if (action === "SET_REJECTED" && oldJob.status !== "active") {
+      throw new Error("Action is incorrect. Job is not active.");
+    }
+    // Don't allow other screeners to screen
+    if (
+      action === "SET_ACTIVE" &&
+      oldJob.assignedTo &&
+      oldJob.assignedTo !== assignedTo
+    ) {
+      throw new Error("Screener is already assigned.");
     }
     let newJob: Job<D, S> | null = null;
 

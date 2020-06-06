@@ -26,6 +26,9 @@ class QueueService {
 
   getQueue(key: string) {
     const queue = this.queues.find((q) => q.key === key);
+    if (!queue) {
+      throw new Error(`Could not find a queue with the key ${key}`);
+    }
     return queue;
   }
 }

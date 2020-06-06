@@ -126,32 +126,6 @@ const changeJob = async (ctx: Context) => {
       email: screener.email,
     };
 
-    // const oldJob = await newStudentQueue.getJobWithPosition(job.id);
-    // if (!oldJob) {
-    // 	ctx.body = "Could not change status of student because no oldJob found.";
-    // 	ctx.status = 400;
-    // 	return;
-    // }
-
-    // if (!isValidStatusChange(oldJob.status, job.status)) {
-    // 	Logger.warn(
-    // 		`Invalid Status change of Job ${job.data.email} from ${oldJob.status} to ${job.status}! Old Screener: ${oldJob.assignedTo?.email} New Screener: ${screenerInfo?.email}`
-    // 	);
-    // 	ctx.body = "Invalid Status change of Job!";
-    // 	ctx.status = 400;
-    // 	return;
-    // }
-
-    // if (
-    // 	job.status === "active" &&
-    // 	job.assignedTo &&
-    // 	job.assignedTo.email !== screener.email
-    // ) {
-    // 	ctx.status = 400;
-    // 	ctx.body = "Ein Screener verifiziert diesen Studenten schon.";
-    // 	return;
-    // }
-
     const changedJob = await QueueService.getQueue(key).changeJob(
       jobData.id,
       jobData,
