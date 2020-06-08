@@ -43,7 +43,7 @@ const login = async (ctx: Context, next: Next) => {
       ctx.throw(401);
     }
     Logger.info(`Screener ${email} logged in!`);
-    ctx.set("Clear-Site-Data", "Cache");
+    ctx.set("Clear-Site-Data", '"cache"');
     ctx.set("Cache-Control", "no-store, no-cache, must-revalidate");
     ctx.set("Pragma", "no-cache");
     ctx.set("Expires", "0");
