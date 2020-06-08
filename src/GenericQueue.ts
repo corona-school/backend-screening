@@ -225,9 +225,19 @@ export default class GenericQueue<D, S> extends EventEmitter {
   };
 
   listInfo = async (): Promise<JobInfo<D, S>[]> => {
-    return (await this.list()).map((j, i) => ({
-      ...j,
-      position: i,
-    }));
+    let k = 0;
+    return (await this.list()).map((j) => {
+      if (j.status === "waiting") {
+        k++;
+        return {
+          ...j,
+          position: k,
+        };
+      }
+      return {
+        ...j,
+        position: 0,
+      };
+    });
   };
 }

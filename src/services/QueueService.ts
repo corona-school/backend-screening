@@ -29,6 +29,7 @@ class QueueService {
     if (!queue) {
       throw new Error(`Could not find a queue with the key ${key}`);
     }
+
     return queue;
   }
 }

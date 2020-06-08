@@ -79,13 +79,10 @@ export class StudentSubscriber {
     const jobList = await this.queue.listInfo();
 
     for (const jobInfo of jobList) {
-      if (jobInfo.data.email === message.jobInfo.data.email) {
-        Logger.info(jobInfo.status, jobInfo.data.email);
-
-        this.io.sockets
-          .in(jobInfo.data.email)
-          .emit(StudentSocketActions.UPDATE_JOB, jobInfo);
-      } else if (jobInfo.status === "waiting") {
+      if (
+        jobInfo.status === "waiting" ||
+        jobInfo.data.email === message.jobInfo.data.email
+      ) {
         this.io.sockets
           .in(jobInfo.data.email)
           .emit(StudentSocketActions.UPDATE_JOB, jobInfo);
