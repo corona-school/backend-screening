@@ -146,6 +146,9 @@ const changeJob = async (ctx: Context) => {
 
     ctx.body = changedJob;
   } catch (err) {
+    Logger.error(
+      `Job could not be changed due to ${err.message}(${err.status})`
+    );
     Response.internalServerError(ctx, {
       code: "INTERNAL_SERVER_ERROR",
       message: err.message,
