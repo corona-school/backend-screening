@@ -132,8 +132,10 @@ export default class GenericQueue<D, S> extends EventEmitter {
     if (action === "SET_ACTIVE" && oldJob.status !== "waiting") {
       throw new Error("Action is incorrect. Job is not waiting.");
     }
-    if (action === "SET_DONE" && oldJob.status !== "active") {
-      throw new Error("Action is incorrect. Job is not active.");
+    if (action === "SET_DONE" && oldJob.status !== "waiting") {
+      throw new Error(
+        "Action is incorrect. Job is not active/completed/reject."
+      );
     }
     if (action === "SET_REJECTED" && oldJob.status !== "active") {
       throw new Error("Action is incorrect. Job is not active.");
