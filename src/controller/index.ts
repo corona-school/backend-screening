@@ -3,6 +3,7 @@ import QueueController from "./QueueController";
 import StudentController from "./StudentController";
 import ScreenerController from "./ScreenerController";
 import StatisticsController from "./StatisticsController";
+import CourseController from "./CourseController";
 
 export {
   OpenHoursController,
@@ -10,4 +11,5 @@ export {
   StudentController,
   ScreenerController,
   StatisticsController,
+  CourseController
 };
