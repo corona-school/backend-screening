@@ -148,9 +148,9 @@ export const apiService = {
     }
   },
 
-  async getCourses(search?: string, state?: string): Promise<Course[]> {
+  async getCourses(search?: string, courseState?: string): Promise<Course[]> {
     try {
-      const { status, data } = await axios.post(`${API}courses`, { search, state });
+      const { status, data } = await axios.post(`${API}courses`, { search, courseState });
       if (status !== 200)
         throw "Retrieving courses responded with non 200 return code " + status;
 
@@ -161,14 +161,14 @@ export const apiService = {
     }
   },
 
-  async updateCourse(id: string | number, update: ApiCourseUpdate): Promise<true> {
+  async updateCourse(id: string | number, update: ApiCourseUpdate): Promise<Course> {
     try {
-      const { status } = await axios.post(`${API}course/${id}/update`, update);
+      const { status, data } = await axios.post(`${API}course/${id}/update`, update);
 
       if(status !== 200)
         throw "updating course failed with code " + status;
 
-      return true;
+      return data.course;
     } catch(error) {
       Logger.error("updateCourse failed with", error);
       throw error;

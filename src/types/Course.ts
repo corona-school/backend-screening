@@ -18,7 +18,7 @@ export interface Course {
 }
 
 export interface ApiCourseUpdate {
-    state?: CourseState.ALLOWED | CourseState.DENIED | CourseState.CANCELLED;
+    courseState?: CourseState.ALLOWED | CourseState.DENIED | CourseState.CANCELLED;
     name?: string;
     description?: string;
     outline?: string;
