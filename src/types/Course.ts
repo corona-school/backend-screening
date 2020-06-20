@@ -15,6 +15,7 @@ export interface Course {
     // tags?: CourseTag[];
     // subcourses?: Subcourse[];
     courseState: CourseState;
+    screeningComment: string | null;
 }
 
 export interface ApiCourseUpdate {
@@ -24,6 +25,7 @@ export interface ApiCourseUpdate {
     outline?: string;
     category?: CourseCategory;
     imageUrl?: string | null;
+    screeningComment?: string | null;
 }
 
 export enum CourseState {
