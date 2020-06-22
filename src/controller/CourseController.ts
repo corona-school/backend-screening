@@ -3,7 +3,7 @@ import { apiService } from "../services/backendApiService";
 import { ApiCourseUpdate } from "../types/Course";
 
 export async function getCourses(ctx: Context) {
-    const { search, courseState } = ctx.request.body;
+    const { search, courseState } = ctx.query;
     const courses = await apiService.getCourses(search, courseState);
     ctx.body = { courses };
 }

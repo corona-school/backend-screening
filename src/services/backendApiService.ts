@@ -150,7 +150,7 @@ export const apiService = {
 
   async getCourses(search?: string, courseState?: string): Promise<Course[]> {
     try {
-      const { status, data } = await axios.post(`${API}courses`, { search, courseState });
+      const { status, data } = await axios.get(`${API}courses`, { params: { search, courseState }});
       if (status !== 200)
         throw "Retrieving courses responded with non 200 return code " + status;
 

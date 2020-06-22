@@ -51,7 +51,7 @@ router.get("/screener/logout", ScreenerController.logout);
 router.get("/screener/info", requireAuth, ScreenerController.getInfo);
 
 // CourseController
-router.post("/courses", requireAuth, CourseController.getCourses);
+router.get("/courses", requireAuth, CourseController.getCourses);
 router.post("/course/:id/update", requireAuth, CourseController.updateCourse);
 
 // StatisticsController
