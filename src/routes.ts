@@ -5,6 +5,7 @@ import {
   StudentController,
   ScreenerController,
   StatisticsController,
+  CourseController,
 } from "./controller";
 import { requireAuth } from "./auth";
 import { DefaultState, Context } from "koa";
@@ -42,14 +43,18 @@ router.get("/student/jobInfo", StudentController.getInfo);
 router.post("/student/verify", StudentController.verify);
 router.post("/student/changeJob", requireAuth, StudentController.changeJob);
 
-// ScreenerRouter
+// ScreenerController
 router.post("/screener/create", requireAuth, ScreenerController.create);
 router.get("/screener/status", ScreenerController.getStatus);
 router.post("/screener/login", ScreenerController.login);
 router.get("/screener/logout", ScreenerController.logout);
 router.get("/screener/info", requireAuth, ScreenerController.getInfo);
 
-// StatisticsRouter
+// CourseController
+router.get("/courses", requireAuth, CourseController.getCourses);
+router.post("/course/:id/update", requireAuth, CourseController.updateCourse);
+
+// StatisticsController
 router.get("/statistics/logs", requireAuth, StatisticsController.getLogs);
 router.get("/queue/statistics", StatisticsController.getStatistics);
 
