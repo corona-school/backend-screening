@@ -5,6 +5,9 @@ import {
   IRawStudent,
   IRawStudent2,
   SearchStudent,
+  ApiScreeningResult,
+  ScreeningStatus,
+  Screening,
 } from "../types/Student";
 import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
@@ -169,6 +172,33 @@ export const apiService = {
         throw "updating course failed with code " + status;
 
       return data.course;
+    } catch(error) {
+      Logger.error("updateCourse failed with", error);
+      throw error;
+    }
+  },
+
+  async getInstructors(screeningStatus: ScreeningStatus.Accepted | ScreeningStatus.Rejected) {
+    try {
+      const { status, data } = await axios.get(`${API}instructors`, { params: { screeningStatus }});
+      if (status !== 200)
+        throw "Retrieving courses responded with non 200 return code " + status;
+
+      return data.instructors;
+    } catch (error) {
+      Logger.error("getCourses failed with", error);
+      throw error;
+    }
+  },
+
+  async updateInstructor(id: string | number, update: ApiScreeningResult): Promise<{ instructor: any, screening: Screening }> {
+    try {
+      const { status, data } = await axios.post(`${API}instructor/${id}/update`, update);
+
+      if(status !== 200)
+        throw "updating course failed with code " + status;
+
+      return data;
     } catch(error) {
       Logger.error("updateCourse failed with", error);
       throw error;
