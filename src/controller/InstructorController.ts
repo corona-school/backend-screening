@@ -3,8 +3,8 @@ import { apiService } from "../services/backendApiService";
 import { ApiScreeningResult } from "../types/Student";
 
 export async function getInstructors(ctx: Context) {
-    const { screeningState } = ctx.query;
-    const instructors = await apiService.getInstructors(screeningState);
+    const { screeningStatus } = ctx.query;
+    const instructors = await apiService.getInstructors(screeningStatus);
     ctx.body = { instructors };
 }
 
