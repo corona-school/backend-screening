@@ -178,9 +178,9 @@ export const apiService = {
     }
   },
 
-  async getInstructors(screeningStatus: ScreeningStatus.Accepted | ScreeningStatus.Rejected) {
+  async getInstructors(screeningStatus: ScreeningStatus.Accepted | ScreeningStatus.Rejected, search: string) {
     try {
-      const { status, data } = await axios.get(`${API}instructors`, { params: { screeningStatus }});
+      const { status, data } = await axios.get(`${API}instructors`, { params: { screeningStatus, search }});
       if (status !== 200)
         throw "Retrieving courses responded with non 200 return code " + status;
 
