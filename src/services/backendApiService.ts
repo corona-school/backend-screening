@@ -178,7 +178,7 @@ export const apiService = {
     }
   },
 
-  async getInstructors(screeningStatus: ScreeningStatus.Accepted | ScreeningStatus.Rejected, search: string) {
+  async getInstructors(screeningStatus: ScreeningStatus.Accepted | ScreeningStatus.Rejected, search: string): Promise<Array<Student & { __screening__: Screening }>> {
     try {
       const { status, data } = await axios.get(`${API}instructors`, { params: { screeningStatus, search }});
       if (status !== 200)
