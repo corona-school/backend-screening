@@ -24,7 +24,12 @@ axios.defaults.headers.common["Token"] = apiToken;
 export const apiService = {
   async getStudent(email: string): Promise<Student> {
     try {
-      const { status, data }: { status: number; data: IRawStudent } = await axios.get(`${API}student/${email}`);
+      const {
+        status,
+        data,
+      }: { status: number; data: IRawStudent } = await axios.get(
+        `${API}student/${email}`
+      );
 
       if (status !== 200)
         throw "Get student response with non-200 return code: " + status;
@@ -33,6 +38,7 @@ export const apiService = {
         throw "Get student response with missing or invalid student data";
 
       const student: Student = {
+        id: data.id,
         firstname: data.firstName,
         lastname: data.lastName,
         email: data.email,
@@ -53,7 +59,12 @@ export const apiService = {
   },
   async getAllStudents(): Promise<SearchStudent[]> {
     try {
-      const { status, data }: { status: number; data: IRawStudent2[] } = await axios.get(`${API}student`);
+      const {
+        status,
+        data,
+      }: { status: number; data: IRawStudent2[] } = await axios.get(
+        `${API}student`
+      );
       if (status !== 200)
         throw "Get all students response with non-200 return code: " + status;
 
@@ -76,8 +87,7 @@ export const apiService = {
   async getUnverifiedStudent(email: string): Promise<Student> {
     const student = await apiService.getStudent(email);
 
-    if (student.verified != null)
-      throw "Student is already verified";
+    if (student.verified != null) throw "Student is already verified";
 
     return student;
   },
@@ -87,7 +97,10 @@ export const apiService = {
     studentEmail: string
   ): Promise<boolean> {
     try {
-      const { status } = await axios.put(`${API}student/${studentEmail}`, studentScreeningResult)
+      const { status } = await axios.put(
+        `${API}student/${studentEmail}`,
+        studentScreeningResult
+      );
 
       if (status !== 200)
         throw "Student data could not be saved in our database.";
@@ -100,7 +113,12 @@ export const apiService = {
   },
   async getScreener(email: string, includePassword = false): Promise<Screener> {
     try {
-      const { status, data }: { status: number; data: IRawScreener } = await axios.get(`${API}screener/${email}/${includePassword}`)
+      const {
+        status,
+        data,
+      }: { status: number; data: IRawScreener } = await axios.get(
+        `${API}screener/${email}/${includePassword}`
+      );
 
       if (status !== 200)
         throw "Get screener response with non-200 return code: " + status;
@@ -146,14 +164,20 @@ export const apiService = {
 
       return true;
     } catch (error) {
-      Logger.error("Create screener failed: {} (status {})", error.response.data, error.response.status);
+      Logger.error(
+        "Create screener failed: {} (status {})",
+        error.response.data,
+        error.response.status
+      );
       throw error;
     }
   },
 
   async getCourses(search?: string, courseState?: string): Promise<Course[]> {
     try {
-      const { status, data } = await axios.get(`${API}courses`, { params: { search, courseState }});
+      const { status, data } = await axios.get(`${API}courses`, {
+        params: { search, courseState },
+      });
       if (status !== 200)
         throw "Retrieving courses responded with non 200 return code " + status;
 
@@ -164,23 +188,33 @@ export const apiService = {
     }
   },
 
-  async updateCourse(id: string | number, update: ApiCourseUpdate): Promise<Course> {
+  async updateCourse(
+    id: string | number,
+    update: ApiCourseUpdate
+  ): Promise<Course> {
     try {
-      const { status, data } = await axios.post(`${API}course/${id}/update`, update);
+      const { status, data } = await axios.post(
+        `${API}course/${id}/update`,
+        update
+      );
 
-      if(status !== 200)
-        throw "updating course failed with code " + status;
+      if (status !== 200) throw "updating course failed with code " + status;
 
       return data.course;
-    } catch(error) {
+    } catch (error) {
       Logger.error("updateCourse failed with", error);
       throw error;
     }
   },
 
-  async getInstructors(screeningStatus: ScreeningStatus.Accepted | ScreeningStatus.Rejected, search: string): Promise<Array<Student & { __screening__: Screening }>> {
+  async getInstructors(
+    screeningStatus: ScreeningStatus.Accepted | ScreeningStatus.Rejected,
+    search: string
+  ): Promise<Array<Student & { __screening__: Screening }>> {
     try {
-      const { status, data } = await axios.get(`${API}instructors`, { params: { screeningStatus, search }});
+      const { status, data } = await axios.get(`${API}instructors`, {
+        params: { screeningStatus, search },
+      });
       if (status !== 200)
         throw "Retrieving courses responded with non 200 return code " + status;
 
@@ -191,15 +225,20 @@ export const apiService = {
     }
   },
 
-  async updateInstructor(id: string | number, update: ApiScreeningResult): Promise<{ instructor: any, screening: Screening }> {
+  async updateInstructor(
+    id: string | number,
+    update: ApiScreeningResult
+  ): Promise<{ instructor: any; screening: Screening }> {
     try {
-      const { status, data } = await axios.post(`${API}instructor/${id}/update`, update);
+      const { status, data } = await axios.post(
+        `${API}instructor/${id}/update`,
+        update
+      );
 
-      if(status !== 200)
-        throw "updating course failed with code " + status;
+      if (status !== 200) throw "updating course failed with code " + status;
 
       return data;
-    } catch(error) {
+    } catch (error) {
       Logger.error("updateCourse failed with", error);
       throw error;
     }
