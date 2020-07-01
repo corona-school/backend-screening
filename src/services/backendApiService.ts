@@ -208,7 +208,7 @@ export const apiService = {
   },
 
   async getInstructors(
-    screeningStatus: ScreeningStatus.Accepted | ScreeningStatus.Rejected,
+    screeningStatus: ScreeningStatus.Accepted | ScreeningStatus.Rejected | ScreeningStatus.Unscreened,
     search: string
   ): Promise<Array<Student & { __screening__: Screening }>> {
     try {
