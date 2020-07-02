@@ -13,8 +13,8 @@ export async function updateInstructor(ctx: Context) {
     const { id } = ctx.params;
     const screenerEmail = ctx.state.user.email;
     console.log(`Screener(${screenerEmail}) is updating Instructor(${id})`);
-    const { instructor, screening} = await apiService.updateInstructor(id, { ...update, screenerEmail });
-    ctx.body = { instructor, screening };
+    const { instructor } = await apiService.updateInstructor(id, { ...update, screenerEmail });
+    ctx.body = { instructor };
 }
 
 export default { getInstructors, updateInstructor };

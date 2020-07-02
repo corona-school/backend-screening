@@ -228,7 +228,7 @@ export const apiService = {
   async updateInstructor(
     id: string | number,
     update: ApiScreeningResult
-  ): Promise<{ instructor: any; screening: Screening }> {
+  ): Promise<{ instructor: any }> {
     try {
       const { status, data } = await axios.post(
         `${API}instructor/${id}/update`,
