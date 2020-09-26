@@ -6,6 +6,7 @@ import {
   ScreenerController,
   StatisticsController,
   CourseController,
+  LectureController,
 } from "./controller";
 import { requireAuth } from "./auth";
 import { DefaultState, Context } from "koa";
@@ -55,12 +56,24 @@ router.get("/screener/info", requireAuth, ScreenerController.getInfo);
 router.get("/courses", requireAuth, CourseController.getCourses);
 router.post("/course/:id/update", requireAuth, CourseController.updateCourse);
 
+// LectureController
+router.post("/lectures/create", requireAuth, LectureController.postLecture);
+router.delete(
+  "/lectures/:id/delete",
+  requireAuth,
+  LectureController.deleteLecture
+);
+
 // StatisticsController
 router.get("/statistics/logs", requireAuth, StatisticsController.getLogs);
 router.get("/queue/statistics", StatisticsController.getStatistics);
 
 // InstructorController
 router.get("/instructors", requireAuth, InstructorController.getInstructors);
-router.post("/instructor/:id/update", requireAuth, InstructorController.updateInstructor);
+router.post(
+  "/instructor/:id/update",
+  requireAuth,
+  InstructorController.updateInstructor
+);
 
 export default router;

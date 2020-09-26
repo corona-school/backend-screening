@@ -13,6 +13,7 @@ import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
 import { Course } from "../types/Course";
 import { ApiCourseUpdate } from "../types/Course";
+import { Lecture } from "../types/Lecture";
 const Logger = LoggerService("backendApiService.ts");
 
 const API = process.env.CORONA_BACKEND_API_URL;
@@ -207,8 +208,40 @@ export const apiService = {
     }
   },
 
+  async postLecture(lecture: Lecture): Promise<{ id: number }> {
+    try {
+      const { status, data } = await axios.post(
+        `${API}lectures/create`,
+        lecture
+      );
+
+      if (status != 200) throw "creating lecture failed with code " + status;
+
+      return data.id;
+    } catch (error) {
+      Logger.error("postLecture failed with", error);
+      throw error;
+    }
+  },
+
+  async deleteLecture(id: number): Promise<boolean> {
+    try {
+      const { status } = await axios.delete(`${API}lectures/${id}/delete`);
+
+      if (status != 204) throw "deleting lecture failed with code " + status;
+
+      return true;
+    } catch (error) {
+      Logger.error("deleteLecture failed with", error);
+      throw error;
+    }
+  },
+
   async getInstructors(
-    screeningStatus: ScreeningStatus.Accepted | ScreeningStatus.Rejected | ScreeningStatus.Unscreened,
+    screeningStatus:
+      | ScreeningStatus.Accepted
+      | ScreeningStatus.Rejected
+      | ScreeningStatus.Unscreened,
     search: string
   ): Promise<Array<Student & { __screening__: Screening }>> {
     try {
