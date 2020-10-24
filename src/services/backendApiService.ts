@@ -21,6 +21,25 @@ const apiUriScreener = API + "screener/";
 const apiToken = process.env.CORONA_BACKEND_API_TOKEN;
 axios.defaults.headers.common["Token"] = apiToken;
 
+function PendingScreenings(data: IRawStudent) {
+  let pendingScreenings = false;
+
+  if (data.isTutor) {
+    pendingScreenings = data.screenings.tutor === undefined;
+    console.log(data.screenings.tutor);
+  }
+  if (data.isInstructor) {
+    pendingScreenings =
+      pendingScreenings || data.screenings.instructor === undefined;
+  }
+  if (data.isProjectCoach) {
+    pendingScreenings =
+      pendingScreenings || data.screenings.projectCoach === undefined;
+  }
+
+  return pendingScreenings;
+}
+
 export const apiService = {
   async getStudent(email: string): Promise<Student> {
     try {
@@ -42,7 +61,7 @@ export const apiService = {
         firstname: data.firstName,
         lastname: data.lastName,
         email: data.email,
-        verified: data.alreadyScreened === false ? undefined : data.verified,
+        pendingScreenings: PendingScreenings(data),
         subjects: data.subjects,
         phone: data.phone,
         birthday: data.birthday,
@@ -87,7 +106,7 @@ export const apiService = {
   async getUnverifiedStudent(email: string): Promise<Student> {
     const student = await apiService.getStudent(email);
 
-    if (student.verified != null) throw "Student is already verified";
+    if (!student.pendingScreenings) throw "Student is already verified";
 
     return student;
   },
@@ -208,7 +227,10 @@ export const apiService = {
   },
 
   async getInstructors(
-    screeningStatus: ScreeningStatus.Accepted | ScreeningStatus.Rejected | ScreeningStatus.Unscreened,
+    screeningStatus:
+      | ScreeningStatus.Accepted
+      | ScreeningStatus.Rejected
+      | ScreeningStatus.Unscreened,
     search: string
   ): Promise<Array<Student & { __screening__: Screening }>> {
     try {

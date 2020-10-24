@@ -3,7 +3,7 @@ export interface Student {
   firstname: string;
   lastname: string;
   email: string;
-  verified?: boolean;
+  pendingScreenings: boolean;
   subjects: string;
   phone?: string;
   birthday?: Date;
@@ -38,6 +38,14 @@ export interface IRawStudent {
   alreadyScreened: boolean;
   phone?: string;
   birthday?: Date;
+  isTutor: boolean;
+  isInstructor: boolean;
+  isProjectCoach: boolean;
+  screenings: {
+    tutor?: ScreeningInfo;
+    instructor?: ScreeningInfo;
+    projectCoach?: ScreeningInfo;
+  };
 }
 
 export enum ScreeningStatus {
@@ -65,4 +73,10 @@ export interface Screening {
   updatedAt: Date;
   screener?: any;
   student?: Student;
+}
+
+export interface ScreeningInfo {
+  verified: boolean;
+  comment?: string;
+  knowsCoronaSchoolFrom?: string;
 }
