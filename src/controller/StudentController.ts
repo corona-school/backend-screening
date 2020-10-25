@@ -110,7 +110,7 @@ const changeJob = async (ctx: Context) => {
     console.log(ctx.request.body);
 
     const studentData: StudentData = ctx.request.body.data;
-
+    const jobId: string = ctx.request.body.jobId;
     const action: string = ctx.request.body.action;
 
     if (!studentData || !studentData.id || !studentData.email) {
@@ -132,19 +132,9 @@ const changeJob = async (ctx: Context) => {
       email: screener.email,
     };
 
-    const oldData = await QueueService.getQueue(key)
-      .list()
-      .then((jobs) => jobs.find((j) => j.id === studentData.id).data);
-
-    if (!oldData) {
-      throw new Error("Could not find job.");
-    }
-
-    const jobData = updateJob(oldData, studentData);
-
     const changedJob = await QueueService.getQueue(key).changeJob(
-      jobData.id,
-      jobData,
+      jobId,
+      studentData,
       screenerInfo,
       action
     );
@@ -152,7 +142,7 @@ const changeJob = async (ctx: Context) => {
     if (changedJob.status === "completed" || changedJob.status === "rejected") {
       await apiService.updateStudent(
         getScreeningResult(changedJob.data, changedJob.assignedTo.email),
-        jobData.email
+        studentData.email
       );
     }
 
