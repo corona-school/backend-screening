@@ -4,9 +4,8 @@ import { Screener } from "../types/Screener";
 import QueueService from "../services/QueueService";
 import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
-import { getId } from "../utils/jobUtils";
-import { createStudentScreeningResult } from "../utils/studentScreenResult";
-import { StudentData, ScreenerInfo } from "../types/Queue";
+import { getId, updateJob } from "../utils/jobUtils";
+import { ScreenerInfo } from "../types/Queue";
 import { Context } from "koa";
 import Response from "../utils/Response";
 
@@ -108,10 +107,13 @@ const verify = async (ctx: Context) => {
 const changeJob = async (ctx: Context) => {
   try {
     const { key } = ctx.request.query;
-    const jobData: StudentData = ctx.request.body.data;
+    const jobId: string = ctx.request.body.jobId;
+    const screeningResult: IStudentScreeningResult =
+      ctx.request.body.screeningResult;
+    const studentEmail: string = ctx.request.body.studentEmail;
     const action: string = ctx.request.body.action;
 
-    if (!jobData) {
+    if (!jobId || !screeningResult || !studentEmail) {
       return Response.badRequest(ctx, {
         code: "BAD_REQUEST",
         message: "Please, specify the job data in the body.",
@@ -130,6 +132,16 @@ const changeJob = async (ctx: Context) => {
       email: screener.email,
     };
 
+    const oldData = await QueueService.getQueue(key)
+      .list()
+      .then((jobs) => jobs.find((j) => j.id === jobId).data);
+
+    if (!oldData) {
+      throw new Error("Could not find job.");
+    }
+
+    const jobData = updateJob(oldData, screeningResult);
+
     const changedJob = await QueueService.getQueue(key).changeJob(
       jobData.id,
       jobData,
@@ -138,10 +150,7 @@ const changeJob = async (ctx: Context) => {
     );
 
     if (changedJob.status === "completed" || changedJob.status === "rejected") {
-      await apiService.updateStudent(
-        createStudentScreeningResult(changedJob),
-        jobData.email
-      );
+      await apiService.updateStudent(screeningResult, jobData.email);
     }
 
     ctx.body = changedJob;

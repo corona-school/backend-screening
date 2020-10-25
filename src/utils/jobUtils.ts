@@ -1,38 +1,18 @@
 import crypto from "crypto";
 import { StudentData, Status, Subject } from "../types/Queue";
-import { IRawStudent, Student, StudentSubject } from "../types/Student";
+import { IRawStudent, StudentSubject } from "../types/Student";
 import LoggerService from "../utils/Logger";
+import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 
 const Logger = LoggerService("jobUtils.ts");
 
 export const getId = (email: string) =>
   crypto.createHash("md5").update(email).digest("hex");
 
-export const createJob = (id: string, student: IRawStudent): StudentData => {
-  const getSubject = (subject: string): string | null => {
-    try {
-      return subject.replace(/[0-9]+|:/g, "");
-    } catch (err) {
-      return null;
-    }
-  };
-
-  const getValues = (subject: string | null): number[] => {
-    try {
-      const matchGroup = subject.match(/[0-9]+:[0-9]+/g);
-      if (matchGroup) {
-        return matchGroup[0].split(":").map((s) => parseInt(s));
-      }
-      return [1, 13];
-    } catch (err) {
-      Logger.error(err);
-      return [1, 13];
-    }
-  };
-
+const ParseSubjects = (rawSubjects: StudentSubject[]): Subject[] => {
   let subjects: Subject[] = [];
   try {
-    subjects = student.subjects.map((s: StudentSubject) => {
+    subjects = rawSubjects.map((s: StudentSubject) => {
       return {
         subject: s.name,
         min: s.gradeInfo.min,
@@ -42,6 +22,11 @@ export const createJob = (id: string, student: IRawStudent): StudentData => {
   } catch (err) {
     Logger.info("Cannot parse");
   }
+  return subjects;
+};
+
+export const createJob = (id: string, student: IRawStudent): StudentData => {
+  const subjects = ParseSubjects(student.subjects);
 
   return {
     id,
@@ -55,6 +40,27 @@ export const createJob = (id: string, student: IRawStudent): StudentData => {
     feedback: student.feedback,
     commentScreener: "",
     jitsi: `https://meet.jit.si/${id}`,
+  };
+};
+
+export const updateJob = (
+  oldData: StudentData,
+  screeningResult: IStudentScreeningResult
+): StudentData => {
+  const subjects = ParseSubjects(screeningResult.subjects);
+
+  return {
+    id: oldData.id,
+    firstname: oldData.firstname,
+    lastname: oldData.lastname,
+    email: oldData.email,
+    subjects: subjects,
+    phone: screeningResult.phone,
+    knowcsfrom: oldData.knowcsfrom,
+    msg: screeningResult.msg,
+    feedback: screeningResult.feedback,
+    commentScreener: oldData.commentScreener,
+    jitsi: oldData.jitsi,
   };
 };
 
