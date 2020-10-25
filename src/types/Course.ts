@@ -1,4 +1,4 @@
-import { Student } from "./Student";
+import { IRawStudent } from "./Student";
 
 // TODO: Do we serialize the Many to Many relations and send them to this backend?
 export interface Course {

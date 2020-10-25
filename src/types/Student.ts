@@ -1,43 +1,4 @@
-export interface Student {
-  id: number;
-  firstname: string;
-  lastname: string;
-  email: string;
-  pendingScreenings: boolean;
-  subjects: string;
-  phone?: string;
-  birthday?: Date;
-  msg: string;
-  feedback?: string;
-}
-
-export interface SearchStudent {
-  firstname: string;
-  lastname: string;
-  email: string;
-}
-
-export interface IRawStudent2 {
-  firstname: string;
-  lastname: string;
-  email: string;
-  subjects: string;
-  msg?: string;
-  verified: boolean;
-  alreadyScreened: boolean;
-}
-
-export interface IRawStudent {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  subjects: string;
-  msg?: string;
-  verified: boolean;
-  alreadyScreened: boolean;
-  phone?: string;
-  birthday?: Date;
+export interface StudentEditableInfo {
   isTutor: boolean;
   isInstructor: boolean;
   isProjectCoach: boolean;
@@ -46,37 +7,60 @@ export interface IRawStudent {
     instructor?: ScreeningInfo;
     projectCoach?: ScreeningInfo;
   };
-}
-
-export enum ScreeningStatus {
-  Unscreened = "UNSCREENED",
-  Accepted = "ACCEPTED",
-  Rejected = "REJECTED",
-}
-
-export interface ApiScreeningResult {
-  verified: boolean;
-  phone?: string;
-  birthday?: Date;
-  commentScreener?: string;
-  knowscsfrom?: string;
-  screenerEmail: string;
-  subjects?: string;
+  projectFields: ProjectFieldWithGradeInfoType[];
+  subjects: Subject[];
   feedback?: string;
+  phone?: string;
+  newsletter: boolean;
+  msg?: string;
+  university?: string;
+  state?: string;
+  isUniversityStudent?: boolean;
+  official?: {
+    hours: number;
+    module: string;
+  };
 }
-export interface Screening {
-  id: number;
-  success: boolean; //verified or not verified
-  comment: string;
-  knowsCoronaSchoolFrom: string;
-  createdAt: Date;
-  updatedAt: Date;
-  screener?: any;
-  student?: Student;
+
+export interface ProjectFieldWithGradeInfoType {
+  name: string;
+  min?: number;
+  max?: number;
+}
+
+export interface Subject {
+  name: string;
+  gradeInfo?: {
+    min: number;
+    max: number;
+  };
 }
 
 export interface ScreeningInfo {
   verified: boolean;
   comment?: string;
   knowsCoronaSchoolFrom?: string;
+}
+
+export interface IRawStudent extends StudentEditableInfo {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+export interface ScreeningResult extends StudentEditableInfo {
+  screenerEmail: string;
+}
+
+export interface SearchStudent {
+  firstname: string;
+  lastname: string;
+  email: string;
+}
+
+export enum ScreeningStatus {
+  Unscreened = "UNSCREENED",
+  Accepted = "ACCEPTED",
+  Rejected = "REJECTED",
 }

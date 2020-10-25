@@ -1,15 +1,11 @@
 import axios from "axios";
 import { Screener, ScreenerRequest, IRawScreener } from "../types/Screener";
 import {
-  Student,
   IRawStudent,
-  IRawStudent2,
-  SearchStudent,
-  ApiScreeningResult,
+  ScreeningResult,
   ScreeningStatus,
-  Screening,
+  SearchStudent,
 } from "../types/Student";
-import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
 import { Course } from "../types/Course";
 import { ApiCourseUpdate } from "../types/Course";
@@ -21,54 +17,39 @@ const apiUriScreener = API + "screener/";
 const apiToken = process.env.CORONA_BACKEND_API_TOKEN;
 axios.defaults.headers.common["Token"] = apiToken;
 
-function PendingScreenings(data: IRawStudent) {
-  let pendingScreenings = false;
+function IsScreened(student: IRawStudent) {
+  let isScreened = false;
 
-  if (data.isTutor) {
-    pendingScreenings = data.screenings.tutor === undefined;
-    console.log(data.screenings.tutor);
+  if (student.isTutor) {
+    isScreened = student.screenings.tutor !== undefined;
   }
-  if (data.isInstructor) {
-    pendingScreenings =
-      pendingScreenings || data.screenings.instructor === undefined;
+  if (student.isInstructor) {
+    isScreened = isScreened || student.screenings.instructor !== undefined;
   }
-  if (data.isProjectCoach) {
-    pendingScreenings =
-      pendingScreenings || data.screenings.projectCoach === undefined;
+  if (student.isProjectCoach) {
+    isScreened = isScreened || student.screenings.projectCoach !== undefined;
   }
 
-  return pendingScreenings;
+  return isScreened;
 }
 
 export const apiService = {
-  async getStudent(email: string): Promise<Student> {
+  async getStudent(email: string): Promise<IRawStudent> {
     try {
       const {
         status,
-        data,
-      }: { status: number; data: IRawStudent } = await axios.get(
+        student,
+      }: { status: number; student: IRawStudent } = await axios.get(
         `${API}student/${email}`
       );
 
       if (status !== 200)
         throw "Get student response with non-200 return code: " + status;
 
-      if (!data || !data.email)
+      if (!student || !student.email)
         throw "Get student response with missing or invalid student data";
 
-      const student: Student = {
-        id: data.id,
-        firstname: data.firstName,
-        lastname: data.lastName,
-        email: data.email,
-        pendingScreenings: PendingScreenings(data),
-        subjects: data.subjects,
-        phone: data.phone,
-        birthday: data.birthday,
-        msg: data.msg,
-      };
-
-      console.log("getStudent():", data);
+      console.log("getStudent():", student);
 
       return student;
     } catch (error) {
@@ -80,21 +61,15 @@ export const apiService = {
     try {
       const {
         status,
-        data,
-      }: { status: number; data: IRawStudent2[] } = await axios.get(
+        students,
+      }: { status: number; students: SearchStudent[] } = await axios.get(
         `${API}student`
       );
       if (status !== 200)
         throw "Get all students response with non-200 return code: " + status;
 
-      if (!data)
+      if (!students)
         throw "Get all students response with missing or invalid student data";
-
-      const students: SearchStudent[] = data.map((s) => ({
-        firstname: s.firstname,
-        lastname: s.lastname,
-        email: s.email,
-      }));
 
       return students;
     } catch (error) {
@@ -103,16 +78,16 @@ export const apiService = {
     }
   },
 
-  async getUnverifiedStudent(email: string): Promise<Student> {
+  async getUnverifiedStudent(email: string): Promise<IRawStudent> {
     const student = await apiService.getStudent(email);
 
-    if (!student.pendingScreenings) throw "Student is already verified";
+    if (IsScreened(student)) throw "Student is already verified";
 
     return student;
   },
 
   async updateStudent(
-    studentScreeningResult: IStudentScreeningResult,
+    studentScreeningResult: ScreeningResult,
     studentEmail: string
   ): Promise<boolean> {
     try {
@@ -220,46 +195,6 @@ export const apiService = {
       if (status !== 200) throw "updating course failed with code " + status;
 
       return data.course;
-    } catch (error) {
-      Logger.error("updateCourse failed with", error);
-      throw error;
-    }
-  },
-
-  async getInstructors(
-    screeningStatus:
-      | ScreeningStatus.Accepted
-      | ScreeningStatus.Rejected
-      | ScreeningStatus.Unscreened,
-    search: string
-  ): Promise<Array<Student & { __screening__: Screening }>> {
-    try {
-      const { status, data } = await axios.get(`${API}instructors`, {
-        params: { screeningStatus, search },
-      });
-      if (status !== 200)
-        throw "Retrieving courses responded with non 200 return code " + status;
-
-      return data.instructors;
-    } catch (error) {
-      Logger.error("getCourses failed with", error);
-      throw error;
-    }
-  },
-
-  async updateInstructor(
-    id: string | number,
-    update: ApiScreeningResult
-  ): Promise<{ instructor: any }> {
-    try {
-      const { status, data } = await axios.post(
-        `${API}instructor/${id}/update`,
-        update
-      );
-
-      if (status !== 200) throw "updating course failed with code " + status;
-
-      return data;
     } catch (error) {
       Logger.error("updateCourse failed with", error);
       throw error;

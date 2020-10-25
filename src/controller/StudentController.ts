@@ -2,13 +2,13 @@ import ScreeningService from "../services/screeningService";
 import { apiService } from "../services/backendApiService";
 import { Screener } from "../types/Screener";
 import QueueService from "../services/QueueService";
-import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
 import { getId } from "../utils/jobUtils";
-import { createStudentScreeningResult } from "../utils/studentScreenResult";
 import { StudentData, ScreenerInfo } from "../types/Queue";
 import { Context } from "koa";
 import Response from "../utils/Response";
+import { ScreeningResult } from "../types/Student";
+import { createStudentScreeningResult } from "../utils/studentScreenResult";
 
 const Logger = LoggerService("studentController.ts");
 
@@ -83,7 +83,7 @@ const getInfo = async (ctx: Context) => {
 };
 
 const verify = async (ctx: Context) => {
-  const screeningResult: IStudentScreeningResult | null =
+  const screeningResult: ScreeningResult | null =
     ctx.request.body.screeningResult;
   const studentEmail: string | null = ctx.request.body.studentEmail;
 

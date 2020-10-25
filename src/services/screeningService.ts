@@ -2,7 +2,7 @@ import crypto from "crypto";
 import QueueService from "../services/QueueService";
 import { createJob, getId } from "../utils/jobUtils";
 import { apiService } from "./backendApiService";
-import { Student } from "../types/Student";
+import { IRawStudent } from "../types/Student";
 
 import { JobInfo } from "../GenericQueue";
 import { ScreenerInfo, StudentData } from "../types/Queue";
@@ -22,7 +22,7 @@ export default class ScreeningService {
     return new Promise((resolve, reject) => {
       apiService
         .getUnverifiedStudent(id)
-        .then((student: Student | null) => {
+        .then((student: IRawStudent | null) => {
           const id = crypto
             .createHash("md5")
             .update(student.email)

@@ -9,7 +9,6 @@ import {
 } from "./controller";
 import { requireAuth } from "./auth";
 import { DefaultState, Context } from "koa";
-import InstructorController from "./controller/InstructorController";
 
 const router = new Router<DefaultState, Context>();
 router.get("/", async (ctx) => {
@@ -58,9 +57,5 @@ router.post("/course/:id/update", requireAuth, CourseController.updateCourse);
 // StatisticsController
 router.get("/statistics/logs", requireAuth, StatisticsController.getLogs);
 router.get("/queue/statistics", StatisticsController.getStatistics);
-
-// InstructorController
-router.get("/instructors", requireAuth, InstructorController.getInstructors);
-router.post("/instructor/:id/update", requireAuth, InstructorController.updateInstructor);
 
 export default router;
