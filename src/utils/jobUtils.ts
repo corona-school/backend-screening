@@ -1,36 +1,21 @@
 import crypto from "crypto";
-import { StudentData, Status, Subject } from "../types/Queue";
-import { IRawStudent, StudentSubject } from "../types/Student";
-import LoggerService from "../utils/Logger";
+import { StudentData, Status } from "../types/Queue";
+import { IRawStudent } from "../types/Student";
 import { IStudentScreeningResult } from "../types/StudentScreeningResult";
-
-const Logger = LoggerService("jobUtils.ts");
 
 export const getId = (email: string) =>
   crypto.createHash("md5").update(email).digest("hex");
 
-const ParseSubjects = (rawSubjects: StudentSubject[]): Subject[] => {
-  let subjects: Subject[] = [];
-  try {
-    subjects = rawSubjects.map((s: StudentSubject) => {
-      return {
-        subject: s.name,
-        min: s.gradeInfo.min,
-        max: s.gradeInfo.max,
-      };
-    });
-  } catch (err) {
-    Logger.info("Cannot parse");
-  }
-  return subjects;
-};
-
 export const createJob = (id: string, student: IRawStudent): StudentData => {
-  const subjects = ParseSubjects(student.subjects);
+  const subjects = student.subjects.map((s) => ({
+    name: s.name,
+    grade: { min: s.grade?.min || 1, max: s.grade?.max || 13 },
+  }));
 
   return {
     id,
     ...student,
+    subjects,
     jitsi: `https://meet.jit.si/${id}`,
   };
 };

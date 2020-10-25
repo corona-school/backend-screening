@@ -30,6 +30,7 @@ export interface Subject {
 
 export interface StudentData extends IRawStudent {
   jitsi: string;
+  subjects: { name: string; grade: { min: number; max: number } }[];
 }
 
 export interface JobInfo extends StudentData {

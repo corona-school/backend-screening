@@ -99,7 +99,7 @@ export interface ProjectFieldWithGradeInfoType {
 
 export interface StudentSubject {
   name: string;
-  gradeInfo?: {
+  grade?: {
     min: number;
     max: number;
   };

@@ -6,6 +6,7 @@ import { IRawStudent, Student } from "../types/Student";
 
 import { JobInfo } from "../GenericQueue";
 import { ScreenerInfo, StudentData } from "../types/Queue";
+import LoggerService from "../utils/Logger";
 
 export default class ScreeningService {
   login = async (
@@ -27,6 +28,7 @@ export default class ScreeningService {
             .createHash("md5")
             .update(student.email)
             .digest("hex");
+
           return newStudentQueue.add(id, createJob(id, student));
         })
         .then((jobInfo: JobInfo<StudentData, ScreenerInfo>) => {

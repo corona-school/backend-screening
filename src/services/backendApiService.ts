@@ -16,12 +16,11 @@ import { ApiCourseUpdate } from "../types/Course";
 const Logger = LoggerService("backendApiService.ts");
 
 const API = process.env.CORONA_BACKEND_API_URL;
-const apiUriStudent = API + "student/";
 const apiUriScreener = API + "screener/";
 const apiToken = process.env.CORONA_BACKEND_API_TOKEN;
 axios.defaults.headers.common["Token"] = apiToken;
 
-function IsScreened(student: IRawStudent) {
+const isScreened = (student: IRawStudent) => {
   let isScreened = false;
 
   if (student.isTutor) {
@@ -35,14 +34,13 @@ function IsScreened(student: IRawStudent) {
   }
 
   return isScreened;
-}
+};
 
 export const apiService = {
   async getStudent(email: string): Promise<IRawStudent> {
     try {
       const {
         status,
-
         data,
       }: { status: number; data: IRawStudent } = await axios.get(
         `${API}student/${email}`
@@ -92,7 +90,7 @@ export const apiService = {
   async getUnverifiedStudent(email: string): Promise<IRawStudent> {
     const student = await apiService.getStudent(email);
 
-    if (IsScreened(student)) throw "Student is already verified";
+    if (isScreened(student)) throw "Student is already verified";
 
     return student;
   },
