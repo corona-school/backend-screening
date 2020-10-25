@@ -1,6 +1,6 @@
 import crypto from "crypto";
-import { StudentData, Status } from "../types/Queue";
-import { Student } from "../types/Student";
+import { StudentData, Status, Subject } from "../types/Queue";
+import { IRawStudent, Student, StudentSubject } from "../types/Student";
 import LoggerService from "../utils/Logger";
 
 const Logger = LoggerService("jobUtils.ts");
@@ -8,7 +8,7 @@ const Logger = LoggerService("jobUtils.ts");
 export const getId = (email: string) =>
   crypto.createHash("md5").update(email).digest("hex");
 
-export const createJob = (id: string, student: Student): StudentData => {
+export const createJob = (id: string, student: IRawStudent): StudentData => {
   const getSubject = (subject: string): string | null => {
     try {
       return subject.replace(/[0-9]+|:/g, "");
@@ -30,22 +30,14 @@ export const createJob = (id: string, student: Student): StudentData => {
     }
   };
 
-  let subjects = [];
+  let subjects: Subject[] = [];
   try {
-    subjects = JSON.parse(student.subjects).map((s: any) => {
-      if (getSubject(s)) {
-        return {
-          subject: getSubject(s),
-          min: getValues(s)[0],
-          max: getValues(s)[1],
-        };
-      } else {
-        return {
-          subject: s.name,
-          min: s.minGrade,
-          max: s.maxGrade,
-        };
-      }
+    subjects = student.subjects.map((s: StudentSubject) => {
+      return {
+        subject: s.name,
+        min: s.gradeInfo.min,
+        max: s.gradeInfo.max,
+      };
     });
   } catch (err) {
     Logger.info("Cannot parse");
@@ -53,8 +45,8 @@ export const createJob = (id: string, student: Student): StudentData => {
 
   return {
     id,
-    firstname: student.firstname,
-    lastname: student.lastname,
+    firstname: student.firstName,
+    lastname: student.lastName,
     email: student.email,
     subjects: subjects,
     phone: student.phone,

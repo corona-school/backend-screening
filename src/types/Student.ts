@@ -1,3 +1,5 @@
+import { ProjectField } from "../../../backend/common/jufo/projectFields";
+
 export interface Student {
   id: number;
   firstname: string;
@@ -27,17 +29,35 @@ export interface IRawStudent2 {
   alreadyScreened: boolean;
 }
 
-export interface IRawStudent {
+export interface StudentEditableInfoDTO {
+  isTutor: boolean;
+  isInstructor: boolean;
+  isProjectCoach: boolean;
+  screenings: {
+    tutor?: ScreeningInfo;
+    instructor?: ScreeningInfo;
+    projectCoach?: ScreeningInfo;
+  };
+  projectFields: ProjectFieldWithGradeInfoType[];
+  subjects: StudentSubject[];
+  feedback?: string;
+  phone?: string;
+  newsletter: boolean;
+  msg?: string;
+  university?: string;
+  state?: string;
+  isUniversityStudent?: boolean;
+  official?: {
+    hours: number;
+    module: string;
+  };
+}
+
+export interface IRawStudent extends StudentEditableInfoDTO {
   id: number;
   firstName: string;
   lastName: string;
   email: string;
-  subjects: string;
-  msg?: string;
-  verified: boolean;
-  alreadyScreened: boolean;
-  phone?: string;
-  birthday?: Date;
 }
 
 export enum ScreeningStatus {
@@ -65,4 +85,24 @@ export interface Screening {
   updatedAt: Date;
   screener?: any;
   student?: Student;
+}
+
+export interface ScreeningInfo {
+  verified: boolean;
+  comment?: string;
+  knowsCoronaSchoolFrom?: string;
+}
+
+export interface ProjectFieldWithGradeInfoType {
+  name: string;
+  min?: number;
+  max?: number;
+}
+
+export interface StudentSubject {
+  name: string;
+  gradeInfo?: {
+    min: number;
+    max: number;
+  };
 }

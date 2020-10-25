@@ -21,35 +21,39 @@ const apiUriScreener = API + "screener/";
 const apiToken = process.env.CORONA_BACKEND_API_TOKEN;
 axios.defaults.headers.common["Token"] = apiToken;
 
+function IsScreened(student: IRawStudent) {
+  let isScreened = false;
+
+  if (student.isTutor) {
+    isScreened = student.screenings.tutor !== undefined;
+  }
+  if (student.isInstructor) {
+    isScreened = isScreened || student.screenings.instructor !== undefined;
+  }
+  if (student.isProjectCoach) {
+    isScreened = isScreened || student.screenings.projectCoach !== undefined;
+  }
+
+  return isScreened;
+}
+
 export const apiService = {
-  async getStudent(email: string): Promise<Student> {
+  async getStudent(email: string): Promise<IRawStudent> {
     try {
       const {
         status,
-        data,
-      }: { status: number; data: IRawStudent } = await axios.get(
+        student,
+      }: { status: number; student: IRawStudent } = await axios.get(
         `${API}student/${email}`
       );
 
       if (status !== 200)
         throw "Get student response with non-200 return code: " + status;
 
-      if (!data || !data.email)
+      if (!student || !student.email)
         throw "Get student response with missing or invalid student data";
 
-      const student: Student = {
-        id: data.id,
-        firstname: data.firstName,
-        lastname: data.lastName,
-        email: data.email,
-        verified: data.alreadyScreened === false ? undefined : data.verified,
-        subjects: data.subjects,
-        phone: data.phone,
-        birthday: data.birthday,
-        msg: data.msg,
-      };
-
-      console.log("getStudent():", data);
+      console.log("getStudent():", student);
 
       return student;
     } catch (error) {
@@ -84,10 +88,10 @@ export const apiService = {
     }
   },
 
-  async getUnverifiedStudent(email: string): Promise<Student> {
+  async getUnverifiedStudent(email: string): Promise<IRawStudent> {
     const student = await apiService.getStudent(email);
 
-    if (student.verified != null) throw "Student is already verified";
+    if (IsScreened(student)) throw "Student is already verified";
 
     return student;
   },
@@ -208,7 +212,10 @@ export const apiService = {
   },
 
   async getInstructors(
-    screeningStatus: ScreeningStatus.Accepted | ScreeningStatus.Rejected | ScreeningStatus.Unscreened,
+    screeningStatus:
+      | ScreeningStatus.Accepted
+      | ScreeningStatus.Rejected
+      | ScreeningStatus.Unscreened,
     search: string
   ): Promise<Array<Student & { __screening__: Screening }>> {
     try {
