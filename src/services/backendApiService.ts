@@ -48,8 +48,6 @@ export const apiService = {
         `${API}student/${email}`
       );
 
-      console.log(data);
-
       if (status !== 200)
         throw "Get student response with non-200 return code: " + status;
 

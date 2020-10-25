@@ -29,6 +29,7 @@ export const createJob = (id: string, student: IRawStudent): StudentData => {
   const subjects = ParseSubjects(student.subjects);
 
   return {
+    id,
     ...student,
     jitsi: `https://meet.jit.si/${id}`,
   };
@@ -36,22 +37,38 @@ export const createJob = (id: string, student: IRawStudent): StudentData => {
 
 export const updateJob = (
   oldData: StudentData,
-  screeningResult: IStudentScreeningResult
+  newData: StudentData
 ): StudentData => {
-  const subjects = ParseSubjects(screeningResult.subjects);
-
   return {
-    id: oldData.id,
-    firstname: oldData.firstname,
-    lastname: oldData.lastname,
-    email: oldData.email,
-    subjects: subjects,
-    phone: screeningResult.phone,
-    knowcsfrom: oldData.knowcsfrom,
-    msg: screeningResult.msg,
-    feedback: screeningResult.feedback,
-    commentScreener: oldData.commentScreener,
-    jitsi: oldData.jitsi,
+    ...oldData,
+    ...newData,
+  };
+};
+
+export const getScreeningResult = (
+  studentData: StudentData,
+  screenerEmail: string
+): IStudentScreeningResult => {
+  return {
+    screenerEmail,
+    isTutor: studentData.isTutor,
+    isInstructor: studentData.isInstructor,
+    isProjectCoach: studentData.isProjectCoach,
+    screenings: {
+      tutor: studentData.screenings.tutor,
+      instructor: studentData.screenings.instructor,
+      projectCoach: studentData.screenings.projectCoach,
+    },
+    projectFields: studentData.projectFields,
+    subjects: studentData.subjects,
+    feedback: studentData.feedback,
+    phone: studentData.phone,
+    newsletter: studentData.newsletter,
+    msg: studentData.msg,
+    university: studentData.university,
+    state: studentData.state,
+    isUniversityStudent: studentData.isUniversityStudent,
+    official: studentData.official,
   };
 };
 

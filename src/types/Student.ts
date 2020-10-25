@@ -1,5 +1,3 @@
-import { ProjectField } from "../../../backend/common/jufo/projectFields";
-
 export interface Student {
   id: number;
   firstname: string;
@@ -54,7 +52,7 @@ export interface StudentEditableInfoDTO {
 }
 
 export interface IRawStudent extends StudentEditableInfoDTO {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
