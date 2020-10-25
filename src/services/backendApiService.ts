@@ -42,20 +42,22 @@ export const apiService = {
     try {
       const {
         status,
-        student,
-      }: { status: number; student: IRawStudent } = await axios.get(
+        data,
+      }: { status: number; data: IRawStudent } = await axios.get(
         `${API}student/${email}`
       );
+
+      console.log(data);
 
       if (status !== 200)
         throw "Get student response with non-200 return code: " + status;
 
-      if (!student || !student.email)
+      if (!data || !data.email)
         throw "Get student response with missing or invalid student data";
 
-      console.log("getStudent():", student);
+      console.log("getStudent():", data);
 
-      return student;
+      return data;
     } catch (error) {
       Logger.error("Get student data failed: ", error);
       throw error;
