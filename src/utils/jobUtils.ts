@@ -29,16 +29,7 @@ export const createJob = (id: string, student: IRawStudent): StudentData => {
   const subjects = ParseSubjects(student.subjects);
 
   return {
-    id,
-    firstname: student.firstName,
-    lastname: student.lastName,
-    email: student.email,
-    subjects: subjects,
-    phone: student.phone,
-    knowcsfrom: "",
-    msg: student.msg,
-    feedback: student.feedback,
-    commentScreener: "",
+    ...student,
     jitsi: `https://meet.jit.si/${id}`,
   };
 };

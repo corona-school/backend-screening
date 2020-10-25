@@ -1,4 +1,5 @@
 import { JobInfo as GenericJobInfo } from "../GenericQueue";
+import { IRawStudent } from "./Student";
 
 export type Status = "waiting" | "active" | "completed" | "rejected";
 
@@ -27,17 +28,7 @@ export interface Subject {
   max: number;
 }
 
-export interface StudentData {
-  id: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  subjects: Subject[];
-  phone?: string;
-  msg?: string;
-  feedback?: string;
-  knowcsfrom?: string;
-  commentScreener?: string;
+export interface StudentData extends IRawStudent {
   jitsi: string;
 }
 

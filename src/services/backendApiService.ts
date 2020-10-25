@@ -42,8 +42,8 @@ export const apiService = {
     try {
       const {
         status,
-        student,
-      }: { status: number; student: IRawStudent } = await axios.get(
+        data: student,
+      }: { status: number; data: IRawStudent } = await axios.get(
         `${API}student/${email}`
       );
 
