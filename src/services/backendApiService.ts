@@ -21,16 +21,16 @@ const apiToken = process.env.CORONA_BACKEND_API_TOKEN;
 axios.defaults.headers.common["Token"] = apiToken;
 
 const isScreened = (student: IRawStudent) => {
-  let isScreened = false;
+  let isScreened = true;
 
   if (student.isTutor) {
-    isScreened = student.screenings.tutor !== undefined;
+    isScreened = isScreened && student.screenings.tutor !== undefined;
   }
   if (student.isInstructor) {
-    isScreened = isScreened || student.screenings.instructor !== undefined;
+    isScreened = isScreened && student.screenings.instructor !== undefined;
   }
   if (student.isProjectCoach) {
-    isScreened = isScreened || student.screenings.projectCoach !== undefined;
+    isScreened = isScreened && student.screenings.projectCoach !== undefined;
   }
 
   return isScreened;
