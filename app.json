@@ -10,9 +10,6 @@
     "repository": "https://github.com/corona-school/backend-screening/",
     "environments": {
         "review": {
-            "env": {
-                "NODE_ENV": "development"
-            },
             "addons": [
                 "heroku-redis:hobby-dev"
             ]
