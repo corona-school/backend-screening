@@ -2,10 +2,14 @@
 
 import cors from "@koa/cors";
 import { Context } from "koa";
-import { validOrigins } from "../constants/origins";
+import config from "../config";
+import { validOrigins, validReviewAppOrigins } from "../constants/origins";
 
 const corsMiddleware = (options = {}) => {
   function originIsValid(origin: string): boolean {
+    if (config.env === "development" && validReviewAppOrigins.some(regexp => origin.match(regexp))) {
+      return true;
+    }
     return validOrigins.indexOf(origin) != -1;
   }
 
