@@ -1,0 +1,21 @@
+{
+    "name": "Corona School Screening Backend",
+    "description": "The backend of Corona School's screening tool",
+    "keywords": [
+        "coronaschool",
+        "node",
+        "typescript"
+    ],
+    "website": "https://corona-school.de/",
+    "repository": "https://github.com/corona-school/backend-screening/",
+    "environments": {
+        "review": {
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "addons": [
+                "heroku-redis:hobby-dev"
+            ]
+        }
+    }
+}
