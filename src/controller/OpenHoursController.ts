@@ -63,7 +63,7 @@ const admins = [
 
 const getOpeningHours = async (ctx: Context) => {
   try {
-    ctx.body = await get(KEY);
+    ctx.body = await get(KEY) ?? [];
   } catch (err) {
     Logger.error(err);
     Response.internalServerError(ctx, UNKNOWN_ERROR);
