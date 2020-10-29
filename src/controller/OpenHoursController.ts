@@ -59,6 +59,7 @@ const admins = [
   "reinerschristopher@gmail.com",
   "leon-erath@hotmail.de",
   "paul.renger@magd.ox.ac.uk",
+  "hanna@corona-school.de"
 ];
 
 const getOpeningHours = async (ctx: Context) => {
