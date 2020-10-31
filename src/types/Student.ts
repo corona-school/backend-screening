@@ -45,6 +45,10 @@ export interface StudentEditableInfoDTO {
   university?: string;
   state?: string;
   isUniversityStudent?: boolean;
+  jufoPastParticipationConfirmed?: boolean;
+  wasJufoParticipant?: string;
+  hasJufoCertificate?: boolean;
+  jufoPastParticipationInfo?: string;
   official?: {
     hours: number;
     module: string;
