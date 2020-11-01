@@ -53,6 +53,10 @@ export const getScreeningResult = (
     university: studentData.university,
     state: studentData.state,
     isUniversityStudent: studentData.isUniversityStudent,
+    jufoPastParticipationConfirmed: studentData.jufoPastParticipationConfirmed,
+    wasJufoParticipant: studentData.wasJufoParticipant,
+    hasJufoCertificate: studentData.hasJufoCertificate,
+    jufoPastParticipationInfo: studentData.jufoPastParticipationInfo,
     official: studentData.official,
   };
 };
