@@ -20,11 +20,17 @@ describe("Testing Student-Screener-Queue:", () => {
 
   const data: StudentData = {
     id: "alskdmalkdmqw",
-    firstname: "Max",
-    lastname: "Müller",
+    firstName: "Max",
+    lastName: "Müller",
     email: "max@müller.de",
     jitsi: "some_link",
     subjects: [],
+    isTutor: true,
+    isInstructor: false, 
+    isProjectCoach: false,
+    newsletter: false,
+    screenings: {},
+    projectFields: [],
   };
   const data2: StudentData = {
     ...data,

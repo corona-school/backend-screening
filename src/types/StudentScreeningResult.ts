@@ -1,8 +1,5 @@
-export interface IStudentScreeningResult {
-  verified: boolean;
-  commentScreener?: string;
-  knowscsfrom?: string;
-  subjects?: string;
-  feedback?: string;
+import { StudentEditableInfoDTO } from "./Student";
+
+export interface IStudentScreeningResult extends StudentEditableInfoDTO {
   screenerEmail: string;
 }

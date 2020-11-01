@@ -27,17 +27,39 @@ export interface IRawStudent2 {
   alreadyScreened: boolean;
 }
 
-export interface IRawStudent {
-  id: number;
+export interface StudentEditableInfoDTO {
+  isTutor: boolean;
+  isInstructor: boolean;
+  isProjectCoach: boolean;
+  screenings: {
+    tutor?: ScreeningInfo;
+    instructor?: ScreeningInfo;
+    projectCoach?: ScreeningInfo;
+  };
+  projectFields: ProjectFieldWithGradeInfoType[];
+  subjects: StudentSubject[];
+  feedback?: string;
+  phone?: string;
+  newsletter: boolean;
+  msg?: string;
+  university?: string;
+  state?: string;
+  isUniversityStudent?: boolean;
+  jufoPastParticipationConfirmed?: boolean;
+  wasJufoParticipant?: string;
+  hasJufoCertificate?: boolean;
+  jufoPastParticipationInfo?: string;
+  official?: {
+    hours: number;
+    module: string;
+  };
+}
+
+export interface IRawStudent extends StudentEditableInfoDTO {
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
-  subjects: string;
-  msg?: string;
-  verified: boolean;
-  alreadyScreened: boolean;
-  phone?: string;
-  birthday?: Date;
 }
 
 export enum ScreeningStatus {
@@ -65,4 +87,24 @@ export interface Screening {
   updatedAt: Date;
   screener?: any;
   student?: Student;
+}
+
+export interface ScreeningInfo {
+  verified: boolean;
+  comment?: string;
+  knowsCoronaSchoolFrom?: string;
+}
+
+export interface ProjectFieldWithGradeInfoType {
+  name: string;
+  min?: number;
+  max?: number;
+}
+
+export interface StudentSubject {
+  name: string;
+  grade?: {
+    min: number;
+    max: number;
+  };
 }
