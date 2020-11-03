@@ -58,12 +58,10 @@ export default class GenericQueue<D, S> extends EventEmitter {
       timeWaiting: Date.now(),
     };
 
-    const number = await this.client.rpush(this.key, JSON.stringify(newJob));
+    await this.client.rpush(this.key, JSON.stringify(newJob));
 
-    const jobInfo: JobInfo<D, S> = {
-      ...newJob,
-      position: number - 1,
-    };
+    const jobInfo: JobInfo<D, S> = await this.getJobWithPosition(newJob.id);
+
     this.publish("addedJob", jobInfo);
 
     return jobInfo;
