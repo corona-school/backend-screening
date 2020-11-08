@@ -36,6 +36,7 @@ export const getScreeningResult = (
 ): IStudentScreeningResult => {
   return {
     screenerEmail,
+    email: studentData.email,
     isTutor: studentData.isTutor,
     isInstructor: studentData.isInstructor,
     isProjectCoach: studentData.isProjectCoach,
