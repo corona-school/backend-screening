@@ -28,6 +28,7 @@ export interface IRawStudent2 {
 }
 
 export interface StudentEditableInfoDTO {
+  email: string;
   isTutor: boolean;
   isInstructor: boolean;
   isProjectCoach: boolean;
@@ -59,7 +60,6 @@ export interface IRawStudent extends StudentEditableInfoDTO {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
 }
 
 export enum ScreeningStatus {
