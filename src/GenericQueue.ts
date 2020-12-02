@@ -94,18 +94,18 @@ export default class GenericQueue<D, S> extends EventEmitter {
 
   getJobWithPosition = async (id: string): Promise<JobInfo<D, S> | null> => {
     const currentList: Job<D, S>[] = await this.listInfo();
-    currentList
+    return currentList
       .filter((j) => j.status === "waiting")
       .sort((a, b) => a.timeWaiting - b.timeWaiting)
-      .forEach((job, index) => {
+      .reduce<JobInfo<D, S>>((acc, job, index) => {
         if (job.id === id) {
-          return {
+          return acc ?? {
             ...job,
-            index,
+            position: index,
           };
         }
-      });
-    return null;
+        return acc;
+      }, null);
   };
 
   changeJob = async (
