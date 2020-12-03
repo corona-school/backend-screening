@@ -26,6 +26,7 @@ export interface ApiCourseUpdate {
   description?: string;
   outline?: string;
   category?: CourseCategory;
+  tags?: { identifier?: string; name?: string }[];
   imageUrl?: string | null;
   screeningComment?: string | null;
   instructors?: { id: number }[];
