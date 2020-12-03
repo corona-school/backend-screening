@@ -33,6 +33,13 @@ export interface ApiCourseUpdate {
   removeLectures?: { id: number }[];
 }
 
+export interface ApiCourseTag {
+  id: string;
+  name: string;
+  category: string;
+  courses: number[];
+}
+
 export enum CourseState {
   CREATED = "created",
   SUBMITTED = "submitted",
