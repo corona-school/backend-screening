@@ -11,7 +11,7 @@ import {
 } from "../types/Student";
 import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
-import { Course } from "../types/Course";
+import { ApiCourseTag, Course } from "../types/Course";
 import { ApiCourseUpdate } from "../types/Course";
 const Logger = LoggerService("backendApiService.ts");
 
@@ -187,6 +187,19 @@ export const apiService = {
       return data.courses;
     } catch (error) {
       Logger.error("getCourses failed with", error);
+      throw error;
+    }
+  },
+
+  async getCourseTags(): Promise<ApiCourseTag[]> {
+    try {
+      const { status, data } = await axios.get(`${API}courses/tags`);
+      if (status !== 200)
+        throw `Retrieving used course tags responded with non 200 return codec ${status}`;
+
+      return data;
+    } catch (error) {
+      Logger.error("getCourseTags failed with ", error);
       throw error;
     }
   },

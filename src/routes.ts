@@ -53,6 +53,7 @@ router.get("/screener/info", requireAuth, ScreenerController.getInfo);
 
 // CourseController
 router.get("/courses", requireAuth, CourseController.getCourses);
+router.get("/courses/tags", requireAuth, CourseController.getCourseTags);
 router.post("/course/:id/update", requireAuth, CourseController.updateCourse);
 
 // StatisticsController
@@ -61,6 +62,10 @@ router.get("/queue/statistics", StatisticsController.getStatistics);
 
 // InstructorController
 router.get("/instructors", requireAuth, InstructorController.getInstructors);
-router.post("/instructor/:id/update", requireAuth, InstructorController.updateInstructor);
+router.post(
+  "/instructor/:id/update",
+  requireAuth,
+  InstructorController.updateInstructor
+);
 
 export default router;

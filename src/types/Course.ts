@@ -26,11 +26,19 @@ export interface ApiCourseUpdate {
   description?: string;
   outline?: string;
   category?: CourseCategory;
+  tags?: { identifier?: string; name?: string }[];
   imageUrl?: string | null;
   screeningComment?: string | null;
   instructors?: { id: number }[];
   newLectures?: ApiAddLecture[];
   removeLectures?: { id: number }[];
+}
+
+export interface ApiCourseTag {
+  id: string;
+  name: string;
+  category: string;
+  courses: number[];
 }
 
 export enum CourseState {
