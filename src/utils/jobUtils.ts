@@ -12,10 +12,17 @@ export const createJob = (id: string, student: IRawStudent): StudentData => {
     grade: { min: s.grade?.min || 1, max: s.grade?.max || 13 },
   }));
 
+  const projectFields = student.projectFields.map((f) => ({
+    name: f.name,
+    min: f.min || 1,
+    max: f.max || 13,
+  }));
+
   return {
     id,
     ...student,
     subjects,
+    projectFields,
     jitsi: `https://meet.jit.si/${id}`,
   };
 };
