@@ -59,12 +59,13 @@ const admins = [
   "reinerschristopher@gmail.com",
   "leon-erath@hotmail.de",
   "paul.renger@magd.ox.ac.uk",
-  "hanna@corona-school.de"
+  "hanna@corona-school.de",
+  "Tobias.Bork@t-online.de",
 ];
 
 const getOpeningHours = async (ctx: Context) => {
   try {
-    ctx.body = await get(KEY) ?? [];
+    ctx.body = (await get(KEY)) ?? [];
   } catch (err) {
     Logger.error(err);
     Response.internalServerError(ctx, UNKNOWN_ERROR);
