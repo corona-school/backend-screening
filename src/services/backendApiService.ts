@@ -176,10 +176,10 @@ export const apiService = {
     }
   },
 
-  async getCourses(search?: string, courseState?: string): Promise<Course[]> {
+  async getCourses(search?: string, courseState?: string, page?: string): Promise<Course[]> {
     try {
       const { status, data } = await axios.get(`${API}courses`, {
-        params: { search, courseState },
+        params: { search, courseState, page },
       });
       if (status !== 200)
         throw "Retrieving courses responded with non 200 return code " + status;
@@ -228,11 +228,12 @@ export const apiService = {
       | ScreeningStatus.Accepted
       | ScreeningStatus.Rejected
       | ScreeningStatus.Unscreened,
-    search: string
+    search: string,
+    page?: string
   ): Promise<Array<Student & { __screening__: Screening }>> {
     try {
       const { status, data } = await axios.get(`${API}instructors`, {
-        params: { screeningStatus, search },
+        params: { screeningStatus, search, page },
       });
       if (status !== 200)
         throw "Retrieving courses responded with non 200 return code " + status;
