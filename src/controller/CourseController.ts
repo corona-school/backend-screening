@@ -8,11 +8,16 @@ export async function getCourses(ctx: Context) {
     ctx.body = { courses };
 }
 
-export async function updateCourse(ctx: Context) {
-    const update: ApiCourseUpdate = ctx.request.body;
-    const { id } = ctx.params;
-    const course = await apiService.updateCourse(id, update);
-    ctx.body = { course };
+export async function getCourseTags(ctx: Context) {
+  const courseTags = await apiService.getCourseTags();
+  ctx.body = { courseTags };
 }
 
-export default { getCourses, updateCourse };
+export async function updateCourse(ctx: Context) {
+  const update: ApiCourseUpdate = ctx.request.body;
+  const { id } = ctx.params;
+  const course = await apiService.updateCourse(id, update);
+  ctx.body = { course };
+}
+
+export default { getCourses, getCourseTags, updateCourse };

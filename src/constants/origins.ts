@@ -8,3 +8,7 @@ export const validOrigins = [
   "https://authentication.corona-school.de",
   "https://screeners.corona-school.de",
 ];
+
+export const validOriginRegexes = [
+  /^https:\/\/(cs-screening-app|cs-screening-admin)-(pr-[0-9]+|br-[-a-z0-9]+).herokuapp.com$/
+]

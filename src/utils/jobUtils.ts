@@ -1,68 +1,71 @@
 import crypto from "crypto";
 import { StudentData, Status } from "../types/Queue";
-import { Student } from "../types/Student";
-import LoggerService from "../utils/Logger";
-
-const Logger = LoggerService("jobUtils.ts");
+import { IRawStudent } from "../types/Student";
+import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 
 export const getId = (email: string) =>
   crypto.createHash("md5").update(email).digest("hex");
 
-export const createJob = (id: string, student: Student): StudentData => {
-  const getSubject = (subject: string): string | null => {
-    try {
-      return subject.replace(/[0-9]+|:/g, "");
-    } catch (err) {
-      return null;
-    }
-  };
+export const createJob = (id: string, student: IRawStudent): StudentData => {
+  const subjects = student.subjects.map((s) => ({
+    name: s.name,
+    grade: { min: s.grade?.min || 1, max: s.grade?.max || 13 },
+  }));
 
-  const getValues = (subject: string | null): number[] => {
-    try {
-      const matchGroup = subject.match(/[0-9]+:[0-9]+/g);
-      if (matchGroup) {
-        return matchGroup[0].split(":").map((s) => parseInt(s));
-      }
-      return [1, 13];
-    } catch (err) {
-      Logger.error(err);
-      return [1, 13];
-    }
-  };
-
-  let subjects = [];
-  try {
-    subjects = JSON.parse(student.subjects).map((s: any) => {
-      if (getSubject(s)) {
-        return {
-          subject: getSubject(s),
-          min: getValues(s)[0],
-          max: getValues(s)[1],
-        };
-      } else {
-        return {
-          subject: s.name,
-          min: s.minGrade,
-          max: s.maxGrade,
-        };
-      }
-    });
-  } catch (err) {
-    Logger.info("Cannot parse");
-  }
+  const projectFields = student.projectFields.map((f) => ({
+    name: f.name,
+    min: f.min || 1,
+    max: f.max || 13,
+  }));
 
   return {
     id,
-    firstname: student.firstname,
-    lastname: student.lastname,
-    email: student.email,
-    subjects: subjects,
-    phone: student.phone,
-    knowcsfrom: "",
-    msg: student.msg,
-    feedback: student.feedback,
-    commentScreener: "",
+    ...student,
+    subjects,
+    projectFields,
     jitsi: `https://meet.jit.si/${id}`,
+  };
+};
+
+export const updateJob = (
+  oldData: StudentData,
+  newData: StudentData
+): StudentData => {
+  return {
+    ...oldData,
+    ...newData,
+  };
+};
+
+export const getScreeningResult = (
+  studentData: StudentData,
+  screenerEmail: string
+): IStudentScreeningResult => {
+  return {
+    screenerEmail,
+    email: studentData.email,
+    isTutor: studentData.isTutor,
+    isInstructor: studentData.isInstructor,
+    isProjectCoach: studentData.isProjectCoach,
+    screenings: {
+      tutor: studentData.screenings.tutor,
+      instructor: studentData.screenings.instructor,
+      projectCoach: studentData.screenings.projectCoach,
+    },
+    projectFields: studentData.projectFields,
+    subjects: studentData.subjects,
+    feedback: studentData.feedback,
+    phone: studentData.phone,
+    newsletter: studentData.newsletter,
+    msg: studentData.msg,
+    university: studentData.university,
+    state: studentData.state,
+    isUniversityStudent: studentData.isUniversityStudent,
+    jufoPastParticipationConfirmed: studentData.jufoPastParticipationConfirmed,
+    wasJufoParticipant: studentData.wasJufoParticipant,
+    hasJufoCertificate: studentData.hasJufoCertificate,
+    jufoPastParticipationInfo: studentData.jufoPastParticipationInfo,
+    official: studentData.official,
   };
 };
 

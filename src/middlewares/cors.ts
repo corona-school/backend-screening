@@ -2,11 +2,11 @@
 
 import cors from "@koa/cors";
 import { Context } from "koa";
-import { validOrigins } from "../constants/origins";
+import { validOrigins, validOriginRegexes } from "../constants/origins";
 
 const corsMiddleware = (options = {}) => {
   function originIsValid(origin: string): boolean {
-    return validOrigins.indexOf(origin) != -1;
+    return validOrigins.indexOf(origin) != -1 || validOriginRegexes.some(regexp => origin.match(regexp));
   }
 
   function verifyOrigin(ctx: Context): any {

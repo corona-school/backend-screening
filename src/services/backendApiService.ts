@@ -11,18 +11,33 @@ import {
 } from "../types/Student";
 import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 import LoggerService from "../utils/Logger";
-import { Course } from "../types/Course";
+import { ApiCourseTag, Course } from "../types/Course";
 import { ApiCourseUpdate } from "../types/Course";
 const Logger = LoggerService("backendApiService.ts");
 
 const API = process.env.CORONA_BACKEND_API_URL;
-const apiUriStudent = API + "student/";
 const apiUriScreener = API + "screener/";
 const apiToken = process.env.CORONA_BACKEND_API_TOKEN;
 axios.defaults.headers.common["Token"] = apiToken;
 
+const isScreened = (student: IRawStudent) => {
+  let isScreened = true;
+
+  if (student.isTutor) {
+    isScreened = isScreened && student.screenings.tutor !== undefined;
+  }
+  if (student.isInstructor) {
+    isScreened = isScreened && student.screenings.instructor !== undefined;
+  }
+  if (student.isProjectCoach) {
+    isScreened = isScreened && student.screenings.projectCoach !== undefined;
+  }
+
+  return isScreened;
+};
+
 export const apiService = {
-  async getStudent(email: string): Promise<Student> {
+  async getStudent(email: string): Promise<IRawStudent> {
     try {
       const {
         status,
@@ -37,21 +52,9 @@ export const apiService = {
       if (!data || !data.email)
         throw "Get student response with missing or invalid student data";
 
-      const student: Student = {
-        id: data.id,
-        firstname: data.firstName,
-        lastname: data.lastName,
-        email: data.email,
-        verified: data.alreadyScreened === false ? undefined : data.verified,
-        subjects: data.subjects,
-        phone: data.phone,
-        birthday: data.birthday,
-        msg: data.msg,
-      };
-
       console.log("getStudent():", data);
 
-      return student;
+      return data;
     } catch (error) {
       Logger.error("Get student data failed: ", error);
       throw error;
@@ -84,10 +87,10 @@ export const apiService = {
     }
   },
 
-  async getUnverifiedStudent(email: string): Promise<Student> {
+  async getUnverifiedStudent(email: string): Promise<IRawStudent> {
     const student = await apiService.getStudent(email);
 
-    if (student.verified != null) throw "Student is already verified";
+    if (isScreened(student)) throw "Student is already verified";
 
     return student;
   },
@@ -188,6 +191,19 @@ export const apiService = {
     }
   },
 
+  async getCourseTags(): Promise<ApiCourseTag[]> {
+    try {
+      const { status, data } = await axios.get(`${API}courses/tags`);
+      if (status !== 200)
+        throw `Retrieving used course tags responded with non 200 return codec ${status}`;
+
+      return data;
+    } catch (error) {
+      Logger.error("getCourseTags failed with ", error);
+      throw error;
+    }
+  },
+
   async updateCourse(
     id: string | number,
     update: ApiCourseUpdate
@@ -208,8 +224,11 @@ export const apiService = {
   },
 
   async getInstructors(
-    screeningStatus: ScreeningStatus.Accepted | ScreeningStatus.Rejected | ScreeningStatus.Unscreened,
-    search?: string,
+    screeningStatus:
+      | ScreeningStatus.Accepted
+      | ScreeningStatus.Rejected
+      | ScreeningStatus.Unscreened,
+    search: string,
     page?: string
   ): Promise<Array<Student & { __screening__: Screening }>> {
     try {
