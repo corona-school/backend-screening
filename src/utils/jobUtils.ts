@@ -1,10 +1,25 @@
 import crypto from "crypto";
-import { StudentData, Status } from "../types/Queue";
+import { StudentData, Status, ScreeningType } from "../types/Queue";
 import { IRawStudent } from "../types/Student";
 import { IStudentScreeningResult } from "../types/StudentScreeningResult";
 
 export const getId = (email: string) =>
   crypto.createHash("md5").update(email).digest("hex");
+
+const getScreeningType = (student: IRawStudent): ScreeningType[] => {
+  const screenings: ScreeningType[] = [];
+
+  if (student.isInstructor && student.screenings.instructor === undefined) {
+    screenings.push(student.official ? "intern" : "instructor");
+  }
+  if (student.isTutor && student.screenings.tutor === undefined) {
+    screenings.push("tutor");
+  }
+  if (student.isProjectCoach && student.screenings.projectCoach === undefined) {
+    screenings.push("projectCoach");
+  }
+  return screenings;
+};
 
 export const createJob = (id: string, student: IRawStudent): StudentData => {
   const subjects = student.subjects.map((s) => ({
@@ -18,12 +33,15 @@ export const createJob = (id: string, student: IRawStudent): StudentData => {
     max: f.max || 13,
   }));
 
+  const screeningTypes = getScreeningType(student);
+
   return {
     id,
     ...student,
     subjects,
     projectFields,
     jitsi: `https://meet.jit.si/${id}`,
+    screeningTypes,
   };
 };
 
