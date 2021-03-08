@@ -26,12 +26,14 @@ describe("Testing Student-Screener-Queue:", () => {
     jitsi: "some_link",
     subjects: [],
     isTutor: true,
-    isInstructor: false, 
+    isInstructor: false,
     isProjectCoach: false,
     newsletter: false,
     screenings: {},
     projectFields: [],
+    screeningTypes: [],
   };
+
   const data2: StudentData = {
     ...data,
     id: "alksmdalksdma",
