@@ -84,6 +84,7 @@ export const getScreeningResult = (
     hasJufoCertificate: studentData.hasJufoCertificate,
     jufoPastParticipationInfo: studentData.jufoPastParticipationInfo,
     official: studentData.official,
+    verifiedAt: studentData.verifiedAt,
   };
 };
 

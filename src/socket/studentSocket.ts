@@ -156,10 +156,10 @@ export class StudentSocket {
             screenerCount: onlineScreenerList.length,
           });
       })
-      .catch(() => {
+      .catch((err) => {
         this.io.sockets
           .in(data.email)
-          .emit(StudentSocketActions.LOGIN, { success: false });
+          .emit(StudentSocketActions.LOGIN, { success: false, err });
       });
   };
 }

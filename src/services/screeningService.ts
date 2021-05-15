@@ -2,11 +2,11 @@ import crypto from "crypto";
 import QueueService from "../services/QueueService";
 import { createJob, getId } from "../utils/jobUtils";
 import { apiService } from "./backendApiService";
-import { IRawStudent, Student } from "../types/Student";
+import { IRawStudent } from "../types/Student";
 
 import { JobInfo } from "../GenericQueue";
 import { ScreenerInfo, StudentData } from "../types/Queue";
-import LoggerService from "../utils/Logger";
+import NotVerified from "../errors/client/not-verified";
 
 export default class ScreeningService {
   login = async (
@@ -24,6 +24,11 @@ export default class ScreeningService {
       apiService
         .getUnverifiedStudent(id)
         .then((student: IRawStudent | null) => {
+          if (student.verifiedAt == null) {
+            throw new NotVerified(
+              "Student tried to log in with email address that is not verified!"
+            );
+          }
           const id = crypto
             .createHash("md5")
             .update(student.email)

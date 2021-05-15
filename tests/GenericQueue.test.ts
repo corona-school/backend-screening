@@ -32,6 +32,7 @@ describe("Testing Student-Screener-Queue:", () => {
     screenings: {},
     projectFields: [],
     screeningTypes: [],
+    verifiedAt: new Date(),
   };
 
   const data2: StudentData = {
