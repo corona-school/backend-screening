@@ -24,7 +24,7 @@ export default class ScreeningService {
       apiService
         .getUnverifiedStudent(id)
         .then((student: IRawStudent | null) => {
-          if (student.verifiedAt == null) {
+          if (student.verification != null) {
             throw new NotVerified(
               "Student tried to log in with email address that is not verified!"
             );
