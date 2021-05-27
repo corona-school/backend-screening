@@ -32,7 +32,7 @@ describe("Testing Student-Screener-Queue:", () => {
     screenings: {},
     projectFields: [],
     screeningTypes: [],
-    verifiedAt: new Date(),
+    verification: null,
   };
 
   const data2: StudentData = {
