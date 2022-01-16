@@ -55,6 +55,7 @@ export interface StudentEditableInfoDTO {
     hours: number;
     module: string;
   };
+  isCodu?: boolean;
 }
 
 export interface IRawStudent extends StudentEditableInfoDTO {
