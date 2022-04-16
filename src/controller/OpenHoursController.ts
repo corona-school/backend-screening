@@ -57,10 +57,11 @@ const admins = [
   "gero@corona-school.de",
   "mascha.matveeva@gmail.com",
   "reinerschristopher@gmail.com",
-  "leon-erath@hotmail.de",
   "paul.renger@magd.ox.ac.uk",
-  "hanna@corona-school.de",
   "Tobias.Bork@t-online.de",
+  "s5alstri@uni-bonn.de",
+  "lea.brinkmeier@web.de",
+  "lennard.schiefelbein@lern-fair.de",
 ];
 
 const getOpeningHours = async (ctx: Context) => {
