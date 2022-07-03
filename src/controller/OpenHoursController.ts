@@ -62,6 +62,7 @@ const admins = [
   "s5alstri@uni-bonn.de",
   "lea.brinkmeier@web.de",
   "lennard.schiefelbein@lern-fair.de",
+  "test+dev+sc1@lern-fair.de",
 ];
 
 const getOpeningHours = async (ctx: Context) => {
